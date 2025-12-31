@@ -3,29 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>京都 2026 - 祇園祭獨旅 (智慧版)</title>
+    <title>Travel Prototype v1.0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Shippori+Mincho:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg-color: #3E3C3A;       /* 煤竹色 */
-            --card-color: #E8E8E8;     /* 灰白 */
-            --accent-color: #E95464;   /* 朱紅 */
-            --text-on-dark: #FFFFFB;   /* 象牙白 */
-            --text-on-light: #2F2F2F;  /* 墨黑 */
-            --menu-bg: #2b2a29;
-            --weather-gradient: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
-            --weather-gradient-hot: linear-gradient(135deg, #FF512F 0%, #DD2476 100%); /* 夏天熱配色 */
+            /* --- 極簡黑白灰配色系統 --- */
+            --bg-body: #F5F5F5;        /* 極淺灰背景，比純白更護眼 */
+            --bg-card: #FFFFFF;        /* 純白卡片 */
+            --text-main: #111111;      /* 極深灰 (近黑) */
+            --text-sub: #666666;       /* 中灰 */
+            --accent: #000000;         /* 重點色：純黑 */
+            --border: #E0E0E0;         /* 邊框線 */
+            --shadow: 0 2px 10px rgba(0,0,0,0.03); /* 極輕柔陰影 */
+            
+            --nav-bg: #FFFFFF;
+            /* 天氣卡片改為低飽和度的灰階漸層 */
+            --weather-gradient: linear-gradient(135deg, #333 0%, #000 100%);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: "Noto Sans TC", sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-on-dark);
+            font-family: "Inter", "Noto Sans TC", sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
             margin: 0; padding: 0;
             height: 100vh;
             display: flex; flex-direction: column; overflow: hidden;
@@ -33,292 +37,188 @@
 
         /* --- Header --- */
         header {
-            padding: 15px 20px;
-            background-color: rgba(62, 60, 58, 0.98);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 0 20px;
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border);
             position: sticky; top: 0; z-index: 100;
             display: flex; justify-content: space-between; align-items: center;
             height: 60px;
         }
-        header h1 { margin: 0; font-size: 1.2rem; font-family: "Shippori Mincho", serif; letter-spacing: 1px; }
+        header h1 { 
+            margin: 0; font-size: 1.1rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; 
+            font-family: "Inter", sans-serif;
+        }
         
         .header-icons { display: flex; gap: 20px; align-items: center; }
-        .header-btn { color: var(--text-on-dark); font-size: 1.2rem; cursor: pointer; text-decoration: none; position: relative;}
-        .fan-btn i { color: var(--accent-color); }
+        .header-btn { color: var(--text-main); font-size: 1.1rem; cursor: pointer; text-decoration: none; opacity: 0.8; transition: opacity 0.2s; }
+        .header-btn:hover { opacity: 1; }
 
-        /* --- Date Selector --- */
+        /* --- Date Selector (Tab Style) --- */
         .date-selector-container {
-            background: var(--bg-color); z-index: 90;
-            padding: 10px 0;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            background: var(--bg-card); z-index: 90;
+            padding: 15px 0 10px 0;
+            border-bottom: 1px solid var(--border);
             width: 100%;
         }
         .date-selector { 
-            display: flex; 
-            overflow-x: auto; 
-            gap: 10px; 
-            padding: 0 20px 5px 20px; 
-            scrollbar-width: none; 
-            -webkit-overflow-scrolling: touch;
-            justify-content: flex-start;
+            display: flex; gap: 10px; padding: 0 20px; 
+            overflow-x: auto; scrollbar-width: none; justify-content: flex-start;
         }
-        @media (min-width: 768px) { .date-selector { justify-content: center; } }
         .date-selector::-webkit-scrollbar { display: none; }
         
         .date-chip {
-            background: rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 16px;
-            white-space: nowrap; font-size: 0.85rem; cursor: pointer; color: #aaa;
-            display: flex; flex-direction: column; align-items: center; min-width: 55px;
-            transition: all 0.2s; border: 1px solid transparent;
-            flex-shrink: 0; 
+            padding: 8px 16px; border-radius: 4px; /* 方形圓角，更理性 */
+            font-size: 0.85rem; cursor: pointer; color: var(--text-sub);
+            display: flex; flex-direction: column; align-items: center; min-width: 60px;
+            transition: all 0.2s; border: 1px solid transparent; background: #F9F9F9;
         }
         .date-chip.active {
-            background: var(--accent-color); color: #fff;
-            box-shadow: 0 0 10px rgba(233, 84, 100, 0.4); transform: scale(1.05);
+            background: var(--accent); color: #fff;
+            border-color: var(--accent);
         }
+        .day-num { font-weight: 600; font-family: "Inter", sans-serif; }
+        .day-week { font-size: 0.75rem; margin-top: 2px; }
 
         /* --- Main Content --- */
         main { flex: 1; overflow-y: hidden; position: relative; }
 
         .page {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            overflow-y: auto; padding: 10px 0 90px 0;
-            display: none; opacity: 0; transition: opacity 0.3s ease;
-            background-color: var(--bg-color);
-            -webkit-overflow-scrolling: touch;
+            overflow-y: auto; padding: 20px 0 100px 0; /* 底部留白給 Dock */
+            display: none; opacity: 0; transition: opacity 0.2s ease;
+            background-color: var(--bg-body);
         }
         .page.active { display: block; opacity: 1; z-index: 10; }
         
-        /* Map Page */
-        #page-map { padding: 0 0 80px 0; } 
-        #map-container { width: 100%; height: 100%; }
-
-        /* Sub Pages */
-        .sub-page {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--bg-color); z-index: 2000;
-            display: flex; flex-direction: column;
-            transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-        }
-        .sub-page.open { transform: translateX(0); }
-        .sub-header {
-            padding: 15px 20px; background: var(--menu-bg);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            display: flex; align-items: center; gap: 15px;
-        }
-        .back-btn { font-size: 1.2rem; color: var(--accent-color); background: none; border: none; padding: 5px; cursor: pointer;}
-        .sub-header h2 { margin: 0; font-size: 1.1rem; font-family: "Shippori Mincho", serif; }
-        .sub-content { flex: 1; overflow-y: auto; padding: 20px; -webkit-overflow-scrolling: touch; }
-
-        /* --- Timeline & Cards --- */
-        .timeline-container { padding: 0 20px; }
+        /* --- Timeline (Minimalist) --- */
+        .timeline-container { padding: 0 20px; max-width: 800px; margin: 0 auto; }
         .timeline-item {
-            position: relative; padding-left: 25px; padding-bottom: 30px;
-            border-left: 2px solid rgba(233, 84, 100, 0.3);
-            transition: all 0.3s ease; /* 加入過渡動畫 */
+            position: relative; padding-left: 30px; padding-bottom: 30px;
+            border-left: 1px solid #CCC; /* 極細灰線 */
+            transition: all 0.3s ease;
         }
-        .timeline-item.hidden { display: none; } /* 隱藏篩選後的項目 */
+        .timeline-item.hidden { display: none; }
         
-        .timeline-item:last-child { border-left: 2px solid transparent; padding-bottom: 0; }
+        .timeline-item:last-child { border-left: 1px solid transparent; padding-bottom: 0; }
         .timeline-item::before {
-            content: ''; position: absolute; left: -6px; top: 18px;
-            width: 10px; height: 10px; background: var(--accent-color);
-            border-radius: 50%; box-shadow: 0 0 0 4px rgba(62, 60, 58, 1);
+            content: ''; position: absolute; left: -5px; top: 20px;
+            width: 9px; height: 9px; background: var(--bg-card);
+            border: 2px solid var(--text-main); /* 空心圓點 */
+            border-radius: 50%;
         }
 
         .card {
-            background-color: var(--card-color); color: var(--text-on-light);
-            border-radius: 12px; padding: 16px; margin-bottom: 5px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2); cursor: pointer;
-            position: relative;
+            background-color: var(--bg-card); color: var(--text-main);
+            border: 1px solid var(--border); border-radius: 8px;
+            padding: 18px; margin-bottom: 5px;
+            box-shadow: var(--shadow); cursor: pointer;
+            position: relative; transition: transform 0.1s;
         }
-        .card:active { transform: scale(0.98); }
-        .card-time { font-size: 0.85rem; color: var(--accent-color); font-weight: 700; display: block; margin-bottom: 6px; }
-        .card-title { font-size: 1.1rem; font-weight: 700; margin: 0 0 8px 0; font-family: "Shippori Mincho", serif; line-height: 1.4; padding-right: 10px;}
+        .card:active { transform: scale(0.99); background: #FAFAFA; }
+        
+        .card-time { 
+            font-size: 0.75rem; color: var(--text-sub); font-family: "Inter", sans-serif; 
+            letter-spacing: 0.5px; display: block; margin-bottom: 8px; font-weight: 600;
+        }
+        .card-title { 
+            font-size: 1.05rem; font-weight: 600; margin: 0 0 10px 0; 
+            line-height: 1.4; padding-right: 10px;
+        }
         .card-price {
-            position: absolute; bottom: 12px; right: 15px;
-            font-weight: bold; color: #d63345; font-size: 0.9rem;
-            background: rgba(255,255,255,0.6); padding: 2px 6px; border-radius: 4px;
+            position: absolute; top: 18px; right: 18px;
+            font-weight: 500; color: var(--text-main); font-size: 0.85rem;
+            font-family: "Inter", sans-serif;
         }
 
-        .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px; max-width: 70%; }
-        .card-tag { font-size: 0.7rem; background: #D0D0D0; padding: 3px 8px; border-radius: 4px; color: #444; }
-        .card-tag.highlight { background: #ffe4e6; color: #d63345; border: 1px solid #fab1b8; }
-        .card-tag.tips { background: #e0f2fe; color: #0369a1; }
-        .card-tag.alert { background: #fee2e2; color: #b91c1c; border: 1px solid #f87171; font-weight: bold;}
-
-        /* --- Weather Styles --- */
-        .weather-card {
-            background: var(--weather-gradient);
-            border-radius: 16px; padding: 25px; margin: 20px;
-            text-align: center; color: white;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            position: relative; overflow: hidden;
+        .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+        /* 標籤改為黑白灰風格 */
+        .card-tag { 
+            font-size: 0.7rem; background: #F0F0F0; padding: 4px 8px; 
+            border-radius: 4px; color: #555; border: 1px solid transparent; 
         }
-        .weather-card.hot { background: var(--weather-gradient-hot); } 
+        .card-tag.highlight { background: #333; color: #FFF; }
+        .card-tag.alert { background: #FFF; color: #000; border: 1px solid #000; }
+
+        /* --- Filter Dock (Floating) --- */
+        .filter-dock {
+            position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%) translateY(20px);
+            width: auto; min-width: 300px;
+            background: #222; /* 深黑底色 */
+            border-radius: 100px; padding: 6px;
+            display: flex; gap: 5px; justify-content: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            z-index: 999; opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+        .filter-dock.visible { opacity: 1; pointer-events: all; transform: translateX(-50%) translateY(0); }
         
-        .weather-source-badge {
-            position: absolute; top: 10px; right: 10px;
-            font-size: 0.65rem; background: rgba(0,0,0,0.3);
-            padding: 3px 8px; border-radius: 10px; opacity: 0.8;
+        .filter-btn {
+            background: transparent; border: none; color: #999;
+            font-size: 0.85rem; padding: 8px 16px; border-radius: 20px;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap; font-weight: 500;
         }
-        .weather-main { display: flex; justify-content: space-around; align-items: center; margin: 20px 0; }
-        .weather-icon { font-size: 3.5rem; }
-        .weather-temp { font-size: 3rem; font-weight: 300; }
-        .weather-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; }
-        .w-item { font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+        .filter-btn.active { background: #FFF; color: #000; font-weight: 600; }
 
-        /* --- Shopping Styles --- */
-        .shopping-section-title { font-family: "Shippori Mincho", serif; margin: 0 0 10px 0; color: var(--accent-color); border-bottom: 1px solid #555; padding-bottom: 5px;}
-        .shopping-group { margin-bottom: 25px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; }
-
-        /* --- Tools Grid --- */
-        .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 10px; }
-        .tool-btn {
-            background: rgba(255,255,255,0.08); padding: 25px 15px;
-            border-radius: 16px; text-align: center;
-            border: 1px solid rgba(255,255,255,0.05); cursor: pointer;
-        }
-        .tool-btn i { font-size: 2.2rem; color: var(--accent-color); margin-bottom: 12px; display: block; }
-
-        /* --- Lists & Footer --- */
-        .checklist-item {
-            background: rgba(255,255,255,0.08); padding: 15px; margin-bottom: 12px;
-            border-radius: 8px; display: flex; align-items: center; gap: 15px;
-        }
-        .checklist-item.checked { opacity: 0.5; }
-        .checklist-item.checked span { text-decoration: line-through; }
-        .checklist-item input { width: 22px; height: 22px; accent-color: var(--accent-color); }
-        
+        /* --- Bottom Nav (Clean) --- */
         nav.bottom-nav {
             position: fixed; bottom: 0; width: 100%;
-            background-color: var(--menu-bg);
+            background-color: var(--nav-bg);
             display: flex; justify-content: space-around;
-            padding: 10px 0 25px 0; border-top: 1px solid rgba(255,255,255,0.1); z-index: 100;
+            padding: 12px 0 25px 0; border-top: 1px solid var(--border); z-index: 100;
         }
-        .nav-item { color: #888; text-align: center; font-size: 0.75rem; cursor: pointer; width: 25%; }
-        .nav-item i { display: block; font-size: 1.4rem; margin-bottom: 4px; }
-        .nav-item.active { color: var(--accent-color); }
+        .nav-item { color: #BBB; text-align: center; font-size: 0.7rem; cursor: pointer; width: 25%; transition: color 0.2s; }
+        .nav-item i { display: block; font-size: 1.3rem; margin-bottom: 5px; }
+        .nav-item.active { color: var(--accent); }
 
-        /* --- Modal --- */
+        /* --- Map Page --- */
+        #map-container { width: 100%; height: 100%; background: #DDD; }
+
+        /* --- Modal (Clean) --- */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 3000;
-            justify-content: center; align-items: end; backdrop-filter: blur(3px);
+            background: rgba(0,0,0,0.5); z-index: 3000;
+            justify-content: center; align-items: end; backdrop-filter: blur(2px);
         }
         .modal.open { display: flex; }
         .modal-content {
-            background: var(--card-color); color: var(--text-on-light);
+            background: #FFF; color: #000;
             width: 100%; max-width: 600px; max-height: 85vh;
-            border-radius: 20px 20px 0 0; padding: 25px;
+            border-radius: 16px 16px 0 0; padding: 30px;
             overflow-y: auto; animation: slideUp 0.3s ease;
-            -webkit-overflow-scrolling: touch;
         }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 1.8rem; color: #888; cursor: pointer; }
+        .close-modal { float: right; font-size: 1.5rem; cursor: pointer; opacity: 0.5; }
         
-        .info-row { margin: 12px 0; display: flex; align-items: flex-start; gap: 12px; font-size: 0.95rem; line-height: 1.6; }
-        .info-row i { color: var(--accent-color); margin-top: 4px; width: 20px; text-align: center; }
+        .modal-header h2 { margin: 0 0 5px 0; font-size: 1.4rem; font-weight: 700; }
+        .sub-text { font-size: 0.9rem; color: #888; display: block; margin-bottom: 20px; font-family: "Inter", sans-serif; }
+        
+        .info-row { margin: 15px 0; display: flex; gap: 15px; font-size: 0.95rem; color: #333; }
+        .info-row i { color: #000; width: 20px; text-align: center; }
+        
         .note-box {
-            background: #f8f8f8; border-left: 4px solid var(--accent-color);
-            padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0;
-            font-size: 0.95rem; color: #333; line-height: 1.7;
+            background: #F5F5F5; padding: 20px; border-radius: 8px; margin: 25px 0;
+            font-size: 0.9rem; line-height: 1.6; color: #444;
         }
-        .link-btn {
-            display: inline-block; background: #eee; color: #333; 
-            padding: 6px 12px; border-radius: 4px; text-decoration: none; 
-            font-size: 0.85rem; margin-top: 5px; border: 1px solid #ccc;
-        }
+
         .action-btn {
-            display: flex; justify-content: center; align-items: center; gap: 8px;
-            width: 100%; padding: 14px; margin-top: 20px;
-            background: var(--accent-color); color: white;
-            text-decoration: none; border-radius: 10px;
-            font-weight: bold; font-size: 1rem; border: none; cursor: pointer;
+            width: 100%; padding: 16px; background: #000; color: #FFF;
+            border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+            margin-top: 10px; font-size: 1rem;
         }
         
-        .taxi-card {
-            background: #fff; color: #000; padding: 20px; 
-            border: 4px solid #000; margin: 15px 0; 
-            text-align: center; border-radius: 8px;
+        /* --- Weather Card (Monochrome) --- */
+        .weather-card {
+            background: var(--weather-gradient); color: white;
+            border-radius: 12px; padding: 25px; margin: 20px;
+            text-align: center; position: relative;
         }
-        .talk-card {
-            background: #fff; color: #333;
-            border-radius: 12px; padding: 20px; margin-bottom: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            text-align: center;
-        }
-        .talk-jp { font-size: 1.4rem; font-weight: bold; margin-bottom: 8px; color: var(--text-on-light); }
-        .talk-zh { font-size: 0.9rem; color: #666; }
-
-        /* --- 新增：底部懸浮篩選列 --- */
-        .filter-dock {
-            position: fixed;
-            bottom: 75px; /* 位於底部導航列上方 */
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 500px;
-            background: rgba(43, 42, 41, 0.95); /* 深色半透明背景 */
-            backdrop-filter: blur(10px);
-            border-radius: 30px;
-            padding: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            z-index: 999; /* 確保在最上層 */
-            border: 1px solid rgba(255,255,255,0.1);
-            opacity: 0; 
-            pointer-events: none; /* 預設不可點擊 */
-            transition: all 0.3s ease;
-            transform: translateX(-50%) translateY(20px); /* 初始位置微下沉 */
-        }
-
-        /* 只有在行程頁面且有內容時顯示 */
-        .filter-dock.visible {
-            opacity: 1;
-            pointer-events: all;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .filter-btn {
-            background: transparent;
-            border: none;
-            color: #888;
-            font-size: 0.9rem;
-            padding: 8px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: "Noto Sans TC", sans-serif;
-            white-space: nowrap;
-            flex: 1;
-        }
-
-        .filter-btn:active { transform: scale(0.95); }
-
-        /* 激活狀態：朱紅色高亮 */
-        .filter-btn.active {
-            background: var(--accent-color);
-            color: white;
-            box-shadow: 0 2px 8px rgba(233, 84, 100, 0.4);
-            font-weight: bold;
-        }
-
     </style>
 </head>
 <body>
 
     <header>
-        <h1>KYOTO 2026</h1>
+        <h1>Kyoto <span style="font-weight:300; opacity:0.6;">Prototype</span></h1>
         <div class="header-icons">
-            <a href="googletranslate://" class="header-btn" title="Google Translate">
-                <i class="fa-solid fa-language"></i>
-            </a>
-            <a href="#" class="header-btn fan-btn" onclick="openToolsPage(); return false;">
-                <i class="fa-solid fa-fan fa-spin" style="animation-duration: 10s;"></i>
-            </a>
+            <a href="#" class="header-btn"><i class="fa-solid fa-sliders"></i></a>
         </div>
     </header>
 
@@ -328,656 +228,264 @@
 
     <main>
         <div id="page-itinerary" class="page active">
-            <div class="timeline-container" id="timeline-container" style="padding-top: 20px;"></div>
-            <div style="text-align:center; color:#666; font-size:0.8rem; margin:30px 0;">平安喜樂 • 滿載而歸</div>
+            <div class="timeline-container" id="timeline-container"></div>
         </div>
 
-        <div id="page-map" class="page">
+        <div id="page-map" class="page" style="padding:0;">
             <div id="map-container"></div>
-            <div style="position:absolute; bottom:90px; left:10px; background:rgba(255,255,255,0.9); padding:8px 12px; border-radius:8px; color:#333; font-size:0.8rem; box-shadow:0 2px 5px rgba(0,0,0,0.3); pointer-events:none; z-index:999;">
-                <i class="fa-solid fa-location-dot" style="color:var(--accent-color)"></i> 顯示當日行程地點
-            </div>
         </div>
 
         <div id="page-weather" class="page">
             <div style="padding: 20px;">
-                <h2 style="font-family:'Shippori Mincho',serif; text-align:center; margin-bottom:10px;">當日天氣預報</h2>
+                <h2 style="text-align:center; font-weight:600;">Weather Forecast</h2>
                 <div id="weather-content">
-                    <div style="text-align:center; padding:20px;">
-                        <i class="fa-solid fa-spinner fa-spin"></i> 正在連線 Open-Meteo 氣象衛星...
                     </div>
-                </div>
-                
-                <div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:12px; margin:20px 0; display:flex; align-items:center; justify-content:space-between; border:1px solid rgba(255,255,255,0.1);">
-                    <div>
-                        <div style="font-weight:bold; color:var(--accent-color);"><i class="fa-solid fa-glass-water"></i> 水分補給 Check</div>
-                        <div style="font-size:0.8rem; opacity:0.7; margin-top:4px;">喝酒前請先喝水</div>
-                    </div>
-                    <div style="display:flex; gap:15px; align-items:center;">
-                        <button onclick="addWater()" style="background:var(--accent-color); border:none; color:white; width:45px; height:45px; border-radius:50%; font-size:1.2rem; cursor:pointer;"><i class="fa-solid fa-plus"></i></button>
-                        <span id="water-count" style="font-size:2rem; font-family:'Shippori Mincho',serif; min-width:30px; text-align:center;">0</span>
-                    </div>
-                </div>
-
-                <div class="note-box">
-                    <div style="font-weight:bold; margin-bottom:5px; color:var(--accent-color);">7月京都氣候 TIPS：</div>
-                    京都盆地地形導致夏季極度悶熱（宛如蒸籠）。<br>
-                    午後常有突發性雷陣雨（夕立），請務必隨身攜帶輕便雨傘。<br>
-                    防曬與補水是每日最重要的事。
-                </div>
             </div>
         </div>
 
-        <div id="page-shopping" class="page">
-            <div style="padding: 20px;">
-                <h2 style="font-family:'Shippori Mincho',serif; text-align:center;">今日購物建議</h2>
-                <p style="text-align:center; opacity:0.7; font-size:0.85rem; margin-bottom:20px;">根據當日行程地點推薦</p>
-                <div id="daily-shopping-list"></div>
-                <div style="margin-top:40px; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;">
-                    <h3 style="color:#aaa; font-size:1rem;">全行程購物清單 (General)</h3>
-                    <div id="general-shopping-container"></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="page-tools" class="page">
-            <h2 style="text-align:center; margin: 30px 0 20px 0; font-family:'Shippori Mincho',serif;">旅人百寶箱</h2>
-            <div class="tools-grid">
-                <div class="tool-btn" onclick="openSubPage('hotel')"><i class="fa-solid fa-bed"></i><span>酒店資訊</span></div>
-                <div class="tool-btn" onclick="openSubPage('packing')"><i class="fa-solid fa-suitcase"></i><span>行李清單</span></div>
-                <div class="tool-btn" onclick="openSubPage('rate')"><i class="fa-solid fa-yen-sign"></i><span>匯率換算</span></div>
-                <div class="tool-btn" onclick="openSubPage('safety')"><i class="fa-solid fa-user-shield"></i><span>安全報平安</span></div>
-                <div class="tool-btn" onclick="openSubPage('talk')"><i class="fa-solid fa-comment-dots"></i><span>手指對話</span></div>
-                <div class="tool-btn" onclick="openTipsModal()"><i class="fa-regular fa-compass"></i><span>路痴救星</span></div>
-            </div>
-            <div style="text-align:center; margin-top:30px;">
-                <button onclick="history.back()" style="background:none; border:1px solid #777; color:#fff; padding:10px 20px; border-radius:20px;">關閉百寶箱</button>
-            </div>
-        </div>
-
-        <div id="subpage-hotel" class="sub-page">
-            <div class="sub-header"><button class="back-btn" onclick="closeSubPage('hotel')"><i class="fa-solid fa-arrow-left"></i></button><h2>酒店資訊</h2></div>
-            <div class="sub-content">
-                <h3 style="color:var(--accent-color); font-family:'Shippori Mincho',serif; margin-bottom:10px;">Dormy Inn Premium Kyoto Ekimae</h3>
-                <div style="font-size:0.9rem; opacity:0.8; margin-bottom:20px;">天然溫泉朵米 premium 京都站前</div>
-                <div class="note-box">
-                    <i class="fa-solid fa-location-dot" style="color:var(--accent-color)"></i> <b>地址：</b><br>京都市下京區東塩小路町558-8<br>
-                    <a href="https://www.google.com/maps/search/?api=1&query=$34.9868,135.7599" target="_blank" class="link-btn" style="margin-top:8px;">開啟地圖</a>
-                </div>
-                <div class="checklist-item" style="opacity:1;"><i class="fa-regular fa-clock" style="color:var(--accent-color)"></i><span><b>In:</b> 15:00 / <b>Out:</b> 11:00</span></div>
-                <h4 style="border-bottom:1px solid #555; padding-bottom:5px; margin-top:25px;">獨旅特色</h4>
-                <ul style="padding-left:20px; line-height:1.6; font-size:0.95rem;"><li>頂樓天然溫泉</li><li>免費夜鳴き蕎麥麵 (21:30-23:00)</li><li>免費洗衣機</li></ul>
-            </div>
-        </div>
-
-        <div id="subpage-packing" class="sub-page">
-            <div class="sub-header"><button class="back-btn" onclick="closeSubPage('packing')"><i class="fa-solid fa-arrow-left"></i></button><h2>行李清單</h2></div>
-            <div class="sub-content" id="packing-list-container"></div>
-        </div>
-        
-        <div id="subpage-rate" class="sub-page">
-            <div class="sub-header"><button class="back-btn" onclick="closeSubPage('rate')"><i class="fa-solid fa-arrow-left"></i></button><h2>匯率換算</h2></div>
-            <div class="sub-content" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:80%;">
-                <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; width:100%;">
-                    <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
-                         <label style="font-size:0.8rem; color:#aaa;">匯率: <input type="number" id="rate-setting" value="0.052" step="0.001" style="width:60px; background:transparent; color:#fff; border:1px solid #555; text-align:center; border-radius:4px;"></label>
-                    </div>
-                    <label>日幣 (JPY)</label><input type="number" id="jpy-input" placeholder="¥" oninput="calcRate('jpy')" style="width: 100%; padding: 15px; margin: 10px 0; font-size: 1.2rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: white; border-radius: 8px; text-align: center;">
-                    <div style="text-align:center; font-size:1.5rem; margin:10px 0; color:var(--accent-color);">⇅</div>
-                    <label>港幣 (HKD)</label><input type="number" id="hkd-input" placeholder="$" oninput="calcRate('hkd')" style="width: 100%; padding: 15px; margin: 10px 0; font-size: 1.2rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: white; border-radius: 8px; text-align: center;">
-                </div>
-            </div>
-        </div>
-        
-        <div id="subpage-safety" class="sub-page">
-            <div class="sub-header"><button class="back-btn" onclick="closeSubPage('safety')"><i class="fa-solid fa-arrow-left"></i></button><h2>安全功能</h2></div>
-            <div class="sub-content">
-                <div style="text-align: center; padding: 30px 20px; background: linear-gradient(135deg, #2E4B71, #1a2e47); border-radius: 16px; margin-bottom: 20px;" onclick="sendSafetyMessage()">
-                    <i class="fa-brands fa-whatsapp" style="font-size:3rem; color:white; margin-bottom:15px;"></i>
-                    <h3 style="margin:0 0 10px 0;">一鍵報平安 (WhatsApp)</h3>
-                    <p style="opacity:0.8; margin:0;">按此發送位置給家人</p>
-                </div>
-                <h3 style="border-bottom:1px solid #555; padding-bottom:10px; margin-top:30px;">緊急資訊</h3>
-                <div class="checklist-item" onclick="alert('110')"><i class="fa-solid fa-shield-halved" style="color:var(--accent-color);"></i><span>警察局: 110</span></div>
-                <div class="checklist-item" onclick="alert('119')"><i class="fa-solid fa-truck-medical" style="color:var(--accent-color);"></i><span>救護/消防: 119</span></div>
-            </div>
-        </div>
-
-        <div id="subpage-talk" class="sub-page">
-            <div class="sub-header"><button class="back-btn" onclick="closeSubPage('talk')"><i class="fa-solid fa-arrow-left"></i></button><h2>手指指對話</h2></div>
-            <div class="sub-content">
-                <div class="talk-card"><div class="talk-jp">一人です。</div><div class="talk-zh">我是一位。</div></div>
-                <div class="talk-card"><div class="talk-jp">おすすめは何ですか？</div><div class="talk-zh">有推薦的菜色嗎？</div></div>
-                <div class="talk-card"><div class="talk-jp">お会計をお願いします。</div><div class="talk-zh">麻煩結帳。</div></div>
-                <div class="talk-card"><div class="talk-jp">クレジットカードは<br>使えますか？</div><div class="talk-zh">可以用信用卡嗎？</div></div>
-                <div class="talk-card"><div class="talk-jp">ここへ行ってください。</div><div class="talk-zh">(給司機) 請去這裡。</div></div>
-                <div class="talk-card"><div class="talk-jp">わさび抜きでお願いします。</div><div class="talk-zh">請不要加芥末。</div></div>
-            </div>
-        </div>
-        
         <div id="filter-dock" class="filter-dock">
-            <button class="filter-btn active" onclick="filterTimeline('all', this)">全部</button>
-            <button class="filter-btn" onclick="filterTimeline('culture', this)">⛩️ 文化</button>
-            <button class="filter-btn" onclick="filterTimeline('food', this)">🍷 食飲</button>
-            <button class="filter-btn" onclick="filterTimeline('shopping', this)">🛍️ 購物</button>
+            <button class="filter-btn active" onclick="filterTimeline('all', this)">All</button>
+            <button class="filter-btn" onclick="filterTimeline('culture', this)">Culture</button>
+            <button class="filter-btn" onclick="filterTimeline('food', this)">Dining</button>
+            <button class="filter-btn" onclick="filterTimeline('shopping', this)">Shop</button>
         </div>
-
     </main>
 
     <nav class="bottom-nav">
-        <div class="nav-item active" onclick="switchMainPage('itinerary', this)"><i class="fa-solid fa-calendar-days"></i> 行程</div>
-        <div class="nav-item" onclick="switchMainPage('map', this)"><i class="fa-solid fa-map-location-dot"></i> 地圖</div>
-        <div class="nav-item" onclick="switchMainPage('weather', this)"><i class="fa-solid fa-cloud-sun-rain"></i> 天氣</div>
-        <div class="nav-item" onclick="switchMainPage('shopping', this)"><i class="fa-solid fa-basket-shopping"></i> 購物</div>
+        <div class="nav-item active" onclick="switchMainPage('itinerary', this)"><i class="fa-regular fa-calendar"></i><span>Plan</span></div>
+        <div class="nav-item" onclick="switchMainPage('map', this)"><i class="fa-regular fa-map"></i><span>Map</span></div>
+        <div class="nav-item" onclick="switchMainPage('weather', this)"><i class="fa-solid fa-cloud"></i><span>Weather</span></div>
     </nav>
 
     <div id="detail-modal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">×</span>
-            <div class="modal-header"><h2 id="modal-title">標題</h2><span id="modal-type" class="sub">類型</span></div>
+            <div class="modal-header">
+                <h2 id="modal-title">Title</h2>
+                <span id="modal-type" class="sub-text">Type</span>
+            </div>
             <div class="modal-body">
-                <div id="taxi-card" class="taxi-card" style="display:none;">
-                    <p style="font-size:0.8rem; color:#666; margin:0 0 5px 0;">運転手さん、ここへお願いします</p>
-                    <h2 id="taxi-address" style="font-size:1.5rem; margin:5px 0; font-weight:bold; line-height:1.2;"></h2>
-                    <p id="taxi-name" style="font-size:1rem; margin-top:5px; color:#444;"></p>
+                <div class="info-row"><i class="fa-regular fa-clock"></i><span id="modal-time">Time</span></div>
+                <div class="info-row"><i class="fa-solid fa-location-dot"></i><span id="modal-address">Address</span></div>
+                <div class="info-row" id="modal-price-row"><i class="fa-regular fa-credit-card"></i><span id="modal-price">Cost</span></div>
+                
+                <div class="note-box">
+                    <div style="font-weight:600; margin-bottom:10px; text-transform:uppercase; font-size:0.8rem; letter-spacing:1px;">Notes</div>
+                    <span id="modal-note">Content...</span>
                 </div>
-                <div class="info-row"><i class="fa-regular fa-clock"></i><span id="modal-time">時間</span></div>
-                <div class="info-row"><i class="fa-solid fa-location-dot"></i><span id="modal-address">地址</span></div>
-                <div class="info-row" id="modal-price-row"><i class="fa-solid fa-money-bill-wave"></i><span id="modal-price"></span></div>
-                <div class="info-row" style="background:rgba(233,84,100,0.1); padding:8px; border-radius:6px; align-items:center;">
-                    <i class="fa-solid fa-calculator"></i><span style="white-space:nowrap;">實際花費(¥)：</span>
-                    <input type="number" id="modal-actual-cost" placeholder="0" style="background:transparent; border:none; border-bottom:1px solid #555; width:80px; color:#333; font-size:1rem; text-align:center;" onchange="saveExpense()">
-                </div>
-                <div class="note-box"><div style="font-weight:bold; margin-bottom:8px; color:var(--accent-color);">攻略與 TIPS：</div><span id="modal-note">內容...</span></div>
-                <div id="modal-links" style="margin-bottom: 20px;"></div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:20px;">
-                     <button class="action-btn" id="modal-map-btn" style="margin-top:0;"><i class="fa-solid fa-map-location-dot"></i> Google 導航</button>
-                     <button class="action-btn" onclick="toggleTaxiCard()" style="margin-top:0; background:#444;"><i class="fa-solid fa-taxi"></i> 給司機看</button>
-                </div>
+                
+                <button class="action-btn" id="modal-map-btn">Open in Google Maps</button>
             </div>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // --- 核心數據：縮減為 3 天 Prototype ---
         const scheduleData = {
-            "day1": { "date": "2026-07-15", "display": "7/15 (三)", "events": [ 
-                { time: "14:00 - 16:00", title: "抵達京都站 & Check-in", type: "交通/住宿", price: "¥2,600", address: "Dormy Inn Premium Kyoto Ekimae", coords: [34.9868, 135.7599], note: "<b>交通：</b>關西機場1F 8號搭利木津巴士。<br>15:00後Check-in，行李可寄放。", link: "https://www.klook.com/activity/1541-kix-airport-limousine-bus-transfer-kyoto/", tags: ["移動", "入住"], shopping_items: ["ICOCA (若需儲值)", "涼感濕紙巾", "鹽分補給糖"] },
-                { time: "午餐 (若早到)", title: "月之藏人", type: "美食", price: "¥2,500", address: "伏見區上油掛町185-1", coords: [34.9310, 135.7610], note: "<b>必點：</b>自家製豆腐、酒粕烤雞。<br>舊酒造改建，氛圍懷舊。", tags: ["美食"] },
-                { time: "16:00 - 18:00", title: "黃櫻 Kappa Country", type: "清酒", price: "¥2,000", address: "伏見區塩屋町228", coords: [34.9305, 135.7615], note: "<b>必喝：</b>Lucky Cat/Dog 精釀啤酒、夏季柚子酒。", tags: ["清酒", "河童"], shopping_items: ["黃櫻清酒", "河童周邊", "夏季酒套裝"] },
-                { time: "18:00 - 19:00", title: "AEON Mall 超市", type: "購物", price: "¥1,500", address: "京都站八條口 Sakura館", coords: [34.9835, 135.7560], note: "買枝豆、水茄子漬物、刺身拼盤回酒店小酌。", tags: ["超市", "補給"], shopping_items: ["枝豆", "水茄子漬物", "刺身拼盤", "日本酒/啤酒"] },
-                { time: "晚餐", title: "Okonomiyaki Katsu", type: "美食", price: "¥1,500", address: "京都市下京區", coords: [35.0028, 135.7596], note: "<b>必點：</b>大阪燒小份 (配Highball)。", tags: ["B級美食", "大阪燒"] }
+            "day1": { "date": "2026-07-15", "display": "Day 01", "weekday": "Wed", "events": [ 
+                { time: "14:00 - 16:00", title: "Arrival & Check-in", type: "Stay", price: "¥2,600", address: "Dormy Inn Premium Kyoto Ekimae", coords: [34.9868, 135.7599], note: "機場巴士直達。Check-in 後寄放行李，稍微休息。", tags: ["Logistics", "Check-in"] },
+                { time: "16:30 - 18:00", title: "Walking: Fushimi Sake District", type: "Culture", price: "Free", address: "伏見桃山", coords: [34.9305, 135.7615], note: "沿著運河散步，感受清酒產區的歷史氛圍。", tags: ["Walk", "Photo"] },
+                { time: "19:00", title: "Dinner: Yakitori Katsu", type: "Food", price: "¥3,500", address: "京都市下京區", coords: [35.0028, 135.7596], note: "簡單的燒鳥晚餐，配一杯 Highball。", tags: ["Local"] }
             ]},
-            "day2": { "date": "2026-07-16", "display": "7/16 (四)", "events": [
-                { time: "早餐", title: "Ogawa Coffee", type: "美食", price: "¥1,200", address: "京都站前地下", coords: [34.9852, 135.7584], note: "<b>必點：</b>京都早餐套餐。", tags: ["咖啡"] },
-                { time: "10:00 - 12:00", title: "月桂冠大倉紀念館", type: "景點", price: "¥600", address: "伏見區南浜町247", coords: [34.9298, 135.7618], note: "<b>重點：</b>試飲夏季冰鎮生酒。必喝中庭伏水井水。", link: "https://www.gekkeikan.com/museum/", tags: ["清酒", "歷史"], shopping_items: ["月桂冠生酒", "清酒杯"] },
-                { time: "12:00 - 13:30", title: "Gion Matayoshi (午餐)", type: "美食", price: "¥4,000", address: "祇園", coords: [35.0050, 135.7750], note: "<b>必點：</b>午間懷石套餐。", tags: ["懷石", "米其林"] },
-                { time: "13:30 - 15:30", title: "伏見酒蔵小路", type: "體驗", price: "¥2,500", address: "伏見區納屋町", coords: [34.9330, 135.7605], note: "<b>必點：</b>十八藏試飲 Set。", link: "https://www.tablecheck.com/en/shops/fushimi-sakagura-kouji/reserve", tags: ["清酒"] },
-                { time: "16:00 - 17:00", title: "MY ONLY FRAGRANCE", type: "體驗", price: "¥6,000", address: "中京區下丸屋町401-2", coords: [35.0085, 135.7680], note: "調製專屬香水，印上旅程日期。", link: "https://www.kkday.com/en-sg/product/248954", tags: ["香氛"], shopping_items: ["專屬香水"] },
-                { time: "18:00 - 20:00", title: "Mezopotamia Kebab", type: "美食", price: "¥1,000", address: "四條", coords: [35.0040, 135.7600], note: "<b>必點：</b>烤肉捲小份。", tags: ["輕食"] },
-                { time: "20:00 後", title: "祇園祭「宵山」步行", type: "祭典", price: "¥1,000", address: "四條烏丸", coords: [35.0039, 135.7595], note: "<b>必做：</b>去「長刀鉾」買個「粽」。<br><span style='color:red;'><b>注意：</b>晚間核心區封路。</span>", tags: ["祭典", "交通管制"], shopping_items: ["長刀鉾 粽 (護身符)"] }
+            "day2": { "date": "2026-07-16", "display": "Day 02", "weekday": "Thu", "events": [
+                { time: "09:00", title: "Coffee: Weekenders Coffee", type: "Food", price: "¥600", address: "富小路通", coords: [35.0050, 135.7650], note: "隱藏在停車場深處的極品咖啡。", tags: ["Coffee", "Must"] },
+                { time: "10:30 - 12:30", title: "Museum: Kyoto City Kyocera", type: "Culture", price: "¥1,200", address: "岡崎公園", coords: [35.0120, 135.7830], note: "欣賞建築翻新後的細節與展覽。", tags: ["Art", "Arch"] },
+                { time: "13:00", title: "Lunch: Udon Yamamoto", type: "Food", price: "¥1,500", address: "平安神宮附近", coords: [35.0130, 135.7820], note: "在地人排隊名店，必點土牛蒡烏龍麵。", tags: ["Local"] },
+                { time: "15:00 - 17:00", title: "Shopping: BAL Kyoto", type: "Shopping", price: "Var.", address: "河原町", coords: [35.0070, 135.7700], note: "京都最有品味的百貨。逛 Conran Shop。", tags: ["Design", "Shop"] },
+                { time: "19:00", title: "Festival: Gion Matsuri Yoiyama", type: "Culture", price: "Free", address: "四條烏丸", coords: [35.0039, 135.7595], note: "<b>重點行程：</b>宵山點燈。避開主幹道，走小巷看山鉾。", tags: ["Highlight", "Crowded"] }
             ]},
-            "day3": { "date": "2026-07-17", "display": "7/17 (五)", "events": [
-                { time: "09:00 - 12:00", title: "山鉾巡行 (前祭)", type: "祭典", price: "免費", address: "御池通/市役所前", coords: [35.0116, 135.7681], note: "<b>攻略：</b>不要在路口擠。<span style='color:red;'><b>注意：</b>人潮極多。</span>", tags: ["祭典", "交通管制"] },
-                { time: "午餐", title: "Kikunoi Lunch Set", type: "美食", price: "¥5,000", address: "木屋町/祇園", coords: [35.0035, 135.7705], note: "<b>必點：</b>午間懷石套餐。", tags: ["懷石", "米其林"] },
-                { time: "13:30 - 16:30", title: "佐佐木酒造", type: "景點", price: "¥2,000", address: "上京區日暮通椹木町", coords: [35.0232, 135.7516], note: "洛中唯一酒造 (佐佐木藏之介老家)。", link: "https://wabunka-lux.jp/experiences/en_sasaki-shuzo/", tags: ["酒造"], shopping_items: ["佐佐木酒造 聚樂第", "酒粕"] },
-                { time: "17:00 - 18:00", title: "Lopia 超市", type: "購物", price: "¥2,000", address: "京都站 Yodobashi B1", coords: [34.9875, 135.7595], note: "肉類極強。必買自家製香腸、大份量壽司 (宵夜)。", tags: ["超市"], shopping_items: ["自家製香腸", "大份量壽司"] }
-            ]},
-             "day4": { "date": "2026-07-18", "display": "7/18 (六)", "events": [
-                { time: "早餐 (8:00前)", title: "Vermillion Espresso", type: "美食", price: "¥1,000", address: "伏見稻荷", coords: [34.9671, 135.7727], note: "<b>攻略：</b>8點前到伏見稻荷避人潮。", tags: ["神社", "咖啡"], shopping_items: ["狐狸面具煎餅"] },
-                { time: "11:30 - 14:00", title: "藤岡酒造 (蒼空)", type: "品酒", price: "¥2,000", address: "伏見", coords: [34.9300, 135.7600], note: "<b>必訪：</b>玻璃屋酒吧「酒蔵Bar En」。", tags: ["清酒", "文青"], shopping_items: ["蒼空 清酒杯"] },
-                { time: "午餐", title: "Wagyu Teppanyaki Kiyomizu", type: "美食", price: "¥4,000", address: "清水寺周邊", coords: [34.9960, 135.7800], note: "<b>必點：</b>午間和牛鐵板燒套餐。", tags: ["和牛", "鐵板燒"] },
-                { time: "14:00 - 16:00", title: "天香堂 香道", type: "體驗", price: "¥3,500", address: "嵐山/嵯峨野", coords: [35.0155, 135.6700], note: "製作匂袋 (香包)。", link: "https://tenkhodou.com/", tags: ["香氛"], shopping_items: ["日式香包 (匂袋)"] },
-                { time: "加碼", title: "野宮神社", type: "景點", price: "免費", address: "嵐山竹林入口", coords: [35.0178, 135.6743], note: "求良緣摸黑色的「龜石」。", tags: ["結緣"], shopping_items: ["戀愛御守"] },
-                { time: "16:30 - 17:30", title: "業務超市", type: "購物", price: "¥1,000", address: "市區", coords: [35.0000, 135.7500], note: "買柚子胡椒醬、七味粉。", tags: ["超市"], shopping_items: ["柚子胡椒", "七味粉"] }
-            ]},
-            "day5": { "date": "2026-07-19", "display": "7/19 (日)", "events": [
-                { time: "早餐", title: "Sentido", type: "美食", price: "¥1,000", address: "烏丸御池", coords: [35.0105, 135.7600], note: "<b>必點：</b>熱壓三明治。", tags: ["咖啡"] },
-                { time: "10:00 - 13:00", title: "錦市場 & 景點午餐", type: "景點/午餐", price: "¥3,000", address: "錦市場", coords: [35.0050, 135.7649], note: "<b>必買：</b>打田漬物(柴漬)。", tags: ["市場"], shopping_items: ["打田漬物 (柴漬)", "津之喜酒舖 清酒"] },
-                { time: "下午", title: "下鴨神社 & 河合神社", type: "景點", price: "¥800", address: "出町柳", coords: [35.0345, 135.7720], note: "河合神社必買「鏡繪馬」化妝祈求變美。", tags: ["神社", "美容"], shopping_items: ["鏡繪馬 (化妝)", "美人水"] },
-                { time: "晚餐", title: "Onigiriya Goku", type: "美食", price: "¥1,000", address: "河原町", coords: [35.0000, 135.7680], note: "<b>必點：</b>米飯球小份。", tags: ["輕食", "飯糰"] }
-            ]},
-            "day6": { "date": "2026-07-20", "display": "7/20 (一)", "events": [
-                { time: "上午", title: "京都文化博物館", type: "景點", price: "¥500", address: "三條高倉", coords: [35.0090, 135.7630], note: "舊銀行建築，很美。逛京都工藝品店。", tags: ["藝文"], shopping_items: ["京都工藝品"] },
-                { time: "午餐", title: "Kamigamo Kirin", type: "美食", price: "¥1,500", address: "上賀茂", coords: [35.0550, 135.7550], note: "<b>必點：</b>Obanzai 自助餐。", tags: ["Obanzai", "蔬菜"] },
-                { time: "14:00 - 16:00", title: "伊勢丹 Isetan", type: "購物", price: "¥10,000", address: "京都站", coords: [34.9858, 135.7588], note: "<b>香水：</b>Shiro / Aux Paradis。<b>超市：</b>551肉包、下鴨茶寮便當。", tags: ["百貨"], shopping_items: ["Shiro / Aux Paradis 香水", "551 肉包", "下鴨茶寮 便當"] },
-                { time: "20:00 後", title: "後祭山鉾搭建", type: "祭典", price: "免費", address: "烏丸御池", coords: [35.0110, 135.7600], note: "看職人「無釘」組裝大船鉾。", tags: ["後祭"] }
-            ]},
-            "day7": { "date": "2026-07-21", "display": "7/21 (二)", "events": [
-                { time: "08:00 - 11:00", title: "東寺 弘法市 (古董市集)", type: "市集", price: "¥5,000", address: "東寺", coords: [34.9806, 135.7476], note: "<b>每月21日限定！</b>早8-9點去。<br>目標：買一個古董清酒杯 (猪口)。", tags: ["市集", "尋寶"], shopping_items: ["古董猪口杯"] },
-                { time: "午餐", title: "市集攤販 / Harvest", type: "美食", price: "¥1,500", address: "東寺周邊", coords: [34.9806, 135.7476], note: "吃攤販炒麵或廣島燒。", tags: ["B級美食"] },
-                { time: "下午", title: "Fresco / Life 超市", type: "購物", price: "¥1,000", address: "二條城附近", coords: [35.0140, 135.7450], note: "順路補充零食。", tags: ["超市"], shopping_items: ["零食", "泡麵"] },
-                { time: "18:00 - 23:00", title: "後祭宵山 (通人版)", type: "祭典", price: "¥2,000", address: "烏丸御池", coords: [35.0080, 135.7570], note: "看屏風祭。買杯路邊冰鎮清酒，坐著聽祇園囃子。", tags: ["宵山", "氛圍"] }
-            ]},
-            "day8": { "date": "2026-07-22", "display": "7/22 (三)", "events": [
-                { time: "早餐", title: "Inoda Coffee 本店", type: "美食", price: "¥1,600", address: "三條", coords: [35.0090, 135.7650], note: "<b>必點：</b>京之朝食。", tags: ["老舖"], shopping_items: ["Inoda 咖啡豆"] },
-                { time: "12:00 - 13:00", title: "最後採買", type: "購物", price: "¥3,000", address: "京都站新幹線口", coords: [34.9858, 135.7588], note: "<b>必買：</b>阿闍梨餅 (軟糯紅豆餅)。", tags: ["伴手禮"], shopping_items: ["阿闍梨餅"] },
-                { time: "午餐", title: "Premium Pound Gion", type: "美食", price: "¥3,000", address: "祇園", coords: [35.0050, 135.7750], note: "<b>必點：</b>午間和牛套餐。<br>離開前的最後享受。", tags: ["和牛"] },
-                { time: "前往機場", title: "利木津巴士", type: "交通", price: "¥2,600", address: "京都站八條口", coords: [34.9839, 135.7593], note: "帶著戰利品回家！", link: "https://www.klook.com/activity/1541-kix-airport-limousine-bus-transfer-kyoto/", tags: ["移動"] }
+            "day3": { "date": "2026-07-17", "display": "Day 03", "weekday": "Fri", "events": [
+                { time: "08:30", title: "Morning Walk: Kamo River", type: "Culture", price: "Free", address: "鴨川三角洲", coords: [35.0300, 135.7720], note: "帶杯咖啡去河邊坐坐，看當地人生活。", tags: ["Relax"] },
+                { time: "11:00", title: "Shopping: Antique Market", type: "Shopping", price: "Var.", address: "知恩寺", coords: [35.0280, 135.7800], note: "尋找昭和時代的玻璃杯與舊書。", tags: ["Vintage"] },
+                { time: "13:00", title: "Departure", type: "Logistics", price: "-", address: "Kyoto Station", coords: [34.9858, 135.7588], note: "前往機場，結束旅程。", tags: ["Train"] }
             ]}
         };
 
-        const packingList = ["護照", "ICOCA", "行動電源", "雨具", "防曬", "好走的鞋", "藥品", "網卡"];
-        const generalShoppingListItems = ["阿闍梨餅", "551 肉包", "下鴨茶寮 便當", "古董猪口杯", "MY ONLY FRAGRANCE 香水", "Shiro / Aux Paradis", "打田漬物", "津之喜酒舖 清酒", "柚子胡椒", "長刀鉾 粽", "涼感濕紙巾", "鹽分補給糖"];
-
+        // --- 狀態變數 ---
         let currentDay = "day1";
         let map = null;
         let markers = [];
-        let waterCount = 0;
-        let currentModalEventTitle = "";
-        let weatherData = null; // Store fetched weather data
-        const STORAGE_KEY = 'kyoto_2026_final_v2';
 
-        // Open-Meteo WMO Code Mapping
-        const wmoMap = {
-            0: {icon: 'fa-sun', text: '晴朗'}, 1: {icon: 'fa-cloud-sun', text: '多雲'}, 2: {icon: 'fa-cloud', text: '陰天'}, 
-            3: {icon: 'fa-cloud', text: '陰天'}, 45: {icon: 'fa-smog', text: '霧'}, 48: {icon: 'fa-smog', text: '霧'},
-            51: {icon: 'fa-cloud-rain', text: '毛毛雨'}, 53: {icon: 'fa-cloud-rain', text: '小雨'}, 55: {icon: 'fa-cloud-showers-heavy', text: '中雨'},
-            61: {icon: 'fa-cloud-showers-heavy', text: '陣雨'}, 63: {icon: 'fa-cloud-showers-heavy', text: '下雨'}, 65: {icon: 'fa-cloud-showers-water', text: '大雨'},
-            80: {icon: 'fa-cloud-rain', text: '陣雨'}, 81: {icon: 'fa-cloud-showers-heavy', text: '大雨'}, 82: {icon: 'fa-cloud-showers-water', text: '暴雨'},
-            95: {icon: 'fa-cloud-bolt', text: '雷雨'}, 96: {icon: 'fa-cloud-bolt', text: '雷陣雨'}, 99: {icon: 'fa-cloud-bolt', text: '豪大雷雨'}
-        };
-
+        // --- 初始化 ---
         function init() { 
             renderDateSelector(); 
-            renderPackingList();
-            renderGeneralShoppingList();
+            selectDay('day1'); 
             initMap();
-            loadState();
-            fetchWeather(); // New: Fetch real weather
-            checkDateAndInit();
         }
 
-        async function fetchWeather() {
-            try {
-                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=35.0116&longitude=135.7681&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&current_weather=true&timezone=Asia%2FTokyo');
-                weatherData = await res.json();
-                renderWeather(currentDay); 
-            } catch(e) {
-                console.error("Weather fetch failed", e);
-            }
-        }
-
-        function checkDateAndInit() {
-            const today = new Date();
-            const month = today.getMonth() + 1;
-            const day = today.getDate();
-            const year = today.getFullYear();
-            const todayStr = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-            let targetDay = "day1";
-            let found = false;
-
-            Object.keys(scheduleData).forEach(key => {
-                if (scheduleData[key].date === todayStr) {
-                    targetDay = key;
-                    found = true;
-                }
-            });
-
-            const chips = document.querySelectorAll('.date-chip');
-            if(found) {
-                chips.forEach(chip => {
-                    if(chip.innerText.includes(`D${targetDay.replace('day','')}`)) {
-                        selectDay(targetDay, chip);
-                        chip.scrollIntoView({behavior: "smooth", inline: "center", block: "nearest"});
-                    }
-                });
-            } else {
-                selectDay('day1', chips[0]);
-            }
-        }
-
-        function saveState() {
-            const state = { checks: {}, water: waterCount, expenses: {} };
-            document.querySelectorAll('input[type="checkbox"]').forEach(input => {
-                if(input.id) state.checks[input.id] = input.checked;
-            });
-            const savedRaw = localStorage.getItem(STORAGE_KEY);
-            let savedExpenses = {};
-            if(savedRaw) { try { savedExpenses = JSON.parse(savedRaw).expenses || {}; } catch(e){} }
-            state.expenses = savedExpenses;
-            const costInput = document.getElementById('modal-actual-cost');
-            if(costInput && currentModalEventTitle) { state.expenses[currentModalEventTitle] = costInput.value; }
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        }
-
-        function loadState() {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (!saved) return;
-            try {
-                const state = JSON.parse(saved);
-                if (typeof state.water === 'number') {
-                    waterCount = state.water;
-                    const wc = document.getElementById('water-count');
-                    if(wc) wc.innerText = waterCount;
-                }
-                setTimeout(() => {
-                    Object.keys(state.checks).forEach(id => {
-                        const el = document.getElementById(id);
-                        if (el) {
-                            el.checked = state.checks[id];
-                            if(el.parentElement.classList.contains('checklist-item')) el.parentElement.classList.toggle('checked', el.checked);
-                        }
-                    });
-                }, 100);
-            } catch (e) { console.error("Load failed", e); }
-        }
-        
-        function saveExpense() { saveState(); }
-        function getSavedExpense(title) {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (!saved) return "";
-            try { const state = JSON.parse(saved); return state.expenses && state.expenses[title] ? state.expenses[title] : ""; } catch(e) { return ""; }
-        }
-
-        // --- Modified: switchMainPage to control Filter Dock ---
-        function switchMainPage(pageId, navEl) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page-' + pageId).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            
-            // [新增] 控制篩選列的顯示/隱藏
-            const filterDock = document.getElementById('filter-dock');
-            if (filterDock) {
-                if (pageId === 'itinerary') {
-                    filterDock.classList.add('visible');
-                } else {
-                    filterDock.classList.remove('visible');
-                }
-            }
-
-            if(navEl) navEl.classList.add('active');
-            else {
-                const idx = ['itinerary', 'map', 'weather', 'shopping'].indexOf(pageId);
-                if(idx !== -1) document.querySelectorAll('.nav-item')[idx].classList.add('active');
-            }
-            if(pageId === 'map' && map) setTimeout(() => { map.invalidateSize(); fitMapToDay(); }, 200);
-        }
-
-        function openToolsPage() {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page-tools').classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        }
-
-        function openSubPage(id) { document.getElementById('subpage-' + id).classList.add('open'); }
-        function closeSubPage(id) { document.getElementById('subpage-' + id).classList.remove('open'); }
-
+        // --- 日期選擇器 ---
         function renderDateSelector() {
             const container = document.getElementById('date-selector'); container.innerHTML = '';
             Object.keys(scheduleData).forEach(dayKey => {
-                const dayInfo = scheduleData[dayKey];
-                const dayNum = dayKey.replace('day', '');
+                const day = scheduleData[dayKey];
                 const chip = document.createElement('div');
                 chip.className = `date-chip`;
                 chip.onclick = () => selectDay(dayKey, chip);
-                chip.innerHTML = `<span class="day-num">D${dayNum}</span><span class="day-week">${dayInfo.display.split(' ')[0]}</span>`;
+                chip.innerHTML = `<span class="day-num">${day.display}</span><span class="day-week">${day.weekday}</span>`;
                 container.appendChild(chip);
             });
+            // 預設選中第一個
+            container.firstChild.classList.add('active');
         }
 
         function selectDay(dayKey, chipEl) {
             currentDay = dayKey;
-            document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('active'));
-            if(chipEl) chipEl.classList.add('active');
+            if(chipEl) {
+                document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('active'));
+                chipEl.classList.add('active');
+            }
             renderTimeline(dayKey);
-            renderWeather(dayKey); 
-            renderDailyShopping(dayKey);
-            if(map) updateMapMarkers(dayKey);
-            loadState(); 
+            updateMapMarkers(dayKey);
+            renderWeatherSim(dayKey);
         }
 
-        // --- Modified: renderTimeline with Auto-Categorization ---
+        // --- 行程渲染 (含自動分類) ---
         function renderTimeline(dayKey) {
             const container = document.getElementById('timeline-container'); 
             container.innerHTML = '';
             
-            // 重置篩選列
+            // 顯示篩選列
             const filterDock = document.getElementById('filter-dock');
-            if(filterDock) {
-                filterDock.classList.add('visible');
-                resetFilterBtns();
-            }
+            filterDock.classList.add('visible');
+            resetFilterBtns();
 
-            const dayTitle = document.createElement('h3'); 
-            dayTitle.style.marginBottom='20px';
-            dayTitle.innerHTML = `<span style="color:var(--accent-color); font-family:'Shippori Mincho',serif;">${scheduleData[dayKey].display}</span>`;
-            container.appendChild(dayTitle);
-            
             scheduleData[dayKey].events.forEach(event => {
                 const item = document.createElement('div'); 
                 item.className = 'timeline-item';
                 
-                // [新增邏輯] 自動判斷類別
-                const category = getCategoryByType(event.type);
-                item.setAttribute('data-category', category);
+                // 自動分類邏輯
+                let cat = 'other';
+                const t = event.type.toLowerCase();
+                if(t.includes('food')||t.includes('coffee')||t.includes('dinner')||t.includes('lunch')) cat='food';
+                else if(t.includes('shopping')||t.includes('market')) cat='shopping';
+                else if(t.includes('culture')||t.includes('museum')||t.includes('walk')||t.includes('festival')) cat='culture';
+                item.setAttribute('data-category', cat);
 
-                let tagsHtml = event.tags.map(t => {
-                    let c = 'card-tag'; 
-                    if(t.includes('必')||t.includes('路痴')||t.includes('重點')) c+=' highlight';
-                    if(t.includes('管制')) c+=' alert';
-                    return `<span class="${c}">${t}</span>`;
+                let tagsHtml = event.tags.map(tag => {
+                    let cls = 'card-tag';
+                    if(tag === 'Highlight') cls += ' highlight';
+                    return `<span class="${cls}">${tag}</span>`;
                 }).join('');
                 
-                let priceHtml = event.price ? `<div class="card-price">${event.price}</div>` : '';
-                
-                item.innerHTML = `<div class="card" onclick='openEventModal(${JSON.stringify(event).replace(/'/g, "'")})'>
-                    <span class="card-time">${event.time}</span><h3 class="card-title">${event.title}</h3><div class="tags">${tagsHtml}</div>${priceHtml}</div>`;
+                item.innerHTML = `
+                    <div class="card" onclick='openModal(${JSON.stringify(event).replace(/'/g, "&#39;")})'>
+                        <span class="card-time">${event.time}</span>
+                        <h3 class="card-title">${event.title}</h3>
+                        <div class="tags">${tagsHtml}</div>
+                        <span class="card-price">${event.price}</span>
+                    </div>`;
                 container.appendChild(item);
             });
             
-            // 底部墊高
-            const padding = document.createElement('div');
-            padding.style.height = "60px";
-            container.appendChild(padding);
+            // 底部留白
+            container.appendChild(document.createElement('div')).style.height = "60px";
         }
 
-        // --- New: Logic Helpers ---
-        function getCategoryByType(type) {
-            if (type.match(/美食|品酒|清酒|咖啡|懷石|米其林|輕食|B級|Obanzai|老舖|和牛/)) return 'food';
-            if (type.match(/購物|市集|百貨|伴手禮|超市/)) return 'shopping';
-            if (type.match(/景點|祭典|神社|體驗|歷史|交通|藝文|宵山|後祭|住宿/)) return 'culture';
-            return 'other'; 
-        }
-
+        // --- 篩選功能 ---
         function filterTimeline(category, btn) {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-
             const items = document.querySelectorAll('.timeline-item');
             items.forEach(item => {
                 const itemCat = item.getAttribute('data-category');
-                if (category === 'all' || itemCat === category) {
-                    item.classList.remove('hidden');
-                } else {
-                    item.classList.add('hidden');
-                }
+                if (category === 'all' || itemCat === category) item.classList.remove('hidden');
+                else item.classList.add('hidden');
             });
         }
-
         function resetFilterBtns() {
-            const btns = document.querySelectorAll('.filter-btn');
-            btns.forEach(b => b.classList.remove('active'));
-            btns[0].classList.add('active');
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.filter-btn').classList.add('active');
         }
 
-        function renderWeather(dayKey) {
-            const container = document.getElementById('weather-content');
-            const targetDate = scheduleData[dayKey].date; 
-            
-            let realData = null;
-            let isReal = false;
-
-            if (weatherData && weatherData.daily && weatherData.daily.time) {
-                const index = weatherData.daily.time.indexOf(targetDate);
-                if (index !== -1) {
-                    realData = {
-                        max: weatherData.daily.temperature_2m_max[index],
-                        min: weatherData.daily.temperature_2m_min[index],
-                        code: weatherData.daily.weathercode[index],
-                        rain: weatherData.daily.precipitation_probability_max[index]
-                    };
-                    isReal = true;
-                }
-            }
-
-            if (!isReal) {
-                const baseTemp = 34;
-                const dayIndex = parseInt(dayKey.replace('day', ''));
-                realData = {
-                    max: baseTemp + (dayIndex % 2 === 0 ? 1 : -1),
-                    min: 26,
-                    code: (dayIndex % 3 === 0) ? 95 : ((dayIndex % 4 === 0) ? 0 : 1), 
-                    rain: (dayIndex % 3 === 0) ? 60 : 20
-                };
-            }
-
-            const wmo = wmoMap[realData.code] || {icon: 'fa-cloud', text: '多雲'};
-            const sourceText = isReal ? "即時衛星預報 (Open-Meteo)" : "歷史平均氣候 (模擬)";
-            const bgClass = realData.max > 32 ? "hot" : "";
-
-            container.innerHTML = `
-                <div class="weather-card ${bgClass}">
-                    <div class="weather-source-badge">${sourceText}</div>
-                    <div style="font-size:0.9rem; opacity:0.9;">${scheduleData[dayKey].display} • 京都</div>
-                    <div class="weather-main">
-                        <div class="weather-icon"><i class="fa-solid ${wmo.icon}"></i></div>
-                        <div class="weather-temp">${Math.round(realData.max)}°C</div>
-                    </div>
-                    <div style="font-size:1.2rem; margin-bottom:15px;">${wmo.text} <span style="font-size:0.8rem; opacity:0.8;">(低溫 ${Math.round(realData.min)}°)</span></div>
-                    <div class="weather-grid">
-                        <div class="w-item"><i class="fa-solid fa-umbrella"></i> 降雨 ${realData.rain}%</div>
-                        <div class="w-item"><i class="fa-solid fa-wind"></i> 風速 2級</div>
-                        <div class="w-item"><i class="fa-solid fa-droplet"></i> 濕度 75%</div>
-                        <div class="w-item"><i class="fa-solid fa-temperature-arrow-up"></i> 體感 ${Math.round(realData.max)+4}°</div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        function addWater() {
-            waterCount++;
-            document.getElementById('water-count').innerText = waterCount;
-            saveState();
-        }
-
-        function renderDailyShopping(dayKey) {
-            const container = document.getElementById('daily-shopping-list');
-            container.innerHTML = '';
-            const events = scheduleData[dayKey].events;
-            let hasItems = false;
-            events.forEach(event => {
-                if (event.shopping_items && event.shopping_items.length > 0) {
-                    hasItems = true;
-                    const group = document.createElement('div');
-                    group.className = 'shopping-group';
-                    let itemsHtml = '';
-                    event.shopping_items.forEach((item, i) => {
-                        const id = `shop-${dayKey}-${event.title}-${i}`.replace(/\s+/g, '');
-                        itemsHtml += `<div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" id="${id}"><label for="${id}"><span>${item}</span></label></div>`;
-                    });
-                    group.innerHTML = `<h4 class="shopping-section-title"><i class="fa-solid fa-location-dot"></i> ${event.title}</h4>${itemsHtml}`;
-                    container.appendChild(group);
-                }
-            });
-            if (!hasItems) container.innerHTML = `<div style="text-align:center; padding:30px; opacity:0.5;"><i class="fa-solid fa-bag-shopping" style="font-size:2rem; margin-bottom:10px;"></i><br>本日以觀光為主，無特定購物建議</div>`;
-        }
-
-        function renderGeneralShoppingList() {
-            const container = document.getElementById('general-shopping-container');
-            generalShoppingListItems.forEach((item,i) => container.innerHTML += `<div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" id="g${i}"><label for="g${i}"><span>${item}</span></label></div>`);
-        }
-
-        function renderPackingList() {
-            const pC = document.getElementById('packing-list-container');
-            pC.innerHTML = '';
-            packingList.forEach((item,i) => pC.innerHTML += `<div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" id="p${i}"><label for="p${i}"><span>${item}</span></label></div>`);
-        }
-        
-        function toggleCheck(el) { 
-            const i = el.querySelector('input'); 
-            if(event.target !== i) i.checked = !i.checked; 
-            el.classList.toggle('checked', i.checked); 
-            saveState();
-        }
-
-        function calcRate(type) {
-            const rate = parseFloat(document.getElementById('rate-setting').value) || 0.052;
-            const jpy = document.getElementById('jpy-input'); 
-            const hkd = document.getElementById('hkd-input');
-            if(type==='jpy') {
-                if(jpy.value === '') hkd.value = ''; else hkd.value = (jpy.value * rate).toFixed(1); 
-            } else {
-                if(hkd.value === '') jpy.value = ''; else jpy.value = (hkd.value / rate).toFixed(0);
-            }
-        }
-
-        function sendSafetyMessage() {
-             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(pos) {
-                    const link = `https://www.google.com/maps/search/?api=1&query=${pos.coords.latitude},${pos.coords.longitude}`;
-                    window.open(`https://wa.me/?text=${encodeURIComponent("Hello! 我在京都一切安好，目前位置：" + link)}`, '_blank');
-                });
-            } else alert("無法獲取定位");
-        }
-
-        function openEventModal(event) {
-            currentModalEventTitle = event.title;
-            document.getElementById('modal-title').innerText = event.title;
-            document.getElementById('modal-type').innerText = event.type;
-            document.getElementById('modal-time').innerText = event.time;
-            document.getElementById('modal-address').innerText = event.address;
-            document.getElementById('modal-note').innerHTML = event.note;
-            document.getElementById('modal-actual-cost').value = getSavedExpense(event.title);
-            document.getElementById('taxi-address').innerText = event.address;
-            document.getElementById('taxi-name').innerText = event.title;
-            document.getElementById('taxi-card').style.display = 'none';
-            const priceRow = document.getElementById('modal-price-row');
-            if (event.price) { priceRow.style.display = 'flex'; document.getElementById('modal-price').innerText = "預算/門票：" + event.price; } else { priceRow.style.display = 'none'; }
-            const lc = document.getElementById('modal-links'); lc.innerHTML = '';
-            if(event.link) lc.innerHTML = `<a href="${event.link}" target="_blank" class="link-btn"><i class="fa-solid fa-link"></i> 預約/詳情</a>`;
-            let mapUrl = "";
-            if(event.coords) mapUrl = `https://www.google.com/maps/search/?api=1&query=${event.coords[0]},${event.coords[1]}`;
-            else { const q = encodeURIComponent(event.address + " " + event.title); mapUrl = `https://www.google.com/maps/search/?api=1&query=${q}`; }
-            document.getElementById('modal-map-btn').onclick = () => window.open(mapUrl, '_blank');
-            document.getElementById('detail-modal').classList.add('open');
-        }
-        
-        function toggleTaxiCard() {
-            const card = document.getElementById('taxi-card');
-            card.style.display = card.style.display === 'none' ? 'block' : 'none';
-        }
-
-        function closeModal() { document.getElementById('detail-modal').classList.remove('open'); currentModalEventTitle = ""; }
-        document.getElementById('detail-modal').addEventListener('click', function(e){if(e.target===this)closeModal()});
-        function openTipsModal() { openEventModal({title:"路痴救星",type:"TIPS",time:"隨時",address:"京都全區",note:"1.京都塔在北邊 (車站正面)<br>2.公車後門上車，前門付款<br>3.善用Google Live View AR導航<br>4.迷路就搭計程車 (門自動開)", tags:[]}); }
-
+        // --- 地圖 (使用灰階 CartoDB Positron) ---
         function initMap() {
-            map = L.map('map-container');
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-            updateMapMarkers(currentDay);
+            map = L.map('map-container').setView([35.0000, 135.7600], 13);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap &copy; CARTO',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(map);
         }
 
         function updateMapMarkers(dayKey) {
             if(!map) return;
             markers.forEach(m => map.removeLayer(m));
             markers = [];
-            const events = scheduleData[dayKey].events;
             const group = new L.featureGroup();
-            events.forEach(event => {
+            
+            // 自定義黑色 Marker Icon
+            const blackIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: "<div style='background-color:black; width:12px; height:12px; border-radius:50%; border:2px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.3);'></div>",
+                iconSize: [12, 12],
+                iconAnchor: [6, 6]
+            });
+
+            scheduleData[dayKey].events.forEach(event => {
                 if(event.coords) {
-                    const navUrl = `https://www.google.com/maps/search/?api=1&query=${event.coords[0]},${event.coords[1]}`;
-                    const popupContent = `<div style="text-align:center"><b>${event.title}</b><br>${event.time}<br><a href="${navUrl}" target="_blank" style="display:inline-block; margin-top:5px; color:#E95464; text-decoration:none; font-weight:bold;"><i class="fa-solid fa-location-arrow"></i> 導航</a></div>`;
-                    const m = L.marker(event.coords).addTo(map).bindPopup(popupContent);
+                    const m = L.marker(event.coords, {icon: blackIcon}).addTo(map)
+                        .bindPopup(`<b>${event.title}</b><br>${event.address}`);
                     markers.push(m);
                     group.addLayer(m);
                 }
             });
-            if(markers.length > 0) map.fitBounds(group.getBounds(), {padding: [50, 50]}); else map.setView([35.0000, 135.7600], 13);
+            if(markers.length > 0) map.fitBounds(group.getBounds(), {padding: [50, 50]});
         }
-        
-        function fitMapToDay() { if(map && markers.length > 0) { const group = new L.featureGroup(markers); map.fitBounds(group.getBounds(), {padding: [50, 50]}); } }
 
+        // --- 天氣模擬 ---
+        function renderWeatherSim(dayKey) {
+            // 簡單模擬數據
+            const temp = 32; 
+            const weatherDesc = "Cloudy / Hot";
+            document.getElementById('weather-content').innerHTML = `
+                <div class="weather-card">
+                    <div style="font-size:3rem; margin-bottom:10px;"><i class="fa-solid fa-cloud"></i></div>
+                    <div style="font-size:2.5rem; font-weight:300;">${temp}°C</div>
+                    <div style="opacity:0.8; font-family:'Inter',sans-serif;">${weatherDesc}</div>
+                    <div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:0.9rem; opacity:0.7;">
+                        <div><i class="fa-solid fa-droplet"></i> 60%</div>
+                        <div><i class="fa-solid fa-wind"></i> 2km/h</div>
+                    </div>
+                </div>`;
+        }
+
+        // --- 頁面切換 ---
+        function switchMainPage(pageId, navEl) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + pageId).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            navEl.classList.add('active');
+
+            const dock = document.getElementById('filter-dock');
+            if(pageId === 'itinerary') dock.classList.add('visible');
+            else dock.classList.remove('visible');
+
+            if(pageId === 'map') setTimeout(() => { map.invalidateSize(); updateMapMarkers(currentDay); }, 200);
+        }
+
+        // --- Modal ---
+        function openModal(data) {
+            document.getElementById('modal-title').innerText = data.title;
+            document.getElementById('modal-type').innerText = data.type;
+            document.getElementById('modal-time').innerText = data.time;
+            document.getElementById('modal-address').innerText = data.address;
+            document.getElementById('modal-price').innerText = data.price;
+            document.getElementById('modal-note').innerHTML = data.note;
+            
+            const mapBtn = document.getElementById('modal-map-btn');
+            mapBtn.onclick = () => {
+                const q = encodeURIComponent(data.address + " " + data.title);
+                window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, '_blank');
+            };
+            
+            document.getElementById('detail-modal').classList.add('open');
+        }
+        function closeModal() { document.getElementById('detail-modal').classList.remove('open'); }
+        document.getElementById('detail-modal').addEventListener('click', (e) => { if(e.target.id === 'detail-modal') closeModal(); });
+
+        // Run
         init();
     </script>
 </body>
