@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Travel Prototype v1.0</title>
+    <title>Travel Prototype v2.0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -11,17 +11,18 @@
     <style>
         :root {
             /* --- 極簡黑白灰配色系統 --- */
-            --bg-body: #F5F5F5;        /* 極淺灰背景，比純白更護眼 */
-            --bg-card: #FFFFFF;        /* 純白卡片 */
-            --text-main: #111111;      /* 極深灰 (近黑) */
-            --text-sub: #666666;       /* 中灰 */
-            --accent: #000000;         /* 重點色：純黑 */
-            --border: #E0E0E0;         /* 邊框線 */
-            --shadow: 0 2px 10px rgba(0,0,0,0.03); /* 極輕柔陰影 */
+            --bg-body: #F4F4F4;        
+            --bg-card: #FFFFFF;        
+            --text-main: #111111;      
+            --text-sub: #666666;       
+            --accent: #000000;         
+            --border: #E5E5E5;         
+            --shadow: 0 4px 12px rgba(0,0,0,0.04);
             
             --nav-bg: #FFFFFF;
-            /* 天氣卡片改為低飽和度的灰階漸層 */
-            --weather-gradient: linear-gradient(135deg, #333 0%, #000 100%);
+            /* 選中狀態的日期背景 */
+            --date-active-bg: #000000;
+            --date-active-text: #FFFFFF;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -40,190 +41,171 @@
             padding: 0 20px;
             background-color: var(--bg-card);
             border-bottom: 1px solid var(--border);
-            position: sticky; top: 0; z-index: 100;
             display: flex; justify-content: space-between; align-items: center;
-            height: 60px;
+            height: 60px; flex-shrink: 0;
         }
         header h1 { 
-            margin: 0; font-size: 1.1rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; 
-            font-family: "Inter", sans-serif;
+            margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; 
         }
-        
-        .header-icons { display: flex; gap: 20px; align-items: center; }
-        .header-btn { color: var(--text-main); font-size: 1.1rem; cursor: pointer; text-decoration: none; opacity: 0.8; transition: opacity 0.2s; }
-        .header-btn:hover { opacity: 1; }
 
-        /* --- Date Selector (Tab Style) --- */
+        /* --- Date Selector (Smart Responsive) --- */
         .date-selector-container {
             background: var(--bg-card); z-index: 90;
-            padding: 15px 0 10px 0;
+            padding: 10px 15px;
             border-bottom: 1px solid var(--border);
             width: 100%;
+            flex-shrink: 0;
         }
         .date-selector { 
-            display: flex; gap: 10px; padding: 0 20px; 
-            overflow-x: auto; scrollbar-width: none; justify-content: flex-start;
+            display: flex; 
+            gap: 8px; 
+            overflow-x: auto; 
+            scrollbar-width: none; 
+            /* 關鍵邏輯：若少則置中/平分，若多則靠左滾動 */
         }
         .date-selector::-webkit-scrollbar { display: none; }
         
         .date-chip {
-            padding: 8px 16px; border-radius: 4px; /* 方形圓角，更理性 */
-            font-size: 0.85rem; cursor: pointer; color: var(--text-sub);
-            display: flex; flex-direction: column; align-items: center; min-width: 60px;
+            /* 智慧彈性佈局 */
+            flex: 1 0 auto;        /* 允許放大，不允許縮小低於 min-width */
+            min-width: 80px;       /* 下限：確保字不會太擠 */
+            max-width: 100%;       /* 上限：如果只有一天，可以撐滿 */
+            
+            padding: 10px 0; 
+            border-radius: 6px;
+            cursor: pointer; 
+            color: var(--text-sub);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
             transition: all 0.2s; border: 1px solid transparent; background: #F9F9F9;
         }
         .date-chip.active {
-            background: var(--accent); color: #fff;
-            border-color: var(--accent);
+            background: var(--date-active-bg); color: var(--date-active-text);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
-        .day-num { font-weight: 600; font-family: "Inter", sans-serif; }
-        .day-week { font-size: 0.75rem; margin-top: 2px; }
+        .day-num { font-weight: 600; font-size: 0.9rem; font-family: "Inter", sans-serif; }
+        .day-week { font-size: 0.7rem; margin-top: 2px; text-transform: uppercase; letter-spacing: 1px;}
 
         /* --- Main Content --- */
         main { flex: 1; overflow-y: hidden; position: relative; }
 
         .page {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            overflow-y: auto; padding: 20px 0 100px 0; /* 底部留白給 Dock */
+            overflow-y: auto; padding: 20px 0 100px 0; /* 底部留白 */
             display: none; opacity: 0; transition: opacity 0.2s ease;
             background-color: var(--bg-body);
         }
         .page.active { display: block; opacity: 1; z-index: 10; }
         
-        /* --- Timeline (Minimalist) --- */
+        /* --- Timeline (Itinerary) --- */
         .timeline-container { padding: 0 20px; max-width: 800px; margin: 0 auto; }
         .timeline-item {
-            position: relative; padding-left: 30px; padding-bottom: 30px;
-            border-left: 1px solid #CCC; /* 極細灰線 */
-            transition: all 0.3s ease;
+            position: relative; padding-left: 24px; padding-bottom: 24px;
+            border-left: 1px solid #DDD; 
         }
-        .timeline-item.hidden { display: none; }
-        
-        .timeline-item:last-child { border-left: 1px solid transparent; padding-bottom: 0; }
+        .timeline-item:last-child { border-left: 1px solid transparent; }
         .timeline-item::before {
-            content: ''; position: absolute; left: -5px; top: 20px;
-            width: 9px; height: 9px; background: var(--bg-card);
-            border: 2px solid var(--text-main); /* 空心圓點 */
-            border-radius: 50%;
+            content: ''; position: absolute; left: -5px; top: 22px;
+            width: 9px; height: 9px; background: #FFF;
+            border: 2px solid #000; border-radius: 50%;
         }
 
         .card {
             background-color: var(--bg-card); color: var(--text-main);
-            border: 1px solid var(--border); border-radius: 8px;
-            padding: 18px; margin-bottom: 5px;
+            border: 1px solid var(--border); border-radius: 12px;
+            padding: 20px; 
             box-shadow: var(--shadow); cursor: pointer;
-            position: relative; transition: transform 0.1s;
+            position: relative;
         }
-        .card:active { transform: scale(0.99); background: #FAFAFA; }
+        .card:active { transform: scale(0.98); background: #FAFAFA; }
         
-        .card-time { 
-            font-size: 0.75rem; color: var(--text-sub); font-family: "Inter", sans-serif; 
-            letter-spacing: 0.5px; display: block; margin-bottom: 8px; font-weight: 600;
-        }
-        .card-title { 
-            font-size: 1.05rem; font-weight: 600; margin: 0 0 10px 0; 
-            line-height: 1.4; padding-right: 10px;
-        }
-        .card-price {
-            position: absolute; top: 18px; right: 18px;
-            font-weight: 500; color: var(--text-main); font-size: 0.85rem;
-            font-family: "Inter", sans-serif;
-        }
-
+        .card-time { font-size: 0.75rem; color: #888; font-weight: 600; margin-bottom: 6px; display: block; font-family: "Inter", sans-serif;}
+        .card-title { font-size: 1.1rem; font-weight: 600; margin: 0 0 8px 0; line-height: 1.4; }
         .tags { display: flex; gap: 6px; flex-wrap: wrap; }
-        /* 標籤改為黑白灰風格 */
-        .card-tag { 
-            font-size: 0.7rem; background: #F0F0F0; padding: 4px 8px; 
-            border-radius: 4px; color: #555; border: 1px solid transparent; 
-        }
-        .card-tag.highlight { background: #333; color: #FFF; }
-        .card-tag.alert { background: #FFF; color: #000; border: 1px solid #000; }
+        .card-tag { font-size: 0.7rem; background: #F2F2F2; padding: 4px 10px; border-radius: 20px; color: #555; font-weight: 500;}
 
-        /* --- Filter Dock (Floating) --- */
-        .filter-dock {
-            position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%) translateY(20px);
-            width: auto; min-width: 300px;
-            background: #222; /* 深黑底色 */
-            border-radius: 100px; padding: 6px;
-            display: flex; gap: 5px; justify-content: center;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-            z-index: 999; opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        /* --- Inspiration Grid (Masonry feel) --- */
+        .inspiration-grid { padding: 0 20px; display: grid; gap: 15px; }
+        .inspire-card {
+            background: #FFF; border: 1px dashed #999; border-radius: 12px; padding: 20px;
+            color: #444; position: relative;
         }
-        .filter-dock.visible { opacity: 1; pointer-events: all; transform: translateX(-50%) translateY(0); }
+        .inspire-badge {
+            background: #000; color: #fff; padding: 2px 8px; border-radius: 4px;
+            font-size: 0.7rem; font-weight: bold; text-transform: uppercase;
+            position: absolute; top: -10px; left: 15px;
+        }
+
+        /* --- Shopping List --- */
+        .shopping-list { padding: 0 20px; }
+        .shop-item {
+            background: #FFF; padding: 15px; border-bottom: 1px solid #EEE;
+            display: flex; align-items: center; gap: 15px;
+        }
+        .shop-item:first-child { border-radius: 12px 12px 0 0; }
+        .shop-item:last-child { border-radius: 0 0 12px 12px; border-bottom: none; }
         
-        .filter-btn {
-            background: transparent; border: none; color: #999;
-            font-size: 0.85rem; padding: 8px 16px; border-radius: 20px;
-            cursor: pointer; transition: all 0.2s; white-space: nowrap; font-weight: 500;
+        .shop-item input[type="checkbox"] {
+            width: 20px; height: 20px; accent-color: #000;
         }
-        .filter-btn.active { background: #FFF; color: #000; font-weight: 600; }
+        .shop-item label { flex: 1; font-size: 0.95rem; cursor: pointer; }
+        .shop-item input:checked + label { text-decoration: line-through; color: #CCC; }
 
-        /* --- Bottom Nav (Clean) --- */
+        /* --- Bottom Nav (4 Items) --- */
         nav.bottom-nav {
             position: fixed; bottom: 0; width: 100%;
             background-color: var(--nav-bg);
             display: flex; justify-content: space-around;
             padding: 12px 0 25px 0; border-top: 1px solid var(--border); z-index: 100;
         }
-        .nav-item { color: #BBB; text-align: center; font-size: 0.7rem; cursor: pointer; width: 25%; transition: color 0.2s; }
-        .nav-item i { display: block; font-size: 1.3rem; margin-bottom: 5px; }
+        .nav-item { color: #CCC; text-align: center; font-size: 0.7rem; cursor: pointer; width: 25%; transition: color 0.2s; }
+        .nav-item i { display: block; font-size: 1.2rem; margin-bottom: 6px; }
         .nav-item.active { color: var(--accent); }
 
-        /* --- Map Page --- */
-        #map-container { width: 100%; height: 100%; background: #DDD; }
-
-        /* --- Modal (Clean) --- */
+        /* --- Modal & Mini Map --- */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 3000;
+            background: rgba(0,0,0,0.6); z-index: 3000;
             justify-content: center; align-items: end; backdrop-filter: blur(2px);
         }
         .modal.open { display: flex; }
         .modal-content {
             background: #FFF; color: #000;
-            width: 100%; max-width: 600px; max-height: 85vh;
-            border-radius: 16px 16px 0 0; padding: 30px;
-            overflow-y: auto; animation: slideUp 0.3s ease;
+            width: 100%; max-width: 600px; max-height: 90vh;
+            border-radius: 20px 20px 0 0; padding: 30px;
+            overflow-y: auto; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex; flex-direction: column;
         }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .close-modal { float: right; font-size: 1.5rem; cursor: pointer; opacity: 0.5; }
         
-        .modal-header h2 { margin: 0 0 5px 0; font-size: 1.4rem; font-weight: 700; }
-        .sub-text { font-size: 0.9rem; color: #888; display: block; margin-bottom: 20px; font-family: "Inter", sans-serif; }
+        /* Modal Map Style */
+        #modal-mini-map {
+            width: 100%; height: 250px; /* 正方形/矩形空間 */
+            background: #EEE; border-radius: 12px;
+            margin-bottom: 25px; border: 1px solid #DDD;
+            flex-shrink: 0;
+        }
         
-        .info-row { margin: 15px 0; display: flex; gap: 15px; font-size: 0.95rem; color: #333; }
-        .info-row i { color: #000; width: 20px; text-align: center; }
+        .modal-header h2 { margin: 0 0 5px 0; font-size: 1.5rem; font-weight: 700; }
+        .info-block { margin-bottom: 20px; font-size: 0.95rem; color: #333; line-height: 1.6; }
+        .info-label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; display: block;}
         
-        .note-box {
-            background: #F5F5F5; padding: 20px; border-radius: 8px; margin: 25px 0;
-            font-size: 0.9rem; line-height: 1.6; color: #444;
+        .close-btn { 
+            position: absolute; top: 20px; right: 20px; width: 30px; height: 30px; 
+            background: #F0F0F0; border-radius: 50%; text-align: center; line-height: 30px; cursor: pointer; color: #555;
         }
 
-        .action-btn {
-            width: 100%; padding: 16px; background: #000; color: #FFF;
-            border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
-            margin-top: 10px; font-size: 1rem;
-        }
-        
-        /* --- Weather Card (Monochrome) --- */
-        .weather-card {
-            background: var(--weather-gradient); color: white;
-            border-radius: 12px; padding: 25px; margin: 20px;
-            text-align: center; position: relative;
-        }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Kyoto <span style="font-weight:300; opacity:0.6;">Prototype</span></h1>
-        <div class="header-icons">
-            <a href="#" class="header-btn"><i class="fa-solid fa-sliders"></i></a>
-        </div>
+        <h1>Prototype <span style="font-weight:300; opacity:0.5;">v2.0</span></h1>
+        <div style="font-size:0.8rem; opacity:0.6;">ARCHITECT ED.</div>
     </header>
 
     <div class="date-selector-container">
-        <div class="date-selector" id="date-selector"></div>
+        <div class="date-selector" id="date-selector">
+            </div>
     </div>
 
     <main>
@@ -231,90 +213,129 @@
             <div class="timeline-container" id="timeline-container"></div>
         </div>
 
-        <div id="page-map" class="page" style="padding:0;">
-            <div id="map-container"></div>
+        <div id="page-inspiration" class="page">
+            <h2 style="padding:0 20px; font-size:1.2rem; margin-bottom:20px;">Backup & Ideas</h2>
+            <div id="inspiration-container" class="inspiration-grid"></div>
+        </div>
+
+        <div id="page-shopping" class="page">
+            <h2 style="padding:0 20px; font-size:1.2rem; margin-bottom:20px;">Daily Shopping</h2>
+            <div id="shopping-container" class="shopping-list"></div>
         </div>
 
         <div id="page-weather" class="page">
-            <div style="padding: 20px;">
-                <h2 style="text-align:center; font-weight:600;">Weather Forecast</h2>
-                <div id="weather-content">
-                    </div>
+            <div style="padding: 20px; text-align:center; margin-top:50px; opacity:0.5;">
+                <i class="fa-solid fa-cloud" style="font-size:3rem; margin-bottom:20px;"></i>
+                <p>Weather Module Placeholder</p>
             </div>
-        </div>
-
-        <div id="filter-dock" class="filter-dock">
-            <button class="filter-btn active" onclick="filterTimeline('all', this)">All</button>
-            <button class="filter-btn" onclick="filterTimeline('culture', this)">Culture</button>
-            <button class="filter-btn" onclick="filterTimeline('food', this)">Dining</button>
-            <button class="filter-btn" onclick="filterTimeline('shopping', this)">Shop</button>
         </div>
     </main>
 
     <nav class="bottom-nav">
-        <div class="nav-item active" onclick="switchMainPage('itinerary', this)"><i class="fa-regular fa-calendar"></i><span>Plan</span></div>
-        <div class="nav-item" onclick="switchMainPage('map', this)"><i class="fa-regular fa-map"></i><span>Map</span></div>
-        <div class="nav-item" onclick="switchMainPage('weather', this)"><i class="fa-solid fa-cloud"></i><span>Weather</span></div>
+        <div class="nav-item active" onclick="switchMainPage('itinerary', this)">
+            <i class="fa-regular fa-calendar"></i><span>Plan</span>
+        </div>
+        <div class="nav-item" onclick="switchMainPage('inspiration', this)">
+            <i class="fa-regular fa-lightbulb"></i><span>Ideas</span>
+        </div>
+        <div class="nav-item" onclick="switchMainPage('shopping', this)">
+            <i class="fa-solid fa-bag-shopping"></i><span>Shop</span>
+        </div>
+        <div class="nav-item" onclick="switchMainPage('weather', this)">
+            <i class="fa-solid fa-cloud"></i><span>Wx</span>
+        </div>
     </nav>
 
     <div id="detail-modal" class="modal">
         <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()">×</span>
+            <div class="close-btn" onclick="closeModal()">×</div>
+            
+            <div id="modal-mini-map"></div>
+            
             <div class="modal-header">
+                <span class="info-label" id="modal-type">Type</span>
                 <h2 id="modal-title">Title</h2>
-                <span id="modal-type" class="sub-text">Type</span>
             </div>
-            <div class="modal-body">
-                <div class="info-row"><i class="fa-regular fa-clock"></i><span id="modal-time">Time</span></div>
-                <div class="info-row"><i class="fa-solid fa-location-dot"></i><span id="modal-address">Address</span></div>
-                <div class="info-row" id="modal-price-row"><i class="fa-regular fa-credit-card"></i><span id="modal-price">Cost</span></div>
-                
-                <div class="note-box">
-                    <div style="font-weight:600; margin-bottom:10px; text-transform:uppercase; font-size:0.8rem; letter-spacing:1px;">Notes</div>
-                    <span id="modal-note">Content...</span>
-                </div>
-                
-                <button class="action-btn" id="modal-map-btn">Open in Google Maps</button>
+            
+            <div class="info-block">
+                <span class="info-label">Time & Price</span>
+                <div id="modal-time-price"></div>
             </div>
+
+            <div class="info-block">
+                <span class="info-label">Address</span>
+                <div id="modal-address"></div>
+            </div>
+
+            <div class="info-block" style="background:#F9F9F9; padding:15px; border-radius:8px;">
+                <span class="info-label">Notes</span>
+                <div id="modal-note" style="white-space: pre-line;"></div>
+            </div>
+            
+            <button onclick="openGoogleMaps()" style="background:#000; color:#fff; border:none; padding:15px; border-radius:8px; font-weight:bold; margin-top:10px;">
+                Open in Google Maps
+            </button>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // --- 核心數據：縮減為 3 天 Prototype ---
+        // --- 核心數據 (3天範例 + 靈感 + 購物) ---
         const scheduleData = {
-            "day1": { "date": "2026-07-15", "display": "Day 01", "weekday": "Wed", "events": [ 
-                { time: "14:00 - 16:00", title: "Arrival & Check-in", type: "Stay", price: "¥2,600", address: "Dormy Inn Premium Kyoto Ekimae", coords: [34.9868, 135.7599], note: "機場巴士直達。Check-in 後寄放行李，稍微休息。", tags: ["Logistics", "Check-in"] },
-                { time: "16:30 - 18:00", title: "Walking: Fushimi Sake District", type: "Culture", price: "Free", address: "伏見桃山", coords: [34.9305, 135.7615], note: "沿著運河散步，感受清酒產區的歷史氛圍。", tags: ["Walk", "Photo"] },
-                { time: "19:00", title: "Dinner: Yakitori Katsu", type: "Food", price: "¥3,500", address: "京都市下京區", coords: [35.0028, 135.7596], note: "簡單的燒鳥晚餐，配一杯 Highball。", tags: ["Local"] }
-            ]},
-            "day2": { "date": "2026-07-16", "display": "Day 02", "weekday": "Thu", "events": [
-                { time: "09:00", title: "Coffee: Weekenders Coffee", type: "Food", price: "¥600", address: "富小路通", coords: [35.0050, 135.7650], note: "隱藏在停車場深處的極品咖啡。", tags: ["Coffee", "Must"] },
-                { time: "10:30 - 12:30", title: "Museum: Kyoto City Kyocera", type: "Culture", price: "¥1,200", address: "岡崎公園", coords: [35.0120, 135.7830], note: "欣賞建築翻新後的細節與展覽。", tags: ["Art", "Arch"] },
-                { time: "13:00", title: "Lunch: Udon Yamamoto", type: "Food", price: "¥1,500", address: "平安神宮附近", coords: [35.0130, 135.7820], note: "在地人排隊名店，必點土牛蒡烏龍麵。", tags: ["Local"] },
-                { time: "15:00 - 17:00", title: "Shopping: BAL Kyoto", type: "Shopping", price: "Var.", address: "河原町", coords: [35.0070, 135.7700], note: "京都最有品味的百貨。逛 Conran Shop。", tags: ["Design", "Shop"] },
-                { time: "19:00", title: "Festival: Gion Matsuri Yoiyama", type: "Culture", price: "Free", address: "四條烏丸", coords: [35.0039, 135.7595], note: "<b>重點行程：</b>宵山點燈。避開主幹道，走小巷看山鉾。", tags: ["Highlight", "Crowded"] }
-            ]},
-            "day3": { "date": "2026-07-17", "display": "Day 03", "weekday": "Fri", "events": [
-                { time: "08:30", title: "Morning Walk: Kamo River", type: "Culture", price: "Free", address: "鴨川三角洲", coords: [35.0300, 135.7720], note: "帶杯咖啡去河邊坐坐，看當地人生活。", tags: ["Relax"] },
-                { time: "11:00", title: "Shopping: Antique Market", type: "Shopping", price: "Var.", address: "知恩寺", coords: [35.0280, 135.7800], note: "尋找昭和時代的玻璃杯與舊書。", tags: ["Vintage"] },
-                { time: "13:00", title: "Departure", type: "Logistics", price: "-", address: "Kyoto Station", coords: [34.9858, 135.7588], note: "前往機場，結束旅程。", tags: ["Train"] }
-            ]}
+            "day1": { 
+                "date": "2026-07-15", "display": "Day 01", "weekday": "Wed", 
+                "events": [ 
+                    { time: "14:00", title: "Arrival & Check-in", type: "Stay", price: "¥2,600", address: "Dormy Inn Premium Kyoto", coords: [34.9868, 135.7599], note: "機場巴士直達。寄放行李。", tags: ["Logistics"] },
+                    { time: "16:30", title: "Fushimi Sake Walk", type: "Culture", price: "Free", address: "伏見桃山", coords: [34.9305, 135.7615], note: "沿運河散步。", tags: ["Walk"] }
+                ],
+                "inspiration": [
+                    { title: "雨天備案：Aeon Mall", tag: "RAINY", note: "如果下大雨，直接去京都站南邊的 Aeon Mall 逛街與超市。" },
+                    { title: "晚餐後：大國藥妝", tag: "SHOP", note: "酒店對面有大國藥妝，開到 22:00。" }
+                ],
+                "shopping": [
+                    "ICOCA 卡 (儲值)", "便利商店 (水/早餐)", "休足時間 (藥妝店)"
+                ]
+            },
+            "day2": { 
+                "date": "2026-07-16", "display": "Day 02", "weekday": "Thu", 
+                "events": [
+                    { time: "09:00", title: "Weekenders Coffee", type: "Food", price: "¥600", address: "富小路通", coords: [35.0050, 135.7650], note: "極品淺焙咖啡。", tags: ["Coffee"] },
+                    { time: "10:30", title: "Kyocera Museum", type: "Culture", price: "¥1,200", address: "岡崎公園", coords: [35.0120, 135.7830], note: "建築翻新巡禮。", tags: ["Art"] }
+                ],
+                "inspiration": [
+                    { title: "順路：平安神宮", tag: "WALK", note: "美術館就在神宮對面，若有時間可進去參拜。" },
+                    { title: "甜點：六盛茶亭", tag: "EAT", note: "著名的舒芙蕾，需要排隊。" }
+                ],
+                "shopping": [
+                    "美術館限定明信片", "信三郎帆布包 (附近)", "一保堂 抹茶粉"
+                ]
+            },
+            "day3": { 
+                "date": "2026-07-17", "display": "Day 03", "weekday": "Fri", 
+                "events": [
+                    { time: "08:30", title: "Kamo River Walk", type: "Culture", price: "Free", address: "鴨川三角洲", coords: [35.0300, 135.7720], note: "帶咖啡去跳烏龜。", tags: ["Nature"] },
+                    { time: "11:00", title: "Antique Market", type: "Shopping", price: "Var.", address: "知恩寺", coords: [35.0280, 135.7800], note: "百萬遍市集。", tags: ["Market"] }
+                ],
+                "inspiration": [
+                    { title: "午餐備案：出町双葉", tag: "FOOD", note: "買名代豆餅，去河邊野餐。" }
+                ],
+                "shopping": [
+                    "古董玻璃杯", "阿闍梨餅 (回程買)"
+                ]
+            }
         };
 
-        // --- 狀態變數 ---
+        // --- 變數與初始化 ---
         let currentDay = "day1";
-        let map = null;
-        let markers = [];
+        let modalMap = null; // 用於 Modal 內的 Leaflet 實例
+        let currentEventData = null; // 暫存當前開啟的事件資料
 
-        // --- 初始化 ---
         function init() { 
             renderDateSelector(); 
             selectDay('day1'); 
-            initMap();
         }
 
-        // --- 日期選擇器 ---
+        // --- 1. 日期選擇器 (智慧型) ---
         function renderDateSelector() {
             const container = document.getElementById('date-selector'); container.innerHTML = '';
             Object.keys(scheduleData).forEach(dayKey => {
@@ -326,7 +347,7 @@
                 container.appendChild(chip);
             });
             // 預設選中第一個
-            container.firstChild.classList.add('active');
+            if(container.firstChild) container.firstChild.classList.add('active');
         }
 
         function selectDay(dayKey, chipEl) {
@@ -334,158 +355,123 @@
             if(chipEl) {
                 document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('active'));
                 chipEl.classList.add('active');
+                // 智慧滾動：讓選中的項目盡量靠中間，但因 CSS flex 已經很好處理了，這裡可選
+                chipEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             }
+            
+            // 刷新各頁面數據
             renderTimeline(dayKey);
-            updateMapMarkers(dayKey);
-            renderWeatherSim(dayKey);
+            renderInspiration(dayKey);
+            renderShopping(dayKey);
         }
 
-        // --- 行程渲染 (含自動分類) ---
+        // --- 2. 渲染邏輯 ---
         function renderTimeline(dayKey) {
-            const container = document.getElementById('timeline-container'); 
-            container.innerHTML = '';
-            
-            // 顯示篩選列
-            const filterDock = document.getElementById('filter-dock');
-            filterDock.classList.add('visible');
-            resetFilterBtns();
-
+            const container = document.getElementById('timeline-container'); container.innerHTML = '';
             scheduleData[dayKey].events.forEach(event => {
-                const item = document.createElement('div'); 
-                item.className = 'timeline-item';
-                
-                // 自動分類邏輯
-                let cat = 'other';
-                const t = event.type.toLowerCase();
-                if(t.includes('food')||t.includes('coffee')||t.includes('dinner')||t.includes('lunch')) cat='food';
-                else if(t.includes('shopping')||t.includes('market')) cat='shopping';
-                else if(t.includes('culture')||t.includes('museum')||t.includes('walk')||t.includes('festival')) cat='culture';
-                item.setAttribute('data-category', cat);
-
-                let tagsHtml = event.tags.map(tag => {
-                    let cls = 'card-tag';
-                    if(tag === 'Highlight') cls += ' highlight';
-                    return `<span class="${cls}">${tag}</span>`;
-                }).join('');
-                
+                const item = document.createElement('div'); item.className = 'timeline-item';
+                let tags = event.tags.map(t => `<span class="card-tag">${t}</span>`).join('');
                 item.innerHTML = `
-                    <div class="card" onclick='openModal(${JSON.stringify(event).replace(/'/g, "&#39;")})'>
+                    <div class="card" onclick='openModal(${JSON.stringify(event).replace(/'/g, "'")})'>
                         <span class="card-time">${event.time}</span>
                         <h3 class="card-title">${event.title}</h3>
-                        <div class="tags">${tagsHtml}</div>
-                        <span class="card-price">${event.price}</span>
+                        <div class="tags">${tags}</div>
                     </div>`;
                 container.appendChild(item);
             });
-            
-            // 底部留白
-            container.appendChild(document.createElement('div')).style.height = "60px";
+            container.appendChild(document.createElement('div')).style.height = "20px";
         }
 
-        // --- 篩選功能 ---
-        function filterTimeline(category, btn) {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            const items = document.querySelectorAll('.timeline-item');
-            items.forEach(item => {
-                const itemCat = item.getAttribute('data-category');
-                if (category === 'all' || itemCat === category) item.classList.remove('hidden');
-                else item.classList.add('hidden');
+        function renderInspiration(dayKey) {
+            const container = document.getElementById('inspiration-container'); container.innerHTML = '';
+            const list = scheduleData[dayKey].inspiration || [];
+            if(list.length === 0) container.innerHTML = "<div style='color:#999; text-align:center;'>No backup plans needed.</div>";
+            
+            list.forEach(item => {
+                const el = document.createElement('div'); el.className = 'inspire-card';
+                el.innerHTML = `<div class="inspire-badge">${item.tag}</div><h3>${item.title}</h3><p style="margin:5px 0 0 0; font-size:0.9rem; color:#666;">${item.note}</p>`;
+                container.appendChild(el);
             });
         }
-        function resetFilterBtns() {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('.filter-btn').classList.add('active');
-        }
 
-        // --- 地圖 (使用灰階 CartoDB Positron) ---
-        function initMap() {
-            map = L.map('map-container').setView([35.0000, 135.7600], 13);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap &copy; CARTO',
-                subdomains: 'abcd',
-                maxZoom: 19
-            }).addTo(map);
-        }
-
-        function updateMapMarkers(dayKey) {
-            if(!map) return;
-            markers.forEach(m => map.removeLayer(m));
-            markers = [];
-            const group = new L.featureGroup();
-            
-            // 自定義黑色 Marker Icon
-            const blackIcon = L.divIcon({
-                className: 'custom-div-icon',
-                html: "<div style='background-color:black; width:12px; height:12px; border-radius:50%; border:2px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.3);'></div>",
-                iconSize: [12, 12],
-                iconAnchor: [6, 6]
+        function renderShopping(dayKey) {
+            const container = document.getElementById('shopping-container'); container.innerHTML = '';
+            const list = scheduleData[dayKey].shopping || [];
+            list.forEach((item, idx) => {
+                const id = `shop-${dayKey}-${idx}`;
+                const el = document.createElement('div'); el.className = 'shop-item';
+                el.innerHTML = `<input type="checkbox" id="${id}"><label for="${id}">${item}</label>`;
+                container.appendChild(el);
             });
+        }
 
-            scheduleData[dayKey].events.forEach(event => {
-                if(event.coords) {
-                    const m = L.marker(event.coords, {icon: blackIcon}).addTo(map)
-                        .bindPopup(`<b>${event.title}</b><br>${event.address}`);
-                    markers.push(m);
-                    group.addLayer(m);
+        // --- 3. Modal 與 情境地圖 ---
+        function openModal(data) {
+            currentEventData = data;
+            
+            // 填入文字資料
+            document.getElementById('modal-title').innerText = data.title;
+            document.getElementById('modal-type').innerText = data.type;
+            document.getElementById('modal-time-price').innerText = `${data.time}  •  ${data.price}`;
+            document.getElementById('modal-address').innerText = data.address;
+            document.getElementById('modal-note').innerText = data.note;
+            
+            // 顯示 Modal
+            document.getElementById('detail-modal').classList.add('open');
+            
+            // 初始化/更新地圖 (必須在 Modal 顯示後執行，否則地圖會灰屏)
+            setTimeout(() => {
+                if(modalMap) {
+                    modalMap.remove(); // 移除舊地圖實例
                 }
-            });
-            if(markers.length > 0) map.fitBounds(group.getBounds(), {padding: [50, 50]});
+                
+                // 建立新地圖 (灰階風格)
+                modalMap = L.map('modal-mini-map', {
+                    zoomControl: false, // 極簡，不顯示 +/- 按鈕
+                    dragging: false,    // 固定視角 (可選)
+                    scrollWheelZoom: false
+                }).setView(data.coords, 15);
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                    attribution: ''
+                }).addTo(modalMap);
+
+                // 黑色圓點 Marker
+                const blackIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: "<div style='background-color:black; width:14px; height:14px; border-radius:50%; border:2px solid white; box-shadow:0 2px 8px rgba(0,0,0,0.4);'></div>",
+                    iconSize: [14, 14], iconAnchor: [7, 7]
+                });
+                L.marker(data.coords, {icon: blackIcon}).addTo(modalMap);
+                
+                modalMap.invalidateSize(); // 關鍵：修正渲染大小
+            }, 100);
         }
 
-        // --- 天氣模擬 ---
-        function renderWeatherSim(dayKey) {
-            // 簡單模擬數據
-            const temp = 32; 
-            const weatherDesc = "Cloudy / Hot";
-            document.getElementById('weather-content').innerHTML = `
-                <div class="weather-card">
-                    <div style="font-size:3rem; margin-bottom:10px;"><i class="fa-solid fa-cloud"></i></div>
-                    <div style="font-size:2.5rem; font-weight:300;">${temp}°C</div>
-                    <div style="opacity:0.8; font-family:'Inter',sans-serif;">${weatherDesc}</div>
-                    <div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:0.9rem; opacity:0.7;">
-                        <div><i class="fa-solid fa-droplet"></i> 60%</div>
-                        <div><i class="fa-solid fa-wind"></i> 2km/h</div>
-                    </div>
-                </div>`;
+        function closeModal() {
+            document.getElementById('detail-modal').classList.remove('open');
+        }
+        
+        function openGoogleMaps() {
+            if(!currentEventData) return;
+            const q = encodeURIComponent(currentEventData.address + " " + currentEventData.title);
+            window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, '_blank');
         }
 
-        // --- 頁面切換 ---
+        // --- 4. 頁面切換 ---
         function switchMainPage(pageId, navEl) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page-' + pageId).classList.add('active');
             
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             navEl.classList.add('active');
-
-            const dock = document.getElementById('filter-dock');
-            if(pageId === 'itinerary') dock.classList.add('visible');
-            else dock.classList.remove('visible');
-
-            if(pageId === 'map') setTimeout(() => { map.invalidateSize(); updateMapMarkers(currentDay); }, 200);
         }
 
-        // --- Modal ---
-        function openModal(data) {
-            document.getElementById('modal-title').innerText = data.title;
-            document.getElementById('modal-type').innerText = data.type;
-            document.getElementById('modal-time').innerText = data.time;
-            document.getElementById('modal-address').innerText = data.address;
-            document.getElementById('modal-price').innerText = data.price;
-            document.getElementById('modal-note').innerHTML = data.note;
-            
-            const mapBtn = document.getElementById('modal-map-btn');
-            mapBtn.onclick = () => {
-                const q = encodeURIComponent(data.address + " " + data.title);
-                window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, '_blank');
-            };
-            
-            document.getElementById('detail-modal').classList.add('open');
-        }
-        function closeModal() { document.getElementById('detail-modal').classList.remove('open'); }
-        document.getElementById('detail-modal').addEventListener('click', (e) => { if(e.target.id === 'detail-modal') closeModal(); });
+        // 點擊背景關閉 Modal
+        document.getElementById('detail-modal').addEventListener('click', (e) => { 
+            if(e.target.id === 'detail-modal') closeModal(); 
+        });
 
-        // Run
         init();
     </script>
 </body>
