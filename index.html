@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Travel Prototype v5.0 (Chinese)</title>
+    <title>Travel Prototype v6.0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -24,7 +24,7 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: "Noto Sans TC", "Inter", sans-serif;
+            font-family: "Inter", "Noto Sans TC", sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
             margin: 0; padding: 0;
@@ -64,7 +64,7 @@
 
         .sidebar-header {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 30px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+            margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
         }
         .sidebar-header h2 { margin: 0; font-size: 1.2rem; font-weight: 700; }
 
@@ -81,7 +81,7 @@
 
         .whatsapp-box { 
             background: #E8F5E9; border: 1px solid #C8E6C9; color: #1B5E20; 
-            padding: 20px; border-radius: 12px; margin-bottom: 30px; 
+            padding: 20px; border-radius: 12px; margin-bottom: 30px; margin-top: 10px;
         }
         .wa-input {
             width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #CCC; border-radius: 8px;
@@ -93,6 +93,7 @@
             display: flex; justify-content: center; align-items: center; gap: 8px;
             font-size: 0.95rem;
         }
+        .wa-btn:active { background: #1da851; }
 
         /* --- Pages --- */
         main { flex: 1; overflow-y: hidden; position: relative; }
@@ -111,7 +112,7 @@
         /* --- Inspiration Filters --- */
         .filter-bar-container {
             padding: 0 20px 15px 20px; position: sticky; top: 0; z-index: 50;
-            background: var(--bg-body); /* 與背景融合 */
+            background: var(--bg-body); 
             overflow-x: auto; white-space: nowrap; scrollbar-width: none;
         }
         .filter-bar-container::-webkit-scrollbar { display: none; }
@@ -145,14 +146,14 @@
 
         .phrase-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.95); z-index: 2000;
+            background: rgba(255,255,255,0.95); z-index: 5000;
             display: flex; justify-content: center; align-items: center;
             opacity: 0; pointer-events: none; transition: opacity 0.3s;
             backdrop-filter: blur(5px);
         }
         .phrase-overlay.active { opacity: 1; pointer-events: all; }
         .phrase-content { text-align: center; width: 85%; }
-        .phrase-big { font-size: 2.5rem; font-weight: 800; color: #000; line-height: 1.3; margin-bottom: 20px; word-break: break-all; }
+        .phrase-big { font-size: 2.8rem; font-weight: 800; color: #000; line-height: 1.3; margin-bottom: 20px; word-break: break-all; }
         .close-phrase {
             position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
             border: 1px solid #CCC; padding: 12px 30px; border-radius: 30px;
@@ -191,11 +192,24 @@
         .nav-item i { display: block; font-size: 1.2rem; margin-bottom: 6px; }
         .nav-item.active { color: var(--accent); }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; justify-content: center; align-items: end; backdrop-filter: blur(2px); }
+        /* --- Modal with Backdrop Close --- */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; justify-content: center; align-items: end; backdrop-filter: blur(2px); cursor: pointer; }
         .modal.open { display: flex; }
-        .modal-content { background: #FFF; color: #000; width: 100%; max-width: 600px; max-height: 90vh; border-radius: 20px 20px 0 0; padding: 30px; overflow-y: auto; animation: slideUp 0.3s ease; }
+        .modal-content { background: #FFF; color: #000; width: 100%; max-width: 600px; max-height: 90vh; border-radius: 20px 20px 0 0; padding: 30px; overflow-y: auto; animation: slideUp 0.3s ease; cursor: default; display: flex; flex-direction: column;}
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        #modal-mini-map { width: 100%; height: 250px; background: #EEE; border-radius: 12px; margin-bottom: 25px; border: 1px solid #DDD; }
+        #modal-mini-map { width: 100%; height: 200px; background: #EEE; border-radius: 12px; margin-bottom: 25px; border: 1px solid #DDD; flex-shrink: 0;}
+
+        /* Modal Specific Styles */
+        .modal-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }
+        .modal-label { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; }
+        .modal-value { font-size: 0.95rem; font-weight: 500; }
+        .modal-note-box { background: #F8F8F8; padding: 15px; border-radius: 8px; border-left: 4px solid #000; margin: 15px 0; }
+        .modal-note-content { font-size: 0.95rem; line-height: 1.6; white-space: pre-line; color: #333; }
+        
+        .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .btn-action { padding: 15px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 0.9rem; text-align: center; }
+        .btn-black { background: #000; color: #FFF; }
+        .btn-gray { background: #EEE; color: #333; }
     </style>
 </head>
 <body>
@@ -205,19 +219,18 @@
         <div class="header-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></div>
     </header>
 
-    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h2>旅行百寶箱</h2>
             <div class="header-btn" onclick="toggleSidebar()"><i class="fa-solid fa-xmark"></i></div>
         </div>
 
-        <div style="font-size:0.8rem; color:#888; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; font-weight:600;">Priority</div>
         <div class="whatsapp-box">
             <div style="font-weight:bold; margin-bottom:5px;"><i class="fa-brands fa-whatsapp"></i> 安全 Check-in</div>
             <div style="font-size:0.85rem; margin-bottom:10px;">傳送定位與平安訊息</div>
             <input type="tel" id="wa-phone" class="wa-input" placeholder="對方電話 (如 85291234567)">
-            <button class="wa-btn" onclick="sendWhatsApp()"><i class="fa-solid fa-paper-plane"></i> 發送位置</button>
+            <button class="wa-btn" id="wa-btn" onclick="sendWhatsApp()"><i class="fa-solid fa-paper-plane"></i> 發送位置</button>
         </div>
 
         <div style="font-size:0.8rem; color:#888; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; font-weight:600;">Tools</div>
@@ -318,71 +331,74 @@
     <div id="detail-modal" class="modal">
         <div class="modal-content">
             <div style="position:absolute; top:20px; right:20px; font-size:1.5rem; cursor:pointer;" onclick="closeModal()">×</div>
+            
             <div id="modal-mini-map"></div>
+            
             <div class="modal-header">
-                <span style="font-size:0.75rem; color:#888; text-transform:uppercase;" id="modal-type">Type</span>
-                <h2 id="modal-title" style="margin:0;">Title</h2>
+                <span class="modal-label" id="modal-type">Type</span>
+                <h2 id="modal-title" style="margin:0; font-size:1.4rem;">Title</h2>
             </div>
-            <div style="margin:20px 0;">
-                <div id="modal-time-price" style="margin-bottom:10px;"></div>
-                <div id="modal-address" style="color:#666; font-size:0.9rem;"></div>
+            
+            <div class="modal-info-grid">
+                <div>
+                    <span class="modal-label">時間</span>
+                    <span class="modal-value" id="modal-time"></span>
+                </div>
+                <div>
+                    <span class="modal-label">預算/消費</span>
+                    <span class="modal-value" id="modal-price"></span>
+                </div>
+                <div>
+                    <span class="modal-label">開放時間</span>
+                    <span class="modal-value" id="modal-open-hours"></span>
+                </div>
+                <div>
+                    <span class="modal-label">地址</span>
+                    <span class="modal-value" id="modal-address-short" style="font-size:0.85rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
+                </div>
             </div>
-            <div style="background:#F9F9F9; padding:15px; border-radius:8px; font-size:0.95rem; line-height:1.6;" id="modal-note"></div>
-            <button onclick="openGoogleMaps()" style="background:#000; color:#fff; border:none; padding:15px; border-radius:8px; font-weight:bold; margin-top:15px; width:100%;">開啟 Google Maps</button>
+
+            <div class="modal-label">備註與攻略</div>
+            <div class="modal-note-box">
+                <div id="modal-note" class="modal-note-content"></div>
+            </div>
+
+            <div class="modal-actions" id="modal-actions">
+                </div>
+
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // --- 核心數據 (3天完整測試版) ---
+        // --- 核心數據 (新增 open_hours, address_jp) ---
         const scheduleData = {
             "day1": { 
                 "date": "2026-07-15", "display": "Day 01", "weekday": "週三", 
                 "events": [ 
-                    { time: "14:00", title: "抵達 & Check-in", type: "住宿", price: "-", address: "Dormy Inn Premium Kyoto", coords: [34.9868, 135.7599], note: "機場巴士直達。Check-in 後寄放行李。", tags: ["移動"] },
-                    { time: "15:30", title: "月之藏人 (午餐)", type: "美食", price: "¥2,500", address: "伏見區上油掛町185-1", coords: [34.9310, 135.7610], note: "自家製豆腐、酒粕烤雞。", tags: ["美食"] },
-                    { time: "16:30", title: "黃櫻 Kappa Country", type: "清酒", price: "¥2,000", address: "伏見區塩屋町228", coords: [34.9305, 135.7615], note: "喝 Lucky Cat/Dog 精釀啤酒。", tags: ["微醺"] },
-                    { time: "18:00", title: "AEON Mall 超市", type: "購物", price: "¥1,500", address: "京都站八條口", coords: [34.9835, 135.7560], note: "買宵夜：枝豆、刺身。", tags: ["超市"] }
+                    { time: "14:00", title: "抵達 & Check-in", type: "住宿", price: "-", open_hours: "24H", address: "Dormy Inn Premium Kyoto", address_jp: "京都市下京区東塩小路町558-8", coords: [34.9868, 135.7599], note: "機場巴士直達。\nCheck-in 後寄放行李。", tags: ["移動"] },
+                    { time: "15:30", title: "月之藏人 (午餐)", type: "美食", price: "¥2,500", open_hours: "11:00-23:00", address: "伏見區上油掛町185-1", address_jp: "伏見区上油掛町185-1", coords: [34.9310, 135.7610], note: "自家製豆腐、酒粕烤雞。\n建議預約。", tags: ["美食"] },
+                    { time: "16:30", title: "黃櫻 Kappa Country", type: "清酒", price: "¥2,000", open_hours: "11:30-22:00", address: "伏見區塩屋町228", address_jp: "伏見区塩屋町228", coords: [34.9305, 135.7615], note: "喝 Lucky Cat/Dog 精釀啤酒。", tags: ["微醺"] },
+                    { time: "18:00", title: "AEON Mall 超市", type: "購物", price: "¥1,500", open_hours: "10:00-21:00", address: "京都站八條口", address_jp: "京都駅八条口", coords: [34.9835, 135.7560], note: "買宵夜：枝豆、刺身。", tags: ["超市"] }
                 ], 
-                "inspiration": [
-                    {title:"雨天：AEON Mall", tag:"RAINY", note:"如果下大雨，直接在這裡逛街吃飯。"},
-                    {title:"順路：Mister Donut", tag:"NEAR", note:"AEON 裡面有，可以買當早餐。"},
-                    {title:"宵夜：大國藥妝", tag:"LATE", note:"酒店對面，開到 22:00，補貨方便。"},
-                    {title:"休息：酒店溫泉", tag:"TIRED", note:"Dormy Inn 頂樓溫泉 15:00 就開了。"}
-                ], 
-                "shopping": ["ICOCA 卡 (儲值)", "便利商店 (大瓶水)", "休足時間 (藥妝店)"] 
+                "inspiration": [{title:"雨天：AEON Mall", tag:"RAINY", note:"如果下大雨，直接在這裡逛街吃飯。"}], "shopping": ["ICOCA 卡"] 
             },
             "day2": { 
                 "date": "2026-07-16", "display": "Day 02", "weekday": "週四", 
                 "events": [ 
-                    { time: "09:00", title: "Ogawa Coffee", type: "美食", price: "¥1,200", address: "京都站前地下", coords: [34.9852, 135.7584], note: "京都早餐套餐。", tags: ["咖啡"] },
-                    { time: "10:30", title: "月桂冠大倉紀念館", type: "景點", price: "¥600", address: "伏見區南浜町247", coords: [34.9298, 135.7618], note: "必喝中庭伏水。", tags: ["文化"] },
-                    { time: "13:30", title: "伏見酒蔵小路", type: "體驗", price: "¥2,500", address: "伏見區納屋町", coords: [34.9330, 135.7605], note: "十八藏試飲 Set。", tags: ["清酒"] },
-                    { time: "16:00", title: "MY ONLY FRAGRANCE", type: "體驗", price: "¥6,000", address: "中京區", coords: [35.0085, 135.7680], note: "調製專屬香水。", tags: ["體驗"] },
-                    { time: "20:00", title: "祇園祭「宵山」", type: "祭典", price: "免費", address: "四條烏丸", coords: [35.0039, 135.7595], note: "買「長刀鉾」粽。人多小心。", tags: ["重點"] }
+                    { time: "09:00", title: "Ogawa Coffee", type: "美食", price: "¥1,200", open_hours: "07:00-21:00", address: "京都站前地下", address_jp: "京都駅前地下街ポルタ", coords: [34.9852, 135.7584], note: "京都早餐套餐。", tags: ["咖啡"] },
+                    { time: "10:30", title: "月桂冠大倉紀念館", type: "景點", price: "¥600", open_hours: "09:30-16:30", address: "伏見區南浜町247", address_jp: "伏見区南浜町247", coords: [34.9298, 135.7618], note: "必喝中庭伏水。", tags: ["文化"] },
+                    { time: "20:00", title: "祇園祭「宵山」", type: "祭典", price: "免費", open_hours: "18:00-23:00", address: "四條烏丸", address_jp: "四条烏丸一帯", coords: [35.0039, 135.7595], note: "買「長刀鉾」粽。人多小心。", tags: ["重點"] }
                 ], 
-                "inspiration": [
-                    {title:"雨天：新風館", tag:"RAINY", note:"與烏丸御池站直結，有商店與餐廳，避雨好去處。"},
-                    {title:"疲累：Smart Coffee", tag:"TIRED", note:"在商店街內的老舖咖啡，布丁很好吃。"},
-                    {title:"順路：六角堂", tag:"NEAR", note:"離香水店很近，可以去看看臍石。"},
-                    {title:"宵夜：Fresco 超市", tag:"LATE", note:"四條附近有 24H 超市。"}
-                ], 
-                "shopping": ["月桂冠生酒", "專屬香水", "長刀鉾 粽 (護身符)"] 
+                "inspiration": [{title:"疲累：Smart Coffee", tag:"TIRED", note:"在商店街內的老舖咖啡，布丁很好吃。"}], "shopping": ["月桂冠生酒"] 
             },
             "day3": { 
                 "date": "2026-07-17", "display": "Day 03", "weekday": "週五", 
                 "events": [ 
-                    { time: "08:30", title: "Inoda Coffee 本店", type: "美食", price: "¥1,600", address: "三條", coords: [35.0090, 135.7650], note: "京之朝食。享受最後的早晨。", tags: ["老舖"] },
-                    { time: "11:00", title: "最後採買 & 伴手禮", type: "購物", price: "¥3,000", address: "京都站", coords: [34.9858, 135.7588], note: "阿闍梨餅、551肉包。", tags: ["購物"] },
-                    { time: "12:30", title: "Premium Pound", type: "美食", price: "¥3,000", address: "祇園", coords: [35.0050, 135.7750], note: "午間和牛套餐，離開前的奢華。", tags: ["和牛"] },
-                    { time: "15:00", title: "前往機場 (利木津)", type: "交通", price: "¥2,600", address: "京都站八條口", coords: [34.9839, 135.7593], note: "帶著戰利品回家！", tags: ["移動"] }
+                    { time: "08:30", title: "Inoda Coffee 本店", type: "美食", price: "¥1,600", open_hours: "07:00-18:00", address: "三條", address_jp: "中京区堺町通三条下ル道祐町140", coords: [35.0090, 135.7650], note: "京之朝食。享受最後的早晨。", tags: ["老舖"] },
+                    { time: "12:30", title: "Premium Pound", type: "美食", price: "¥3,000", open_hours: "11:30-14:30", address: "祇園", address_jp: "東山区祇園町南側570-15", coords: [35.0050, 135.7750], note: "午間和牛套餐，離開前的奢華。", tags: ["和牛"] },
                 ], 
-                "inspiration": [
-                    {title:"順路：京都伊勢丹", tag:"NEAR", note:"如果伴手禮沒買夠，車站伊勢丹 B1 超好買。"},
-                    {title:"疲累：車站 Skyway", tag:"TIRED", note:"京都站空中徑路，人少，看風景發呆。"},
-                    {title:"雨天：Porta 地下街", tag:"RAINY", note:"車站前地下街，完全不用淋雨。"}
-                ], 
-                "shopping": ["Inoda 咖啡豆", "阿闍梨餅", "551 肉包", "下鴨茶寮 便當"] 
+                "inspiration": [{title:"順路：京都伊勢丹", tag:"NEAR", note:"如果伴手禮沒買夠，車站伊勢丹 B1 超好買。"}], "shopping": ["Inoda 咖啡豆"] 
             }
         };
 
@@ -394,8 +410,10 @@
 
         // Sidebar & Navigation
         function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.querySelector('.sidebar-overlay').classList.toggle('open');
+            const sb = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sb.classList.toggle('open');
+            overlay.classList.toggle('open');
         }
         
         function navigateTo(pageId) {
@@ -415,16 +433,37 @@
             else ds.style.display = 'block';
         }
 
-        // Feature Logic
+        // WhatsApp Logic (Fix for Popup Blocker)
         function sendWhatsApp() {
-            const phone = document.getElementById('wa-phone').value;
+            let phone = document.getElementById('wa-phone').value;
+            // Sanitize phone number (remove non-digits)
+            phone = phone.replace(/\D/g, '');
+            
             if(!phone) { alert("請輸入對方電話號碼"); return; }
+            
+            const btn = document.getElementById('wa-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> 定位中...";
+            
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((pos) => {
-                    const url = `https://wa.me/${phone}?text=${encodeURIComponent(`我現在在這裡，一切平安！\nhttps://www.google.com/maps/search/?api=1&query=${pos.coords.latitude},${pos.coords.longitude}`)}`;
-                    window.open(url, '_blank');
-                });
-            } else alert("瀏覽器不支援定位");
+                    const lat = pos.coords.latitude.toFixed(5);
+                    const lng = pos.coords.longitude.toFixed(5);
+                    const mapUrl = `http://maps.google.com/maps?q=${lat},${lng}`;
+                    const text = `我現在在這裡，一切平安！\n${mapUrl}`;
+                    
+                    // Use window.location to bypass popup blockers
+                    window.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+                    
+                    btn.innerHTML = originalText;
+                }, (err) => {
+                    alert("無法獲取位置，請確認定位權限");
+                    btn.innerHTML = originalText;
+                }, {timeout: 10000});
+            } else {
+                alert("瀏覽器不支援定位");
+                btn.innerHTML = originalText;
+            }
         }
 
         function showPhrase(jp, zh) {
@@ -476,15 +515,11 @@
         }
         function renderInspiration(dayKey) {
             const container = document.getElementById('inspiration-container'); container.innerHTML = '';
-            // Reset filter visual
             document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
             document.querySelector('.filter-chip').classList.add('active');
-            
             const list = scheduleData[dayKey].inspiration || [];
             if(list.length === 0) container.innerHTML = "<div style='color:#999; text-align:center; padding:20px;'>無特別備案</div>";
-
             list.forEach(item => {
-                // Add data-tag attribute for filtering
                 container.innerHTML += `<div class="inspire-card" data-tag="${item.tag}"><div class="inspire-badge">${item.tag}</div><h3>${item.title}</h3><p style="margin:5px 0 0 0; font-size:0.9rem; color:#666;">${item.note}</p></div>`;
             });
         }
@@ -494,14 +529,45 @@
                 container.innerHTML += `<div class="shop-item"><input type="checkbox" id="s${idx}"><label for="s${idx}">${item}</label></div>`;
             });
         }
+
+        // --- Enhanced Modal Logic ---
         function openModal(data) {
             currentEventData = data;
+            
+            // 1. Fill Fields
             document.getElementById('modal-title').innerText = data.title;
             document.getElementById('modal-type').innerText = data.type;
-            document.getElementById('modal-time-price').innerText = `${data.time} • ${data.price}`;
-            document.getElementById('modal-address').innerText = data.address;
+            document.getElementById('modal-time').innerText = data.time;
+            document.getElementById('modal-price').innerText = data.price;
+            document.getElementById('modal-open-hours').innerText = data.open_hours || "待確認";
+            document.getElementById('modal-address-short').innerText = data.address;
             document.getElementById('modal-note').innerText = data.note;
+            
+            // 2. Dynamic Actions Buttons
+            const actionsContainer = document.getElementById('modal-actions');
+            actionsContainer.innerHTML = ''; // Clear previous
+            
+            // Button A: Google Maps (Always present)
+            const mapBtn = `<button class="btn-action btn-black" onclick="openGoogleMaps()">📍 導航</button>`;
+            actionsContainer.innerHTML += mapBtn;
+
+            // Button B: Contextual (Taxi OR Email)
+            if (data.type === '美食' || data.type.includes('餐') || data.type === '老舖') {
+                // It's a restaurant -> Show Email Search
+                const emailBtn = `<button class="btn-action btn-gray" onclick="searchGmail('${data.title}')">📧 搜尋預約</button>`;
+                actionsContainer.innerHTML += emailBtn;
+            } else {
+                // It's a spot/hotel -> Show Taxi Card
+                // Use address_jp if available, otherwise address
+                const addr = data.address_jp || data.address;
+                const taxiBtn = `<button class="btn-action btn-gray" onclick="showPhrase('${addr}', '請載我去這裡')">🚕 的士卡</button>`;
+                actionsContainer.innerHTML += taxiBtn;
+            }
+
+            // 3. Show Modal
             document.getElementById('detail-modal').classList.add('open');
+            
+            // 4. Render Map
             setTimeout(() => {
                 if(modalMap) modalMap.remove();
                 modalMap = L.map('modal-mini-map', {zoomControl:false, dragging:false}).setView(data.coords, 15);
@@ -510,9 +576,22 @@
                 modalMap.invalidateSize();
             }, 100);
         }
+
         function closeModal() { document.getElementById('detail-modal').classList.remove('open'); }
+        
+        // Backdrop Click Close
+        document.getElementById('detail-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
         function openGoogleMaps() { if(currentEventData) window.open(`https://www.google.com/maps/search/?api=1&query=$${encodeURIComponent(currentEventData.address)}`, '_blank'); }
         
+        function searchGmail(query) {
+            // Searches Gmail for the restaurant name
+            const url = `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(query)}`;
+            window.open(url, '_blank');
+        }
+
         init();
     </script>
 </body>
