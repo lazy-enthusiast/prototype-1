@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Travel App v13.0 (Feb Schedule)</title>
+<title>Travel App v14.0 (Real-time Sync)</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -133,7 +133,7 @@ display: flex; flex-direction: column; align-items: center; justify-content: cen
 .ws-label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
 .ws-value { font-size: 1.1rem; font-weight: 600; margin-top: 2px; }
 
-.weather-notice { text-align: center; font-size: 0.7rem; color: #999; margin-top: 20px; padding: 0 20px; }
+.weather-notice { text-align: center; font-size: 0.75rem; color: #666; margin-top: 20px; padding: 10px 20px; background: #EEE; border-radius: 8px; margin-left: 20px; margin-right: 20px; }
 
 /* --- Common Pages --- */
 .date-selector-container { background: var(--bg-card); padding: 10px 15px; border-bottom: 1px solid var(--border); width: 100%; flex-shrink: 0; position: relative; z-index: 90; min-height: 70px; display: block; }
@@ -292,7 +292,7 @@ nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: #FFF
 <div id="weather-content">
 <div style="text-align:center; padding:50px; opacity:0.5;"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><p>載入天氣中...</p></div>
 </div>
-<div class="weather-notice">注意：因行程日期(2026年)尚未到達，系統目前顯示的是「即時未來預報」並模擬對應至您的行程天數，僅供功能測試參考。</div>
+<div class="weather-notice" id="weather-notice"></div>
 </div>
 
 <div id="page-phrases" class="page">
@@ -364,16 +364,16 @@ nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: #FFF
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// Data & Variables - Updated for Feb 14 Start
+// --- UPDATED SCHEDULE: Jan 07, 2026 START ---
 const scheduleData = {
-"day1": { "date": "2026-02-14", "display": "Feb 14", "weekday": "週六", "events": [ { time: "14:00", title: "抵達 & Check-in", type: "住宿", price: "-", open_hours: "24H", address: "Dormy Inn Premium Kyoto", address_jp: "京都市下京区東塩小路町558-8", coords: [34.9868, 135.7599], note: "機場巴士直達。", tags: ["移動"] } ], "inspiration": [{title:"雨天：AEON Mall", tag:"RAINY", note:"雨天備案"}], "shopping": ["ICOCA"] },
-"day2": { "date": "2026-02-15", "display": "Feb 15", "weekday": "週日", "events": [ { time: "09:00", title: "Ogawa Coffee", type: "美食", price: "¥1,200", open_hours: "07-21", address: "京都站前地下", coords: [34.9852, 135.7584], note: "早餐。", tags: ["咖啡"] } ], "inspiration": [], "shopping": [] },
-"day3": { "date": "2026-02-16", "display": "Feb 16", "weekday": "週一", "events": [], "inspiration": [], "shopping": [] },
-"day4": { "date": "2026-02-17", "display": "Feb 17", "weekday": "週二", "events": [], "inspiration": [], "shopping": [] },
-"day5": { "date": "2026-02-18", "display": "Feb 18", "weekday": "週三", "events": [], "inspiration": [], "shopping": [] },
-"day6": { "date": "2026-02-19", "display": "Feb 19", "weekday": "週四", "events": [], "inspiration": [], "shopping": [] },
-"day7": { "date": "2026-02-20", "display": "Feb 20", "weekday": "週五", "events": [], "inspiration": [], "shopping": [] },
-"day8": { "date": "2026-02-21", "display": "Feb 21", "weekday": "週六", "events": [], "inspiration": [], "shopping": [] }
+"day1": { "date": "2026-01-07", "display": "Jan 07", "weekday": "週三", "events": [ { time: "14:00", title: "抵達 & Check-in", type: "住宿", price: "-", open_hours: "24H", address: "Dormy Inn Premium Kyoto", address_jp: "京都市下京区東塩小路町558-8", coords: [34.9868, 135.7599], note: "機場巴士直達。", tags: ["移動"] } ], "inspiration": [{title:"雨天：AEON Mall", tag:"RAINY", note:"雨天備案"}], "shopping": ["ICOCA"] },
+"day2": { "date": "2026-01-08", "display": "Jan 08", "weekday": "週四", "events": [ { time: "09:00", title: "Ogawa Coffee", type: "美食", price: "¥1,200", open_hours: "07-21", address: "京都站前地下", coords: [34.9852, 135.7584], note: "早餐。", tags: ["咖啡"] } ], "inspiration": [], "shopping": [] },
+"day3": { "date": "2026-01-09", "display": "Jan 09", "weekday": "週五", "events": [], "inspiration": [], "shopping": [] },
+"day4": { "date": "2026-01-10", "display": "Jan 10", "weekday": "週六", "events": [], "inspiration": [], "shopping": [] },
+"day5": { "date": "2026-01-11", "display": "Jan 11", "weekday": "週日", "events": [], "inspiration": [], "shopping": [] },
+"day6": { "date": "2026-01-12", "display": "Jan 12", "weekday": "週一", "events": [], "inspiration": [], "shopping": [] },
+"day7": { "date": "2026-01-13", "display": "Jan 13", "weekday": "週二", "events": [], "inspiration": [], "shopping": [] },
+"day8": { "date": "2026-01-14", "display": "Jan 14", "weekday": "週三", "events": [], "inspiration": [], "shopping": [] }
 };
 
 let currentDay = "day1";
@@ -433,12 +433,12 @@ const icon = isSuccess ? '<i class="fa-solid fa-check-circle" style="color:#25D3
 statusEl.innerHTML = `${icon} ${rate.toFixed(4)} (${dateLabel})`;
 }
 
-// --- Weather Module ---
+// --- Weather Module (Robust Logic) ---
 async function fetchWeather() {
 const lat = 35.0116; const lon = 135.7681;
 try {
-// Fetching 14 days of forecast from "NOW" to simulate future availability
-const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max&timezone=auto&forecast_days=14`;
+// Fetch 14 days forecast. Since today is Dec 31, 2025, it covers Jan 1 - Jan 13/14 approx.
+const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max&timezone=auto&forecast_days=16`;
 const res = await fetch(url);
 weatherCache = await res.json();
 if(document.getElementById('page-weather').classList.contains('active')) renderWeatherModule();
@@ -448,25 +448,36 @@ if(document.getElementById('page-weather').classList.contains('active')) renderW
 function renderWeatherModule() {
 if(!weatherCache || !weatherCache.daily) return;
 const container = document.getElementById('weather-content');
+const noticeEl = document.getElementById('weather-notice');
 
-// Map Schedule Day index (Day 1 -> Index 0)
-const dayIndex = parseInt(currentDay.replace('day', '')) - 1;
-// Guard against out of bounds (if itinerary is longer than forecast available)
-if (dayIndex >= weatherCache.daily.time.length) {
-container.innerHTML = "<div style='text-align:center; padding:40px; opacity:0.5;'>無此日期的預報數據</div>";
+// 1. Get the target date string for the currently selected schedule day
+const targetDate = scheduleData[currentDay].date; // e.g., "2026-01-07"
+
+// 2. Find this date in the API response list
+const apiIndex = weatherCache.daily.time.indexOf(targetDate);
+
+if (apiIndex === -1) {
+// Date not found in forecast (too far in future or past)
+container.innerHTML = `
+<div style='text-align:center; padding:40px; color:#666;'>
+<i class="fa-regular fa-calendar-xmark fa-2x" style="margin-bottom:10px;"></i><br>
+暫無 ${scheduleData[currentDay].display} 的預報數據<br>
+<span style="font-size:0.8rem; color:#999;">(僅提供未來14天內預報)</span>
+</div>`;
+noticeEl.style.display = 'none';
 return;
 }
 
+// 3. Render Data using the matched index
 const d = weatherCache.daily;
-const code = d.weathercode[dayIndex];
-const max = d.temperature_2m_max[dayIndex];
-const min = d.temperature_2m_min[dayIndex];
-const rain = d.precipitation_probability_max[dayIndex];
-const uv = d.uv_index_max[dayIndex];
-const sunrise = d.sunrise[dayIndex].split('T')[1];
-const sunset = d.sunset[dayIndex].split('T')[1];
+const code = d.weathercode[apiIndex];
+const max = d.temperature_2m_max[apiIndex];
+const min = d.temperature_2m_min[apiIndex];
+const rain = d.precipitation_probability_max[apiIndex];
+const uv = d.uv_index_max[apiIndex];
+const sunrise = d.sunrise[apiIndex].split('T')[1];
+const sunset = d.sunset[apiIndex].split('T')[1];
 
-// Use the DATE from scheduleData, but the WEATHER from the API (mapped by index)
 const displayDate = scheduleData[currentDay].display;
 const displayWeekday = scheduleData[currentDay].weekday;
 
@@ -499,6 +510,8 @@ container.innerHTML = `
 <div class="weather-stat-card"><i class="fa-solid fa-moon ws-icon"></i><span class="ws-label">日落</span><span class="ws-value">${sunset}</span></div>
 </div>
 `;
+noticeEl.style.display = 'block';
+noticeEl.innerHTML = `<i class="fa-solid fa-satellite-dish"></i> 已同步即時預報：顯示對應 ${targetDate} 之數據`;
 }
 
 // --- Logic ---
@@ -568,7 +581,6 @@ function selectDay(dayKey, chipEl) {
 currentDay = dayKey;
 if(chipEl) { document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('active')); chipEl.classList.add('active'); chipEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); }
 else {
-// Update active chip visually if selected programmatically
 const chips = document.querySelectorAll('.date-chip');
 const index = parseInt(dayKey.replace('day', '')) - 1;
 if(chips[index]) {
