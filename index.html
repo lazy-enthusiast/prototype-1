@@ -1,583 +1,639 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Travel Prototype v11.0</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --bg-body: #F4F4F4;        
-            --bg-card: #FFFFFF;        
-            --text-main: #111111;      
-            --text-sub: #666666;       
-            --accent: #000000;         
-            --border: #E5E5E5;         
-            --shadow: 0 4px 12px rgba(0,0,0,0.04);
-            --sidebar-width: 320px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Travel App v13.0 (Feb Schedule)</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+<style>
+:root {
+--bg-body: #F4F4F4;
+--bg-card: #FFFFFF;
+--text-main: #111111;
+--text-sub: #666666;
+--accent: #000000;
+--border: #E5E5E5;
+--shadow: 0 4px 12px rgba(0,0,0,0.04);
+--sidebar-width: 320px;
+}
 
-        body {
-            font-family: "Inter", "Noto Sans TC", sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            margin: 0; padding: 0;
-            height: 100vh;
-            display: flex; flex-direction: column; overflow: hidden;
-        }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-        /* --- Header --- */
-        header {
-            padding: 0 20px;
-            background-color: var(--bg-card);
-            border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center;
-            height: 60px; flex-shrink: 0; position: relative; z-index: 200;
-        }
-        header h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; }
-        .header-actions { display: flex; align-items: center; gap: 5px; }
-        .header-btn { 
-            font-size: 1.2rem; cursor: pointer; color: var(--text-main); 
-            border-radius: 50%; transition: background 0.2s; width: 44px; height: 44px;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .header-btn:active { background: #F0F0F0; }
+body {
+font-family: "Inter", "Noto Sans TC", sans-serif;
+background-color: var(--bg-body);
+color: var(--text-main);
+margin: 0; padding: 0;
+height: 100vh;
+display: flex; flex-direction: column; overflow: hidden;
+}
 
-        /* --- Sidebar (Cleaned Up) --- */
-        .sidebar-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 1000;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s;
-            backdrop-filter: blur(2px);
-        }
-        .sidebar-overlay.open { opacity: 1; pointer-events: all; }
+/* --- Header --- */
+header {
+padding: 0 20px;
+background-color: var(--bg-card);
+border-bottom: 1px solid var(--border);
+display: flex; justify-content: space-between; align-items: center;
+height: 60px; flex-shrink: 0; position: relative; z-index: 200;
+}
+header h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; }
+.header-actions { display: flex; align-items: center; gap: 5px; }
+.header-btn {
+font-size: 1.2rem; cursor: pointer; color: var(--text-main);
+border-radius: 50%; transition: background 0.2s; width: 44px; height: 44px;
+display: flex; justify-content: center; align-items: center;
+}
+.header-btn:active { background: #F0F0F0; }
 
-        .sidebar {
-            position: fixed; top: 0; right: 0; width: 85%; max-width: var(--sidebar-width); height: 100%;
-            background: #FFF; z-index: 1001;
-            transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            overflow-y: auto; padding: 25px 20px; /* Adjusted Padding */
-            box-shadow: -5px 0 15px rgba(0,0,0,0.05);
-            display: flex; flex-direction: column;
-        }
-        .sidebar.open { transform: translateX(0); }
+/* --- Sidebar --- */
+.sidebar-overlay {
+position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+background: rgba(0,0,0,0.5); z-index: 1000;
+opacity: 0; pointer-events: none; transition: opacity 0.3s;
+backdrop-filter: blur(2px);
+}
+.sidebar-overlay.open { opacity: 1; pointer-events: all; }
 
-        .sidebar-section-title {
-            font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; 
-            margin-bottom: 10px; margin-top: 25px; font-weight: 600;
-        }
-        
-        /* WhatsApp Box (Top Item) */
-        .whatsapp-box { 
-            background: #E8F5E9; border: 1px solid #C8E6C9; color: #1B5E20; 
-            padding: 15px; border-radius: 12px; margin-bottom: 10px; margin-top: 20px; /* Added top margin since header is gone */
-        }
-        .wa-input {
-            width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #CCC; border-radius: 6px;
-            font-size: 0.95rem; background: #FFF;
-        }
-        .wa-btn {
-            width: 100%; background: #25D366; color: white; border: none; padding: 10px;
-            border-radius: 6px; font-weight: bold; cursor: pointer; 
-            display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 0.9rem;
-        }
+.sidebar {
+position: fixed; top: 0; right: 0; width: 85%; max-width: var(--sidebar-width); height: 100%;
+background: #FFF; z-index: 1001;
+transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+overflow-y: auto; padding: 25px 20px;
+box-shadow: -5px 0 15px rgba(0,0,0,0.05);
+display: flex; flex-direction: column;
+}
+.sidebar.open { transform: translateX(0); }
 
-        /* Tools */
-        .nav-launcher {
-            display: flex; align-items: center; gap: 15px;
-            background: #FFF; border: 1px solid #EEE; padding: 15px;
-            border-radius: 12px; margin-bottom: 10px; cursor: pointer;
-            transition: all 0.2s;
-        }
-        .nav-launcher:active { background: #F5F5F5; }
-        .nav-launcher-icon { font-size: 1.2rem; color: var(--accent); width: 25px; text-align: center;}
-        .nav-launcher h3 { margin: 0; font-size: 0.95rem; font-weight: 600; }
-        .nav-launcher p { margin: 2px 0 0 0; font-size: 0.8rem; color: #888; }
+.sidebar-section-title {
+font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px;
+margin-bottom: 10px; margin-top: 25px; font-weight: 600;
+}
 
-        .tool-box { background: #F9F9F9; padding: 15px; border-radius: 12px; border: 1px solid #EEE; margin-bottom: 10px; }
-        .currency-grid { display: grid; grid-template-columns: 1fr 30px 1fr; align-items: center; gap: 5px; margin-bottom: 8px; }
-        .curr-group { display: flex; flex-direction: column; }
-        .curr-label { font-size: 0.7rem; color: #888; font-weight: bold; margin-bottom: 4px; padding-left: 2px;}
-        .curr-input { width: 100%; padding: 10px; border: 1px solid #DDD; border-radius: 8px; font-size: 1.1rem; text-align: center; background: #FFF; font-weight: 500; }
-        .curr-icon { text-align: center; color: #AAA; font-size: 0.9rem; margin-top: 15px;} 
-        .rate-info { font-size: 0.75rem; color: #AAA; text-align: right; margin-top: 5px; display: flex; justify-content: space-between; align-items: center;}
-        .rate-status { font-weight: bold; color: #25D366; display: flex; align-items: center; gap: 4px; }
-        .rate-status.manual { color: #FFA500; }
-        .memo-area { width: 100%; height: 100px; padding: 10px; border: 1px solid #DDD; border-radius: 6px; font-family: inherit; font-size: 0.9rem; resize: none; background: #FFF; }
+.whatsapp-box {
+background: #E8F5E9; border: 1px solid #C8E6C9; color: #1B5E20;
+padding: 15px; border-radius: 12px; margin-bottom: 10px; margin-top: 20px;
+}
+.wa-input {
+width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #CCC; border-radius: 6px;
+font-size: 0.95rem; background: #FFF;
+}
+.wa-btn {
+width: 100%; background: #25D366; color: white; border: none; padding: 10px;
+border-radius: 6px; font-weight: bold; cursor: pointer;
+display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 0.9rem;
+}
 
-        /* --- Weather Module CSS --- */
-        .weather-main-card {
-            background: linear-gradient(135deg, #2c3e50, #000000);
-            color: white; border-radius: 16px; padding: 25px;
-            margin: 0 20px 20px 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            text-align: center; position: relative; overflow: hidden;
-        }
-        .weather-date { font-size: 0.9rem; opacity: 0.8; margin-bottom: 5px; }
-        .weather-icon-lg { font-size: 4rem; margin: 15px 0; }
-        .weather-temp-lg { font-size: 3.5rem; font-weight: 300; letter-spacing: -2px; }
-        .weather-desc { font-size: 1.2rem; margin-bottom: 20px; font-weight: 500; }
-        
-        .weather-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 0 20px; }
-        .weather-stat-card {
-            background: #FFF; border: 1px solid #EEE; padding: 15px; border-radius: 12px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .ws-icon { font-size: 1.2rem; color: #666; margin-bottom: 5px; }
-        .ws-label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
-        .ws-value { font-size: 1.1rem; font-weight: 600; margin-top: 2px; }
+/* Tools */
+.nav-launcher {
+display: flex; align-items: center; gap: 15px;
+background: #FFF; border: 1px solid #EEE; padding: 15px;
+border-radius: 12px; margin-bottom: 10px; cursor: pointer;
+transition: all 0.2s;
+}
+.nav-launcher:active { background: #F5F5F5; }
+.nav-launcher-icon { font-size: 1.2rem; color: var(--accent); width: 25px; text-align: center;}
+.nav-launcher h3 { margin: 0; font-size: 0.95rem; font-weight: 600; }
+.nav-launcher p { margin: 2px 0 0 0; font-size: 0.8rem; color: #888; }
 
-        /* --- Common Pages/Components --- */
-        .date-selector-container { background: var(--bg-card); padding: 10px 15px; border-bottom: 1px solid var(--border); width: 100%; flex-shrink: 0; position: relative; z-index: 90; min-height: 70px; display: block; }
-        .date-selector { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
-        .date-chip { flex: 1 0 auto; min-width: 70px; padding: 10px 0; border-radius: 6px; cursor: pointer; color: var(--text-sub); display: flex; flex-direction: column; align-items: center; justify-content: center; background: #F9F9F9; }
-        .date-chip.active { background: #000; color: #FFF; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .day-num { font-weight: 600; font-size: 0.9rem; } .day-week { font-size: 0.7rem; margin-top: 2px; text-transform: uppercase; }
+.tool-box { background: #F9F9F9; padding: 15px; border-radius: 12px; border: 1px solid #EEE; margin-bottom: 10px; }
+.currency-grid { display: grid; grid-template-columns: 1fr 30px 1fr; align-items: center; gap: 5px; margin-bottom: 8px; }
+.curr-group { display: flex; flex-direction: column; }
+.curr-label { font-size: 0.7rem; color: #888; font-weight: bold; margin-bottom: 4px; padding-left: 2px;}
+.curr-input { width: 100%; padding: 10px; border: 1px solid #DDD; border-radius: 8px; font-size: 1.1rem; text-align: center; background: #FFF; font-weight: 500; }
+.curr-icon { text-align: center; color: #AAA; font-size: 0.9rem; margin-top: 15px;}
 
-        main { flex: 1; overflow-y: hidden; position: relative; }
-        .page { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto; padding: 20px 0 100px 0; display: none; opacity: 0; transition: opacity 0.2s ease; background-color: var(--bg-body); }
-        .page.active { display: block; opacity: 1; z-index: 10; }
-        .page-header { padding: 0 20px; margin-bottom: 20px; }
-        .page-title { font-size: 1.5rem; font-weight: 700; margin: 0; }
-        .page-subtitle { color: #666; font-size: 0.9rem; margin-top: 5px; }
+.rate-info-container { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 0.75rem; color: #666;}
+.rate-status { display: flex; align-items: center; gap: 5px; font-weight: 500;}
+.rate-actions { display: flex; gap: 10px; }
+.rate-btn-text { cursor: pointer; text-decoration: underline; color: #444; }
+.rate-btn-text:hover { color: #000; }
 
-        .timeline-container { padding: 0 20px; max-width: 800px; margin: 0 auto; }
-        .timeline-item { position: relative; padding-left: 24px; padding-bottom: 24px; border-left: 1px solid #DDD; }
-        .timeline-item:last-child { border-left: 1px solid transparent; }
-        .timeline-item::before { content: ''; position: absolute; left: -5px; top: 22px; width: 9px; height: 9px; background: #FFF; border: 2px solid #000; border-radius: 50%; }
-        .card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); cursor: pointer; position: relative; }
-        .card-time { font-size: 0.75rem; color: #888; font-weight: 600; margin-bottom: 6px; display: block; }
-        .card-title { font-size: 1.1rem; font-weight: 600; margin: 0 0 8px 0; padding-right: 30px; }
-        .tags { display: flex; gap: 6px; flex-wrap: wrap; }
-        .card-tag { font-size: 0.7rem; background: #F2F2F2; padding: 4px 10px; border-radius: 20px; color: #555; }
-        .card-nav-btn { position: absolute; top: 20px; right: 20px; width: 30px; height: 30px; border-radius: 50%; background: #F4F4F4; color: #000; display: flex; justify-content: center; align-items: center; font-size: 0.9rem; transition: background 0.2s; z-index: 5; }
+.memo-area { width: 100%; height: 100px; padding: 10px; border: 1px solid #DDD; border-radius: 6px; font-family: inherit; font-size: 0.9rem; resize: none; background: #FFF; }
 
-        .filter-bar-container { padding: 0 20px 15px 20px; position: sticky; top: 0; z-index: 50; background: var(--bg-body); overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
-        .filter-chip { display: inline-block; padding: 8px 16px; margin-right: 8px; background: #FFF; border: 1px solid #DDD; border-radius: 20px; font-size: 0.85rem; color: #555; cursor: pointer; transition: all 0.2s; }
-        .filter-chip.active { background: #000; color: #FFF; border-color: #000; }
-        .inspiration-grid { padding: 0 20px; display: grid; gap: 15px; }
-        .inspire-card { background: #FFF; border: 1px dashed #999; border-radius: 12px; padding: 20px; color: #444; position: relative; display: block;} 
-        .inspire-card.hidden { display: none; }
-        .inspire-badge { background: #000; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; position: absolute; top: -10px; left: 15px; }
-        .shopping-list { padding: 0 20px; }
-        .shop-item { background: #FFF; padding: 15px; border-bottom: 1px solid #EEE; display: flex; align-items: center; gap: 15px; }
-        .shop-item input[type="checkbox"] { width: 20px; height: 20px; accent-color: #000; }
+/* --- Weather Module --- */
+.weather-main-card {
+background: linear-gradient(135deg, #2c3e50, #000000);
+color: white; border-radius: 16px; padding: 25px;
+margin: 0 20px 20px 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+text-align: center; position: relative; overflow: hidden;
+}
+.weather-date { font-size: 1rem; opacity: 0.9; margin-bottom: 5px; font-weight: 600; letter-spacing: 0.5px; }
+.weather-icon-lg { font-size: 4rem; margin: 15px 0; }
+.weather-temp-lg { font-size: 3.5rem; font-weight: 300; letter-spacing: -2px; }
+.weather-desc { font-size: 1.2rem; margin-bottom: 20px; font-weight: 500; }
+.weather-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 0 20px; }
+.weather-stat-card {
+background: #FFF; border: 1px solid #EEE; padding: 15px; border-radius: 12px;
+display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.ws-icon { font-size: 1.2rem; color: #666; margin-bottom: 5px; }
+.ws-label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+.ws-value { font-size: 1.1rem; font-weight: 600; margin-top: 2px; }
 
-        .info-card { background: #FFF; padding: 20px; border-radius: 12px; margin: 0 20px 15px 20px; border: 1px solid var(--border); }
-        .info-row { display: flex; gap: 15px; margin-bottom: 12px; align-items: flex-start; font-size: 0.95rem; color: #333; }
-        .contact-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
-        .btn-icon-sm { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 0.9rem; cursor: pointer; transition: transform 0.1s; }
-        .btn-icon-sm:active { transform: scale(0.9); }
-        .btn-call { background: #E8F5E9; color: #2E7D32; border: 1px solid #C8E6C9; }
-        .btn-wa { background: #25D366; color: white; border: 1px solid #20bd5a; }
+.weather-notice { text-align: center; font-size: 0.7rem; color: #999; margin-top: 20px; padding: 0 20px; }
 
-        .phrase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
-        .phrase-card { background: #FFF; border: 1px solid var(--border); padding: 25px 15px; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); aspect-ratio: 1.2; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .phrase-card:active { transform: scale(0.96); background: #F5F5F5; }
-        .phrase-jp { font-weight: bold; font-size: 1.1rem; margin-bottom: 8px; }
-        .phrase-zh { font-size: 0.85rem; color: #888; }
-        .phrase-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 5000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(5px); }
-        .phrase-overlay.active { opacity: 1; pointer-events: all; }
-        .phrase-content { text-align: center; width: 85%; }
-        .phrase-big { font-size: 2.8rem; font-weight: 800; color: #000; line-height: 1.3; margin-bottom: 20px; word-break: break-all; }
-        .close-phrase { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); border: 1px solid #CCC; padding: 12px 30px; border-radius: 30px; color: #666; cursor: pointer; background: #FFF; font-weight: 600; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+/* --- Common Pages --- */
+.date-selector-container { background: var(--bg-card); padding: 10px 15px; border-bottom: 1px solid var(--border); width: 100%; flex-shrink: 0; position: relative; z-index: 90; min-height: 70px; display: block; }
+.date-selector { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+.date-chip { flex: 1 0 auto; min-width: 70px; padding: 10px 0; border-radius: 6px; cursor: pointer; color: var(--text-sub); display: flex; flex-direction: column; align-items: center; justify-content: center; background: #F9F9F9; }
+.date-chip.active { background: #000; color: #FFF; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.day-num { font-weight: 600; font-size: 0.9rem; } .day-week { font-size: 0.7rem; margin-top: 2px; text-transform: uppercase; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; justify-content: center; align-items: end; backdrop-filter: blur(2px); cursor: pointer; }
-        .modal.open { display: flex; }
-        .modal-content { background: #FFF; color: #000; width: 100%; max-width: 600px; max-height: 90vh; border-radius: 20px 20px 0 0; padding: 30px; overflow-y: auto; animation: slideUp 0.3s ease; cursor: default; display: flex; flex-direction: column;}
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        #modal-mini-map { width: 100%; height: 200px; background: #EEE; border-radius: 12px; margin-bottom: 25px; border: 1px solid #DDD; flex-shrink: 0;}
-        .modal-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }
-        .modal-label { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; }
-        .modal-value { font-size: 0.95rem; font-weight: 500; }
-        .modal-note-box { background: #F8F8F8; padding: 15px; border-radius: 8px; border-left: 4px solid #000; margin: 15px 0; }
-        .modal-note-content { font-size: 0.95rem; line-height: 1.6; white-space: pre-line; color: #333; }
-        .modal-actions { margin-top: 20px; }
-        .btn-action { width: 100%; padding: 15px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1rem; text-align: center; }
-        .btn-black { background: #000; color: #FFF; }
-        .nav-link { font-size:0.85rem; color:#000; text-decoration:none; margin-left:5px; background:#EEE; padding:2px 8px; border-radius:4px; display:inline-block;}
+main { flex: 1; overflow-y: hidden; position: relative; }
+.page { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto; padding: 20px 0 100px 0; display: none; opacity: 0; transition: opacity 0.2s ease; background-color: var(--bg-body); }
+.page.active { display: block; opacity: 1; z-index: 10; }
+.page-header { padding: 0 20px; margin-bottom: 20px; }
+.page-title { font-size: 1.5rem; font-weight: 700; margin: 0; }
 
-        nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: #FFF; display: flex; justify-content: space-around; padding: 12px 0 25px 0; border-top: 1px solid var(--border); z-index: 100; }
-        .nav-item { color: #CCC; text-align: center; font-size: 0.7rem; cursor: pointer; width: 25%; }
-        .nav-item i { display: block; font-size: 1.2rem; margin-bottom: 6px; }
-        .nav-item.active { color: var(--accent); }
-    </style>
+.timeline-container { padding: 0 20px; max-width: 800px; margin: 0 auto; }
+.timeline-item { position: relative; padding-left: 24px; padding-bottom: 24px; border-left: 1px solid #DDD; }
+.timeline-item:last-child { border-left: 1px solid transparent; }
+.timeline-item::before { content: ''; position: absolute; left: -5px; top: 22px; width: 9px; height: 9px; background: #FFF; border: 2px solid #000; border-radius: 50%; }
+.card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); cursor: pointer; position: relative; }
+.card-time { font-size: 0.75rem; color: #888; font-weight: 600; margin-bottom: 6px; display: block; }
+.card-title { font-size: 1.1rem; font-weight: 600; margin: 0 0 8px 0; padding-right: 30px; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.card-tag { font-size: 0.7rem; background: #F2F2F2; padding: 4px 10px; border-radius: 20px; color: #555; }
+.card-nav-btn { position: absolute; top: 20px; right: 20px; width: 30px; height: 30px; border-radius: 50%; background: #F4F4F4; color: #000; display: flex; justify-content: center; align-items: center; font-size: 0.9rem; transition: background 0.2s; z-index: 5; }
+
+.filter-bar-container { padding: 0 20px 15px 20px; position: sticky; top: 0; z-index: 50; background: var(--bg-body); overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+.filter-chip { display: inline-block; padding: 8px 16px; margin-right: 8px; background: #FFF; border: 1px solid #DDD; border-radius: 20px; font-size: 0.85rem; color: #555; cursor: pointer; transition: all 0.2s; }
+.filter-chip.active { background: #000; color: #FFF; border-color: #000; }
+.inspiration-grid { padding: 0 20px; display: grid; gap: 15px; }
+.inspire-card { background: #FFF; border: 1px dashed #999; border-radius: 12px; padding: 20px; color: #444; position: relative; display: block;}
+.inspire-card.hidden { display: none; }
+.inspire-badge { background: #000; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; position: absolute; top: -10px; left: 15px; }
+.shopping-list { padding: 0 20px; }
+.shop-item { background: #FFF; padding: 15px; border-bottom: 1px solid #EEE; display: flex; align-items: center; gap: 15px; }
+.shop-item input[type="checkbox"] { width: 20px; height: 20px; accent-color: #000; }
+
+.info-card { background: #FFF; padding: 20px; border-radius: 12px; margin: 0 20px 15px 20px; border: 1px solid var(--border); }
+.info-row { display: flex; gap: 15px; margin-bottom: 12px; align-items: flex-start; font-size: 0.95rem; color: #333; }
+.contact-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+.btn-icon-sm { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 0.9rem; cursor: pointer; transition: transform 0.1s; }
+.btn-icon-sm:active { transform: scale(0.9); }
+.btn-call { background: #E8F5E9; color: #2E7D32; border: 1px solid #C8E6C9; }
+.btn-wa { background: #25D366; color: white; border: 1px solid #20bd5a; }
+
+.phrase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
+.phrase-card { background: #FFF; border: 1px solid var(--border); padding: 25px 15px; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); aspect-ratio: 1.2; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.phrase-card:active { transform: scale(0.96); background: #F5F5F5; }
+.phrase-jp { font-weight: bold; font-size: 1.1rem; margin-bottom: 8px; }
+.phrase-zh { font-size: 0.85rem; color: #888; }
+.phrase-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 5000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(5px); }
+.phrase-overlay.active { opacity: 1; pointer-events: all; }
+.phrase-content { text-align: center; width: 85%; }
+.phrase-big { font-size: 2.8rem; font-weight: 800; color: #000; line-height: 1.3; margin-bottom: 20px; word-break: break-all; }
+.close-phrase { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); border: 1px solid #CCC; padding: 12px 30px; border-radius: 30px; color: #666; cursor: pointer; background: #FFF; font-weight: 600; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; justify-content: center; align-items: end; backdrop-filter: blur(2px); cursor: pointer; }
+.modal.open { display: flex; }
+.modal-content { background: #FFF; color: #000; width: 100%; max-width: 600px; max-height: 90vh; border-radius: 20px 20px 0 0; padding: 30px; overflow-y: auto; animation: slideUp 0.3s ease; cursor: default; display: flex; flex-direction: column;}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+#modal-mini-map { width: 100%; height: 200px; background: #EEE; border-radius: 12px; margin-bottom: 25px; border: 1px solid #DDD; flex-shrink: 0;}
+.modal-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }
+.modal-label { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; }
+.modal-value { font-size: 0.95rem; font-weight: 500; }
+.modal-note-box { background: #F8F8F8; padding: 15px; border-radius: 8px; border-left: 4px solid #000; margin: 15px 0; }
+.modal-note-content { font-size: 0.95rem; line-height: 1.6; white-space: pre-line; color: #333; }
+.modal-actions { margin-top: 20px; }
+.btn-action { width: 100%; padding: 15px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1rem; text-align: center; }
+.btn-black { background: #000; color: #FFF; }
+.nav-link { font-size:0.85rem; color:#000; text-decoration:none; margin-left:5px; background:#EEE; padding:2px 8px; border-radius:4px; display:inline-block;}
+
+nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: #FFF; display: flex; justify-content: space-around; padding: 12px 0 25px 0; border-top: 1px solid var(--border); z-index: 100; }
+.nav-item { color: #CCC; text-align: center; font-size: 0.7rem; cursor: pointer; width: 25%; }
+.nav-item i { display: block; font-size: 1.2rem; margin-bottom: 6px; }
+.nav-item.active { color: var(--accent); }
+</style>
 </head>
 <body>
 
-    <header>
-        <h1>KYOTO <span style="font-weight:300; opacity:0.5;">2026</span></h1>
-        <div class="header-actions">
-            <div class="header-btn" onclick="openTranslate()"><i class="fa-solid fa-language"></i></div>
-            <div class="header-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></div>
-        </div>
-    </header>
+<header>
+<h1>KYOTO <span style="font-weight:300; opacity:0.5;">2026</span></h1>
+<div class="header-actions">
+<div class="header-btn" onclick="openTranslate()"><i class="fa-solid fa-language"></i></div>
+<div class="header-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></div>
+</div>
+</header>
 
-    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
-    <div class="sidebar" id="sidebar">
-        <div class="whatsapp-box">
-            <div style="font-weight:bold; margin-bottom:5px;"><i class="fa-brands fa-whatsapp"></i> 安全 Check-in</div>
-            <input type="tel" id="wa-phone" class="wa-input" placeholder="對方電話 (如 85291234567)">
-            <button class="wa-btn" id="wa-btn" onclick="sendWhatsApp()"><i class="fa-solid fa-paper-plane"></i> 發送位置</button>
-        </div>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+<div class="sidebar" id="sidebar">
+<div class="whatsapp-box">
+<div style="font-weight:bold; margin-bottom:5px;"><i class="fa-brands fa-whatsapp"></i> 安全 Check-in</div>
+<input type="tel" id="wa-phone" class="wa-input" placeholder="對方電話 (如 85291234567)">
+<button class="wa-btn" id="wa-btn" onclick="sendWhatsApp()"><i class="fa-solid fa-paper-plane"></i> 發送位置</button>
+</div>
 
-        <div class="sidebar-section-title">Navigation</div>
-        <div class="nav-launcher" onclick="navigateTo('phrases')">
-            <div class="nav-launcher-icon"><i class="fa-solid fa-comments"></i></div>
-            <div class="nav-launcher-text"><h3>對話卡片</h3><p>手指指溝通無障礙</p></div>
-        </div>
-        <div class="nav-launcher" onclick="navigateTo('info')">
-            <div class="nav-launcher-icon"><i class="fa-solid fa-suitcase"></i></div>
-            <div class="nav-launcher-text"><h3>旅程資訊</h3><p>航班、酒店、緊急聯絡</p></div>
-        </div>
+<div class="sidebar-section-title">Navigation</div>
+<div class="nav-launcher" onclick="navigateTo('phrases')">
+<div class="nav-launcher-icon"><i class="fa-solid fa-comments"></i></div>
+<div class="nav-launcher-text"><h3>對話卡片</h3><p>手指指溝通無障礙</p></div>
+</div>
+<div class="nav-launcher" onclick="navigateTo('info')">
+<div class="nav-launcher-icon"><i class="fa-solid fa-suitcase"></i></div>
+<div class="nav-launcher-text"><h3>旅程資訊</h3><p>航班、酒店、緊急聯絡</p></div>
+</div>
 
-        <div class="sidebar-section-title">Utilities</div>
-        <div class="tool-box">
-            <div style="font-weight:bold; margin-bottom:15px;"><i class="fa-solid fa-coins"></i> 匯率計算 (JPY ⇄ HKD)</div>
-            <div class="currency-grid">
-                <div class="curr-group"><span class="curr-label">JPY (日幣)</span><input type="number" id="curr-jpy" class="curr-input" placeholder="0" oninput="convertCurrency()"></div>
-                <div class="curr-icon"><i class="fa-solid fa-right-left"></i></div>
-                <div class="curr-group"><span class="curr-label">HKD (港幣)</span><input type="number" id="curr-hkd" class="curr-input" placeholder="0" readonly style="background:#EEE;"></div>
-            </div>
-            <div class="rate-info"><span id="rate-status" class="rate-status"><i class="fa-solid fa-circle-notch fa-spin"></i> 載入中...</span><span style="cursor:pointer; text-decoration:underline;" onclick="editRate()">手動修改</span></div>
-        </div>
-        <div class="tool-box">
-            <div style="font-weight:bold; margin-bottom:10px;"><i class="fa-solid fa-pen"></i> 旅行隨手記</div>
-            <textarea id="quick-memo" class="memo-area" placeholder="房號、Wifi密碼、提醒事項..." oninput="saveMemo()"></textarea>
-        </div>
-    </div>
+<div class="sidebar-section-title">Utilities</div>
+<div class="tool-box">
+<div style="font-weight:bold; margin-bottom:15px;"><i class="fa-solid fa-coins"></i> 匯率計算 (JPY ⇄ HKD)</div>
+<div class="currency-grid">
+<div class="curr-group"><span class="curr-label">JPY (日幣)</span><input type="number" id="curr-jpy" class="curr-input" placeholder="0" oninput="convertCurrency()"></div>
+<div class="curr-icon"><i class="fa-solid fa-right-left"></i></div>
+<div class="curr-group"><span class="curr-label">HKD (港幣)</span><input type="number" id="curr-hkd" class="curr-input" placeholder="0" readonly style="background:#EEE;"></div>
+</div>
+<div class="rate-info-container">
+<div id="rate-status" class="rate-status"><i class="fa-solid fa-circle-notch fa-spin"></i> 載入中...</div>
+<div class="rate-actions">
+<span class="rate-btn-text" onclick="fetchRates(true)">刷新</span>
+<span class="rate-btn-text" onclick="editRate()">手動</span>
+</div>
+</div>
+</div>
+<div class="tool-box">
+<div style="font-weight:bold; margin-bottom:10px;"><i class="fa-solid fa-pen"></i> 旅行隨手記</div>
+<textarea id="quick-memo" class="memo-area" placeholder="房號、Wifi密碼、提醒事項..." oninput="saveMemo()"></textarea>
+</div>
+</div>
 
-    <div id="phrase-overlay" class="phrase-overlay" onclick="closePhrase()">
-        <div class="phrase-content"><div id="overlay-jp" class="phrase-big"></div><div id="overlay-zh" class="phrase-sub"></div></div>
-        <div class="close-phrase">點擊關閉</div>
-    </div>
+<div id="phrase-overlay" class="phrase-overlay" onclick="closePhrase()">
+<div class="phrase-content"><div id="overlay-jp" class="phrase-big"></div><div id="overlay-zh" class="phrase-sub"></div></div>
+<div class="close-phrase">點擊關閉</div>
+</div>
 
-    <div class="date-selector-container">
-        <div class="date-selector" id="date-selector"></div>
-    </div>
-    
-    <main>
-        <div id="page-itinerary" class="page active">
-            <div class="timeline-container" id="timeline-container"></div>
-        </div>
-        <div id="page-inspiration" class="page">
-            <div class="filter-bar-container">
-                <span class="filter-chip active" onclick="filterInspiration('all', this)">全部</span>
-                <span class="filter-chip" onclick="filterInspiration('RAINY', this)">☔ 雨天</span>
-                <span class="filter-chip" onclick="filterInspiration('TIRED', this)">☕ 休息</span>
-                <span class="filter-chip" onclick="filterInspiration('LATE', this)">🌙 深夜</span>
-                <span class="filter-chip" onclick="filterInspiration('NEAR', this)">📍 順路</span>
-            </div>
-            <div id="inspiration-container" class="inspiration-grid"></div>
-        </div>
-        <div id="page-shopping" class="page">
-            <div class="page-header"><h2 class="page-title">購物清單</h2></div>
-            <div id="shopping-container" class="shopping-list"></div>
-        </div>
-        
-        <div id="page-weather" class="page">
-            <div id="weather-content">
-                <div style="text-align:center; padding:50px; opacity:0.5;"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><p>載入天氣中...</p></div>
-            </div>
-        </div>
+<div class="date-selector-container">
+<div class="date-selector" id="date-selector"></div>
+</div>
 
-        <div id="page-phrases" class="page">
-            <div class="page-header"><h2 class="page-title">溝通對話卡</h2></div>
-            <div class="phrase-grid">
-                <div class="phrase-card" onclick="showPhrase('一人です', '我是一位')"><div class="phrase-jp">一人です</div><div class="phrase-zh">一位</div></div>
-                <div class="phrase-card" onclick="showPhrase('お会計お願いします', '麻煩結帳')"><div class="phrase-jp">お会計</div><div class="phrase-zh">結帳</div></div>
-                <div class="phrase-card" onclick="showPhrase('これをお願いします', '我要這個')"><div class="phrase-jp">これを...</div><div class="phrase-zh">我要這個</div></div>
-                <div class="phrase-card" onclick="showPhrase('トイレはどこですか', '洗手間在哪裡？')"><div class="phrase-jp">トイレ</div><div class="phrase-zh">洗手間</div></div>
-                <div class="phrase-card" onclick="showPhrase('カードは使えますか', '可以用信用卡嗎？')"><div class="phrase-jp">カード</div><div class="phrase-zh">信用卡</div></div>
-                <div class="phrase-card" onclick="showPhrase('わさび抜きで', '請不要加芥末')"><div class="phrase-jp">わさび抜き</div><div class="phrase-zh">去芥末</div></div>
-            </div>
-        </div>
-        <div id="page-info" class="page">
-            <div class="page-header"><h2 class="page-title">旅程資訊</h2></div>
-            <div class="info-card">
-                <div style="font-weight:bold; margin-bottom:15px; border-bottom:1px solid #EEE; padding-bottom:10px;">住宿資訊</div>
-                <div class="info-row"><div class="info-icon"><i class="fa-solid fa-hotel"></i></div><div><span class="info-label">酒店</span><span class="info-value">Dormy Inn Premium Kyoto</span></div></div>
-                <div class="info-row">
-                    <div class="info-icon"><i class="fa-solid fa-location-dot"></i></div>
-                    <div><span class="info-label">地址</span><span class="info-value">京都市下京區東塩小路町 558-8</span><a href="javascript:void(0)" onclick="openMapQuery('Dormy Inn Premium Kyoto')" class="nav-link-sm"><i class="fa-solid fa-location-arrow"></i> 導航</a></div>
-                </div>
-                <div class="info-row">
-                    <div class="info-icon"><i class="fa-solid fa-phone"></i></div>
-                    <div>
-                        <span class="info-label">電話</span>
-                        <div class="contact-container">
-                            <span class="info-value" style="margin-right:10px;">+81-75-371-5489</span>
-                            <a href="javascript:void(0)" onclick="callNumber('+81753715489')" class="btn-icon-sm btn-call" title="撥打電話"><i class="fa-solid fa-phone"></i></a>
-                            <a href="javascript:void(0)" onclick="chatWhatsApp('+81753715489')" class="btn-icon-sm btn-wa" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="info-card">
-                <div style="font-weight:bold; margin-bottom:15px; border-bottom:1px solid #EEE; padding-bottom:10px;">緊急聯絡</div>
-                <div class="info-row"><div class="info-icon"><i class="fa-solid fa-shield-halved"></i></div><div style="width:100%; display:flex; justify-content:space-between; align-items:center;"><div><span class="info-label">警察局</span><span class="info-value">110</span></div><a href="javascript:void(0)" onclick="callNumber('110')" class="btn-icon-sm btn-call"><i class="fa-solid fa-phone"></i></a></div></div>
-                <div class="info-row"><div class="info-icon"><i class="fa-solid fa-truck-medical"></i></div><div style="width:100%; display:flex; justify-content:space-between; align-items:center;"><div><span class="info-label">救護 / 火警</span><span class="info-value">119</span></div><a href="javascript:void(0)" onclick="callNumber('119')" class="btn-icon-sm btn-call"><i class="fa-solid fa-phone"></i></a></div></div>
-            </div>
-        </div>
-    </main>
+<main>
+<div id="page-itinerary" class="page active">
+<div class="timeline-container" id="timeline-container"></div>
+</div>
+<div id="page-inspiration" class="page">
+<div class="filter-bar-container">
+<span class="filter-chip active" onclick="filterInspiration('all', this)">全部</span>
+<span class="filter-chip" onclick="filterInspiration('RAINY', this)">☔ 雨天</span>
+<span class="filter-chip" onclick="filterInspiration('TIRED', this)">☕ 休息</span>
+<span class="filter-chip" onclick="filterInspiration('LATE', this)">🌙 深夜</span>
+<span class="filter-chip" onclick="filterInspiration('NEAR', this)">📍 順路</span>
+</div>
+<div id="inspiration-container" class="inspiration-grid"></div>
+</div>
+<div id="page-shopping" class="page">
+<div class="page-header"><h2 class="page-title">購物清單</h2></div>
+<div id="shopping-container" class="shopping-list"></div>
+</div>
 
-    <nav class="bottom-nav">
-        <div class="nav-item active" onclick="switchMainPage('itinerary', this)"><i class="fa-regular fa-calendar"></i><span>行程</span></div>
-        <div class="nav-item" onclick="switchMainPage('inspiration', this)"><i class="fa-regular fa-lightbulb"></i><span>靈感</span></div>
-        <div class="nav-item" onclick="switchMainPage('shopping', this)"><i class="fa-solid fa-bag-shopping"></i><span>採買</span></div>
-        <div class="nav-item" onclick="switchMainPage('weather', this)"><i class="fa-solid fa-cloud"></i><span>天氣</span></div>
-    </nav>
+<div id="page-weather" class="page">
+<div id="weather-content">
+<div style="text-align:center; padding:50px; opacity:0.5;"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><p>載入天氣中...</p></div>
+</div>
+<div class="weather-notice">注意：因行程日期(2026年)尚未到達，系統目前顯示的是「即時未來預報」並模擬對應至您的行程天數，僅供功能測試參考。</div>
+</div>
 
-    <div id="detail-modal" class="modal">
-        <div class="modal-content">
-            <div style="position:absolute; top:20px; right:20px; font-size:1.5rem; cursor:pointer;" onclick="closeModal()">×</div>
-            <div id="modal-mini-map"></div>
-            <div class="modal-header">
-                <span class="modal-label" id="modal-type">Type</span>
-                <h2 id="modal-title" style="margin:0; font-size:1.4rem;">Title</h2>
-            </div>
-            <div class="modal-info-grid">
-                <div><span class="modal-label">時間</span><span class="modal-value" id="modal-time"></span></div>
-                <div><span class="modal-label">預算</span><span class="modal-value" id="modal-price"></span></div>
-                <div><span class="modal-label">開放時間</span><span class="modal-value" id="modal-open-hours"></span></div>
-                <div><span class="modal-label">地址</span><span class="modal-value" id="modal-address-short" style="font-size:0.85rem;"></span><a href="javascript:void(0)" id="modal-nav-link" class="nav-link"><i class="fa-solid fa-location-arrow"></i> 導航</a></div>
-            </div>
-            <div class="modal-label">備註與攻略</div>
-            <div class="modal-note-box"><div id="modal-note" class="modal-note-content"></div></div>
-            <div class="modal-actions" id="modal-actions"></div>
-        </div>
-    </div>
+<div id="page-phrases" class="page">
+<div class="page-header"><h2 class="page-title">溝通對話卡</h2></div>
+<div class="phrase-grid">
+<div class="phrase-card" onclick="showPhrase('一人です', '我是一位')"><div class="phrase-jp">一人です</div><div class="phrase-zh">一位</div></div>
+<div class="phrase-card" onclick="showPhrase('お会計お願いします', '麻煩結帳')"><div class="phrase-jp">お会計</div><div class="phrase-zh">結帳</div></div>
+<div class="phrase-card" onclick="showPhrase('これをお願いします', '我要這個')"><div class="phrase-jp">これを...</div><div class="phrase-zh">我要這個</div></div>
+<div class="phrase-card" onclick="showPhrase('トイレはどこですか', '洗手間在哪裡？')"><div class="phrase-jp">トイレ</div><div class="phrase-zh">洗手間</div></div>
+<div class="phrase-card" onclick="showPhrase('カードは使えますか', '可以用信用卡嗎？')"><div class="phrase-jp">カード</div><div class="phrase-zh">信用卡</div></div>
+<div class="phrase-card" onclick="showPhrase('わさび抜きで', '請不要加芥末')"><div class="phrase-jp">わさび抜き</div><div class="phrase-zh">去芥末</div></div>
+</div>
+</div>
+<div id="page-info" class="page">
+<div class="page-header"><h2 class="page-title">旅程資訊</h2></div>
+<div class="info-card">
+<div style="font-weight:bold; margin-bottom:15px; border-bottom:1px solid #EEE; padding-bottom:10px;">住宿資訊</div>
+<div class="info-row"><div class="info-icon"><i class="fa-solid fa-hotel"></i></div><div><span class="info-label">酒店</span><span class="info-value">Dormy Inn Premium Kyoto</span></div></div>
+<div class="info-row">
+<div class="info-icon"><i class="fa-solid fa-location-dot"></i></div>
+<div><span class="info-label">地址</span><span class="info-value">京都市下京區東塩小路町 558-8</span><a href="javascript:void(0)" onclick="openMapQuery('Dormy Inn Premium Kyoto')" class="nav-link-sm"><i class="fa-solid fa-location-arrow"></i> 導航</a></div>
+</div>
+<div class="info-row">
+<div class="info-icon"><i class="fa-solid fa-phone"></i></div>
+<div>
+<span class="info-label">電話</span>
+<div class="contact-container">
+<span class="info-value" style="margin-right:10px;">+81-75-371-5489</span>
+<a href="javascript:void(0)" onclick="callNumber('+81753715489')" class="btn-icon-sm btn-call" title="撥打電話"><i class="fa-solid fa-phone"></i></a>
+<a href="javascript:void(0)" onclick="chatWhatsApp('+81753715489')" class="btn-icon-sm btn-wa" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+</div>
+</div>
+</div>
+</div>
+<div class="info-card">
+<div style="font-weight:bold; margin-bottom:15px; border-bottom:1px solid #EEE; padding-bottom:10px;">緊急聯絡</div>
+<div class="info-row"><div class="info-icon"><i class="fa-solid fa-shield-halved"></i></div><div style="width:100%; display:flex; justify-content:space-between; align-items:center;"><div><span class="info-label">警察局</span><span class="info-value">110</span></div><a href="javascript:void(0)" onclick="callNumber('110')" class="btn-icon-sm btn-call"><i class="fa-solid fa-phone"></i></a></div></div>
+<div class="info-row"><div class="info-icon"><i class="fa-solid fa-truck-medical"></i></div><div style="width:100%; display:flex; justify-content:space-between; align-items:center;"><div><span class="info-label">救護 / 火警</span><span class="info-value">119</span></div><a href="javascript:void(0)" onclick="callNumber('119')" class="btn-icon-sm btn-call"><i class="fa-solid fa-phone"></i></a></div></div>
+</div>
+</div>
+</main>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        // Data & Variables
-        const scheduleData = {
-            "day1": { "date": "2026-07-15", "display": "Day 01", "weekday": "週三", "events": [ { time: "14:00", title: "抵達 & Check-in", type: "住宿", price: "-", open_hours: "24H", address: "Dormy Inn Premium Kyoto", address_jp: "京都市下京区東塩小路町558-8", coords: [34.9868, 135.7599], note: "機場巴士直達。", tags: ["移動"] } ], "inspiration": [{title:"雨天：AEON Mall", tag:"RAINY", note:"雨天備案"}], "shopping": ["ICOCA"] },
-            "day2": { "date": "2026-07-16", "display": "Day 02", "weekday": "週四", "events": [ { time: "09:00", title: "Ogawa Coffee", type: "美食", price: "¥1,200", open_hours: "07-21", address: "京都站前地下", coords: [34.9852, 135.7584], note: "早餐。", tags: ["咖啡"] } ], "inspiration": [], "shopping": [] },
-            "day3": { "date": "2026-07-17", "display": "Day 03", "weekday": "週五", "events": [], "inspiration": [], "shopping": [] },
-            "day4": { "date": "2026-07-18", "display": "Day 04", "weekday": "週六", "events": [], "inspiration": [], "shopping": [] },
-            "day5": { "date": "2026-07-19", "display": "Day 05", "weekday": "週日", "events": [], "inspiration": [], "shopping": [] },
-            "day6": { "date": "2026-07-20", "display": "Day 06", "weekday": "週一", "events": [], "inspiration": [], "shopping": [] },
-            "day7": { "date": "2026-07-21", "display": "Day 07", "weekday": "週二", "events": [], "inspiration": [], "shopping": [] },
-            "day8": { "date": "2026-07-22", "display": "Day 08", "weekday": "週三", "events": [], "inspiration": [], "shopping": [] }
-        };
+<nav class="bottom-nav">
+<div class="nav-item active" onclick="switchMainPage('itinerary', this)"><i class="fa-regular fa-calendar"></i><span>行程</span></div>
+<div class="nav-item" onclick="switchMainPage('inspiration', this)"><i class="fa-regular fa-lightbulb"></i><span>靈感</span></div>
+<div class="nav-item" onclick="switchMainPage('shopping', this)"><i class="fa-solid fa-bag-shopping"></i><span>採買</span></div>
+<div class="nav-item" onclick="switchMainPage('weather', this)"><i class="fa-solid fa-cloud"></i><span>天氣</span></div>
+</nav>
 
-        let currentDay = "day1";
-        let modalMap = null;
-        let currentEventData = null;
-        let exchangeRate = 0.053; 
-        let weatherCache = null;
+<div id="detail-modal" class="modal">
+<div class="modal-content">
+<div style="position:absolute; top:20px; right:20px; font-size:1.5rem; cursor:pointer;" onclick="closeModal()">×</div>
+<div id="modal-mini-map"></div>
+<div class="modal-header">
+<span class="modal-label" id="modal-type">Type</span>
+<h2 id="modal-title" style="margin:0; font-size:1.4rem;">Title</h2>
+</div>
+<div class="modal-info-grid">
+<div><span class="modal-label">時間</span><span class="modal-value" id="modal-time"></span></div>
+<div><span class="modal-label">預算</span><span class="modal-value" id="modal-price"></span></div>
+<div><span class="modal-label">開放時間</span><span class="modal-value" id="modal-open-hours"></span></div>
+<div><span class="modal-label">地址</span><span class="modal-value" id="modal-address-short" style="font-size:0.85rem;"></span><a href="javascript:void(0)" id="modal-nav-link" class="nav-link"><i class="fa-solid fa-location-arrow"></i> 導航</a></div>
+</div>
+<div class="modal-label">備註與攻略</div>
+<div class="modal-note-box"><div id="modal-note" class="modal-note-content"></div></div>
+<div class="modal-actions" id="modal-actions"></div>
+</div>
+</div>
 
-        function init() { 
-            renderDateSelector(); selectDay('day1'); 
-            switchMainPage('itinerary', document.querySelector('.nav-item.active'));
-            fetchRates(); fetchWeather();
-            if(localStorage.getItem('travelMemo')) document.getElementById('quick-memo').value = localStorage.getItem('travelMemo');
-        }
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// Data & Variables - Updated for Feb 14 Start
+const scheduleData = {
+"day1": { "date": "2026-02-14", "display": "Feb 14", "weekday": "週六", "events": [ { time: "14:00", title: "抵達 & Check-in", type: "住宿", price: "-", open_hours: "24H", address: "Dormy Inn Premium Kyoto", address_jp: "京都市下京区東塩小路町558-8", coords: [34.9868, 135.7599], note: "機場巴士直達。", tags: ["移動"] } ], "inspiration": [{title:"雨天：AEON Mall", tag:"RAINY", note:"雨天備案"}], "shopping": ["ICOCA"] },
+"day2": { "date": "2026-02-15", "display": "Feb 15", "weekday": "週日", "events": [ { time: "09:00", title: "Ogawa Coffee", type: "美食", price: "¥1,200", open_hours: "07-21", address: "京都站前地下", coords: [34.9852, 135.7584], note: "早餐。", tags: ["咖啡"] } ], "inspiration": [], "shopping": [] },
+"day3": { "date": "2026-02-16", "display": "Feb 16", "weekday": "週一", "events": [], "inspiration": [], "shopping": [] },
+"day4": { "date": "2026-02-17", "display": "Feb 17", "weekday": "週二", "events": [], "inspiration": [], "shopping": [] },
+"day5": { "date": "2026-02-18", "display": "Feb 18", "weekday": "週三", "events": [], "inspiration": [], "shopping": [] },
+"day6": { "date": "2026-02-19", "display": "Feb 19", "weekday": "週四", "events": [], "inspiration": [], "shopping": [] },
+"day7": { "date": "2026-02-20", "display": "Feb 20", "weekday": "週五", "events": [], "inspiration": [], "shopping": [] },
+"day8": { "date": "2026-02-21", "display": "Feb 21", "weekday": "週六", "events": [], "inspiration": [], "shopping": [] }
+};
 
-        // --- Live Data Fetches ---
-        async function fetchRates() {
-            try {
-                const res = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/jpy.json');
-                const data = await res.json();
-                if(data.jpy && data.jpy.hkd) {
-                    exchangeRate = data.jpy.hkd;
-                    const statusEl = document.getElementById('rate-status');
-                    statusEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> 實時匯率: ${exchangeRate.toFixed(4)}`;
-                    statusEl.classList.remove('manual');
-                }
-            } catch(e) { document.getElementById('rate-status').innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 離線 (預設: ${exchangeRate})`; }
-        }
+let currentDay = "day1";
+let modalMap = null;
+let currentEventData = null;
+let exchangeRate = 0.053;
+let weatherCache = null;
 
-        async function fetchWeather() {
-            // Kyoto Coordinates
-            const lat = 35.0116; const lon = 135.7681;
-            try {
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max&timezone=auto&forecast_days=14`;
-                const res = await fetch(url);
-                weatherCache = await res.json();
-                // If on weather page, render immediately
-                if(document.getElementById('page-weather').classList.contains('active')) renderWeatherModule();
-            } catch(e) { console.error("Weather Error", e); document.getElementById('weather-content').innerHTML = "無法載入天氣資訊"; }
-        }
+function init() {
+renderDateSelector(); selectDay('day1');
+switchMainPage('itinerary', document.querySelector('.nav-item.active'));
+fetchRates(); fetchWeather();
+if(localStorage.getItem('travelMemo')) document.getElementById('quick-memo').value = localStorage.getItem('travelMemo');
+}
 
-        function renderWeatherModule() {
-            if(!weatherCache || !weatherCache.daily) return;
-            const container = document.getElementById('weather-content');
-            
-            // Map Schedule Day index (Day 1 -> Index 0)
-            const dayIndex = parseInt(currentDay.replace('day', '')) - 1;
-            // Guard against out of bounds
-            if (dayIndex >= weatherCache.daily.time.length) {
-                container.innerHTML = "<div style='text-align:center; padding:40px; opacity:0.5;'>無此日期的預報數據</div>";
-                return;
-            }
+async function fetchRates(force = false) {
+const statusEl = document.getElementById('rate-status');
+statusEl.innerHTML = '<i class="fa-solid fa-sync fa-spin"></i> 更新中...';
 
-            const d = weatherCache.daily;
-            const code = d.weathercode[dayIndex];
-            const max = d.temperature_2m_max[dayIndex];
-            const min = d.temperature_2m_min[dayIndex];
-            const rain = d.precipitation_probability_max[dayIndex];
-            const uv = d.uv_index_max[dayIndex];
-            const sunrise = d.sunrise[dayIndex].split('T')[1];
-            const sunset = d.sunset[dayIndex].split('T')[1];
+const cachedRate = localStorage.getItem('cachedRate');
+const cachedTime = localStorage.getItem('cachedRateTime');
+const now = new Date().getTime();
 
-            // WMO Code Map
-            const wmo = {
-                0: {icon: 'fa-sun', text: '晴朗', color: '#f1c40f'},
-                1: {icon: 'fa-cloud-sun', text: '多雲', color: '#f39c12'},
-                2: {icon: 'fa-cloud-sun', text: '多雲', color: '#f39c12'},
-                3: {icon: 'fa-cloud', text: '陰天', color: '#95a5a6'},
-                45: {icon: 'fa-smog', text: '霧', color: '#95a5a6'},
-                51: {icon: 'fa-cloud-rain', text: '毛毛雨', color: '#3498db'},
-                53: {icon: 'fa-cloud-rain', text: '小雨', color: '#3498db'},
-                61: {icon: 'fa-cloud-showers-heavy', text: '陣雨', color: '#2980b9'},
-                63: {icon: 'fa-cloud-showers-heavy', text: '下雨', color: '#2980b9'},
-                80: {icon: 'fa-cloud-showers-water', text: '雷陣雨', color: '#8e44ad'},
-                95: {icon: 'fa-bolt', text: '雷雨', color: '#8e44ad'}
-            };
-            const w = wmo[code] || {icon: 'fa-cloud', text: '未知', color: '#ccc'};
+if (!force && cachedRate && cachedTime && (now - cachedTime < 12 * 60 * 60 * 1000)) {
+exchangeRate = parseFloat(cachedRate);
+const dateObj = new Date(parseInt(cachedTime));
+const dateStr = `${dateObj.getMonth()+1}/${dateObj.getDate()}`;
+updateRateUI(exchangeRate, dateStr, true);
+return;
+}
 
-            container.innerHTML = `
-                <div class="weather-main-card">
-                    <div class="weather-date">${scheduleData[currentDay].display} • 京都</div>
-                    <div class="weather-icon-lg" style="color:${w.color}"><i class="fa-solid ${w.icon}"></i></div>
-                    <div class="weather-temp-lg">${Math.round(max)}°</div>
-                    <div class="weather-desc">${w.text} / 低溫 ${Math.round(min)}°</div>
-                </div>
-                <div class="weather-grid">
-                    <div class="weather-stat-card"><i class="fa-solid fa-umbrella ws-icon"></i><span class="ws-label">降雨機率</span><span class="ws-value">${rain}%</span></div>
-                    <div class="weather-stat-card"><i class="fa-solid fa-sun ws-icon"></i><span class="ws-label">紫外線</span><span class="ws-value">${uv}</span></div>
-                    <div class="weather-stat-card"><i class="fa-regular fa-clock ws-icon"></i><span class="ws-label">日出</span><span class="ws-value">${sunrise}</span></div>
-                    <div class="weather-stat-card"><i class="fa-solid fa-moon ws-icon"></i><span class="ws-label">日落</span><span class="ws-value">${sunset}</span></div>
-                </div>
-            `;
-        }
+try {
+const res = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/jpy.json');
+const data = await res.json();
+if(data.jpy && data.jpy.hkd) {
+exchangeRate = data.jpy.hkd;
+const apiDate = data.date;
+localStorage.setItem('cachedRate', exchangeRate);
+localStorage.setItem('cachedRateTime', now);
+updateRateUI(exchangeRate, apiDate, true);
+convertCurrency();
+}
+} catch(e) {
+console.error(e);
+if(cachedRate) {
+exchangeRate = parseFloat(cachedRate);
+updateRateUI(exchangeRate, '離線數據', false);
+} else {
+updateRateUI(exchangeRate, '預設', false);
+}
+}
+}
 
-        // --- Logic ---
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('open'); }
-        function openTranslate() { window.open("https://translate.google.com/?sl=auto&tl=zh-TW", "_blank"); }
-        
-        function navigateTo(pageId) {
-            toggleSidebar();
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page-' + pageId).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.querySelector('.date-selector-container').style.display = 'none';
-        }
+function updateRateUI(rate, dateLabel, isSuccess) {
+const statusEl = document.getElementById('rate-status');
+const icon = isSuccess ? '<i class="fa-solid fa-check-circle" style="color:#25D366;"></i>' : '<i class="fa-solid fa-triangle-exclamation" style="color:orange;"></i>';
+statusEl.innerHTML = `${icon} ${rate.toFixed(4)} (${dateLabel})`;
+}
 
-        function switchMainPage(pageId, navEl) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page-' + pageId).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            if(navEl) navEl.classList.add('active');
-            const ds = document.querySelector('.date-selector-container');
-            if(pageId === 'itinerary' || pageId === 'shopping' || pageId === 'inspiration' || pageId === 'weather') ds.style.display = 'block'; 
-            else ds.style.display = 'none';
-            
-            // Special render for weather
-            if(pageId === 'weather') renderWeatherModule();
-        }
+// --- Weather Module ---
+async function fetchWeather() {
+const lat = 35.0116; const lon = 135.7681;
+try {
+// Fetching 14 days of forecast from "NOW" to simulate future availability
+const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max&timezone=auto&forecast_days=14`;
+const res = await fetch(url);
+weatherCache = await res.json();
+if(document.getElementById('page-weather').classList.contains('active')) renderWeatherModule();
+} catch(e) { console.error("Weather Error", e); document.getElementById('weather-content').innerHTML = "無法載入天氣資訊"; }
+}
 
-        function convertCurrency() {
-            const jpy = parseFloat(document.getElementById('curr-jpy').value);
-            if(!isNaN(jpy)) { document.getElementById('curr-hkd').value = (jpy * exchangeRate).toFixed(1); } else { document.getElementById('curr-hkd').value = ""; }
-        }
-        function editRate() {
-            const newRate = prompt("手動設定匯率:", exchangeRate);
-            if(newRate && !isNaN(newRate)) { exchangeRate = parseFloat(newRate); document.getElementById('rate-status').innerHTML = `<i class="fa-solid fa-lock"></i> 手動: ${exchangeRate}`; document.getElementById('rate-status').classList.add('manual'); convertCurrency(); }
-        }
-        function saveMemo() { localStorage.setItem('travelMemo', document.getElementById('quick-memo').value); }
-        function sendWhatsApp() {
-            let phone = document.getElementById('wa-phone').value.replace(/\D/g, '');
-            if(!phone) { alert("請輸入對方電話號碼"); return; }
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((pos) => {
-                    const url = `https://wa.me/${phone}?text=${encodeURIComponent(`我現在在這裡，一切平安！\nhttps://www.google.com/maps/search/?api=1&query=${pos.coords.latitude},${pos.coords.longitude}`)}`;
-                    window.location.href = url;
-                });
-            } else alert("瀏覽器不支援定位");
-        }
-        function callNumber(num) { window.location.href = `tel:${num}`; }
-        function chatWhatsApp(num) { let clean = num.replace(/\D/g, ''); window.open(`https://wa.me/${clean}`, '_blank'); }
-        function showPhrase(jp, zh) { document.getElementById('overlay-jp').innerText = jp; document.getElementById('overlay-zh').innerText = zh; document.getElementById('phrase-overlay').classList.add('active'); }
-        function closePhrase() { document.getElementById('phrase-overlay').classList.remove('active'); }
-        function renderDateSelector() {
-            const container = document.getElementById('date-selector'); container.innerHTML = '';
-            Object.keys(scheduleData).forEach(dayKey => {
-                const day = scheduleData[dayKey];
-                const chip = document.createElement('div'); chip.className = `date-chip`;
-                chip.onclick = () => selectDay(dayKey, chip);
-                chip.innerHTML = `<span class="day-num">${day.display}</span><span class="day-week">${day.weekday}</span>`;
-                container.appendChild(chip);
-            });
-            if(container.firstChild) container.firstChild.classList.add('active');
-        }
-        function selectDay(dayKey, chipEl) {
-            currentDay = dayKey;
-            if(chipEl) { document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('active')); chipEl.classList.add('active'); chipEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); }
-            renderTimeline(dayKey); renderInspiration(dayKey); renderShopping(dayKey);
-            // Re-render weather if on weather page
-            if(document.getElementById('page-weather').classList.contains('active')) renderWeatherModule();
-        }
-        function renderTimeline(dayKey) {
-            const container = document.getElementById('timeline-container'); container.innerHTML = '';
-            const events = scheduleData[dayKey].events || [];
-            if(events.length === 0) { container.innerHTML = `<div style="text-align:center; padding:40px; color:#AAA;">自由探索的一天</div>`; return; }
-            events.forEach(event => {
-                const item = document.createElement('div'); item.className = 'timeline-item';
-                let tags = event.tags.map(t => `<span class="card-tag">${t}</span>`).join('');
-                const navBtn = `<div class="card-nav-btn" onclick="event.stopPropagation(); openMapQuery('${event.address}')"><i class="fa-solid fa-location-arrow"></i></div>`;
-                item.innerHTML = `<div class="card" onclick='openModal(${JSON.stringify(event).replace(/'/g, "'")})'>${navBtn}<span class="card-time">${event.time}</span><h3 class="card-title">${event.title}</h3><div class="tags">${tags}</div></div>`;
-                container.appendChild(item);
-            });
-            container.appendChild(document.createElement('div')).style.height = "20px";
-        }
-        function renderInspiration(dayKey) {
-            const container = document.getElementById('inspiration-container'); container.innerHTML = '';
-            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-            document.querySelector('.filter-chip').classList.add('active');
-            (scheduleData[dayKey].inspiration || []).forEach(item => { container.innerHTML += `<div class="inspire-card" data-tag="${item.tag}"><div class="inspire-badge">${item.tag}</div><h3>${item.title}</h3><p style="margin:5px 0 0 0; font-size:0.9rem; color:#666;">${item.note}</p></div>`; });
-        }
-        function filterInspiration(tag, btn) {
-            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active')); btn.classList.add('active');
-            document.querySelectorAll('.inspire-card').forEach(card => { if(tag === 'all' || card.getAttribute('data-tag') === tag) card.classList.remove('hidden'); else card.classList.add('hidden'); });
-        }
-        function renderShopping(dayKey) {
-            const container = document.getElementById('shopping-container'); container.innerHTML = '';
-            (scheduleData[dayKey].shopping || []).forEach((item, idx) => { container.innerHTML += `<div class="shop-item"><input type="checkbox" id="s${idx}"><label for="s${idx}">${item}</label></div>`; });
-        }
-        function openMapQuery(address) { window.open(`https://www.google.com/maps/search/?api=1&query=$${encodeURIComponent(address)}`, '_blank'); }
-        function openModal(data) {
-            currentEventData = data;
-            document.getElementById('modal-title').innerText = data.title;
-            document.getElementById('modal-type').innerText = data.type;
-            document.getElementById('modal-time').innerText = data.time;
-            document.getElementById('modal-price').innerText = data.price;
-            document.getElementById('modal-open-hours').innerText = data.open_hours || "待確認";
-            document.getElementById('modal-address-short').innerText = data.address;
-            document.getElementById('modal-note').innerText = data.note;
-            document.getElementById('modal-nav-link').onclick = function() { openMapQuery(data.address); };
-            const actionsContainer = document.getElementById('modal-actions');
-            actionsContainer.innerHTML = '';
-            if (data.type === '美食' || data.type.includes('餐')) {
-                actionsContainer.innerHTML = `<button class="btn-action btn-black" onclick="searchGmail('${data.title}')">📧 搜尋預約信 (Gmail)</button>`;
-            } else {
-                const addr = data.address_jp || data.address;
-                actionsContainer.innerHTML = `<button class="btn-action btn-black" onclick="showPhrase('${addr}', '請載我去這裡')">🚕 顯示的士卡 (地址)</button>`;
-            }
-            document.getElementById('detail-modal').classList.add('open');
-            setTimeout(() => { if(modalMap) modalMap.remove(); modalMap = L.map('modal-mini-map', {zoomControl:false, dragging:false}).setView(data.coords, 15); L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(modalMap); L.marker(data.coords, {icon: L.divIcon({className:'custom-div-icon',html:"<div style='background:black;width:14px;height:14px;border-radius:50%;border:2px solid white;'></div>",iconSize:[14,14]})}).addTo(modalMap); modalMap.invalidateSize(); }, 100);
-        }
-        function closeModal() { document.getElementById('detail-modal').classList.remove('open'); }
-        document.getElementById('detail-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
-        function searchGmail(query) { window.open(`https://mail.google.com/mail/u/0/#search/${encodeURIComponent(query)}`, '_blank'); }
-        
-        init();
-    </script>
+function renderWeatherModule() {
+if(!weatherCache || !weatherCache.daily) return;
+const container = document.getElementById('weather-content');
+
+// Map Schedule Day index (Day 1 -> Index 0)
+const dayIndex = parseInt(currentDay.replace('day', '')) - 1;
+// Guard against out of bounds (if itinerary is longer than forecast available)
+if (dayIndex >= weatherCache.daily.time.length) {
+container.innerHTML = "<div style='text-align:center; padding:40px; opacity:0.5;'>無此日期的預報數據</div>";
+return;
+}
+
+const d = weatherCache.daily;
+const code = d.weathercode[dayIndex];
+const max = d.temperature_2m_max[dayIndex];
+const min = d.temperature_2m_min[dayIndex];
+const rain = d.precipitation_probability_max[dayIndex];
+const uv = d.uv_index_max[dayIndex];
+const sunrise = d.sunrise[dayIndex].split('T')[1];
+const sunset = d.sunset[dayIndex].split('T')[1];
+
+// Use the DATE from scheduleData, but the WEATHER from the API (mapped by index)
+const displayDate = scheduleData[currentDay].display;
+const displayWeekday = scheduleData[currentDay].weekday;
+
+const wmo = {
+0: {icon: 'fa-sun', text: '晴朗', color: '#f1c40f'},
+1: {icon: 'fa-cloud-sun', text: '多雲', color: '#f39c12'},
+2: {icon: 'fa-cloud-sun', text: '多雲', color: '#f39c12'},
+3: {icon: 'fa-cloud', text: '陰天', color: '#95a5a6'},
+45: {icon: 'fa-smog', text: '霧', color: '#95a5a6'},
+51: {icon: 'fa-cloud-rain', text: '毛毛雨', color: '#3498db'},
+53: {icon: 'fa-cloud-rain', text: '小雨', color: '#3498db'},
+61: {icon: 'fa-cloud-showers-heavy', text: '陣雨', color: '#2980b9'},
+63: {icon: 'fa-cloud-showers-heavy', text: '下雨', color: '#2980b9'},
+80: {icon: 'fa-cloud-showers-water', text: '雷陣雨', color: '#8e44ad'},
+95: {icon: 'fa-bolt', text: '雷雨', color: '#8e44ad'}
+};
+const w = wmo[code] || {icon: 'fa-cloud', text: '未知', color: '#ccc'};
+
+container.innerHTML = `
+<div class="weather-main-card">
+<div class="weather-date">${displayDate} (${displayWeekday}) • 京都</div>
+<div class="weather-icon-lg" style="color:${w.color}"><i class="fa-solid ${w.icon}"></i></div>
+<div class="weather-temp-lg">${Math.round(max)}°</div>
+<div class="weather-desc">${w.text} / 低溫 ${Math.round(min)}°</div>
+</div>
+<div class="weather-grid">
+<div class="weather-stat-card"><i class="fa-solid fa-umbrella ws-icon"></i><span class="ws-label">降雨機率</span><span class="ws-value">${rain}%</span></div>
+<div class="weather-stat-card"><i class="fa-solid fa-sun ws-icon"></i><span class="ws-label">紫外線</span><span class="ws-value">${uv}</span></div>
+<div class="weather-stat-card"><i class="fa-regular fa-clock ws-icon"></i><span class="ws-label">日出</span><span class="ws-value">${sunrise}</span></div>
+<div class="weather-stat-card"><i class="fa-solid fa-moon ws-icon"></i><span class="ws-label">日落</span><span class="ws-value">${sunset}</span></div>
+</div>
+`;
+}
+
+// --- Logic ---
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('open'); }
+function openTranslate() { window.open("https://translate.google.com/?sl=auto&tl=zh-TW", "_blank"); }
+
+function navigateTo(pageId) {
+toggleSidebar();
+document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+document.getElementById('page-' + pageId).classList.add('active');
+document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+document.querySelector('.date-selector-container').style.display = 'none';
+}
+
+function switchMainPage(pageId, navEl) {
+document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+document.getElementById('page-' + pageId).classList.add('active');
+document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+if(navEl) navEl.classList.add('active');
+const ds = document.querySelector('.date-selector-container');
+if(pageId === 'itinerary' || pageId === 'shopping' || pageId === 'inspiration' || pageId === 'weather') ds.style.display = 'block';
+else ds.style.display = 'none';
+if(pageId === 'weather') renderWeatherModule();
+}
+
+function convertCurrency() {
+const jpy = parseFloat(document.getElementById('curr-jpy').value);
+if(!isNaN(jpy)) { document.getElementById('curr-hkd').value = (jpy * exchangeRate).toFixed(1); } else { document.getElementById('curr-hkd').value = ""; }
+}
+function editRate() {
+const newRate = prompt("手動設定匯率 (覆蓋自動抓取):", exchangeRate);
+if(newRate && !isNaN(newRate)) {
+exchangeRate = parseFloat(newRate);
+updateRateUI(exchangeRate, '手動', false);
+convertCurrency();
+}
+}
+function saveMemo() { localStorage.setItem('travelMemo', document.getElementById('quick-memo').value); }
+function sendWhatsApp() {
+let phone = document.getElementById('wa-phone').value.replace(/\D/g, '');
+if(!phone) { alert("請輸入對方電話號碼"); return; }
+if (navigator.geolocation) {
+navigator.geolocation.getCurrentPosition((pos) => {
+const url = `https://wa.me/${phone}?text=${encodeURIComponent(`我現在在這裡，一切平安！\nhttps://www.google.com/maps/search/?api=1&query=${pos.coords.latitude},${pos.coords.longitude}`)}`;
+window.location.href = url;
+});
+} else alert("瀏覽器不支援定位");
+}
+function callNumber(num) { window.location.href = `tel:${num}`; }
+function chatWhatsApp(num) { let clean = num.replace(/\D/g, ''); window.open(`https://wa.me/${clean}`, '_blank'); }
+function showPhrase(jp, zh) { document.getElementById('overlay-jp').innerText = jp; document.getElementById('overlay-zh').innerText = zh; document.getElementById('phrase-overlay').classList.add('active'); }
+function closePhrase() { document.getElementById('phrase-overlay').classList.remove('active'); }
+
+function renderDateSelector() {
+const container = document.getElementById('date-selector'); container.innerHTML = '';
+Object.keys(scheduleData).forEach(dayKey => {
+const day = scheduleData[dayKey];
+const chip = document.createElement('div'); chip.className = `date-chip`;
+chip.onclick = () => selectDay(dayKey, chip);
+chip.innerHTML = `<span class="day-num">${day.display}</span><span class="day-week">${day.weekday}</span>`;
+container.appendChild(chip);
+});
+if(container.firstChild) container.firstChild.classList.add('active');
+}
+
+function selectDay(dayKey, chipEl) {
+currentDay = dayKey;
+if(chipEl) { document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('active')); chipEl.classList.add('active'); chipEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); }
+else {
+// Update active chip visually if selected programmatically
+const chips = document.querySelectorAll('.date-chip');
+const index = parseInt(dayKey.replace('day', '')) - 1;
+if(chips[index]) {
+chips.forEach(c => c.classList.remove('active'));
+chips[index].classList.add('active');
+}
+}
+renderTimeline(dayKey); renderInspiration(dayKey); renderShopping(dayKey);
+if(document.getElementById('page-weather').classList.contains('active')) renderWeatherModule();
+}
+
+function renderTimeline(dayKey) {
+const container = document.getElementById('timeline-container'); container.innerHTML = '';
+const events = scheduleData[dayKey].events || [];
+if(events.length === 0) { container.innerHTML = `<div style="text-align:center; padding:40px; color:#AAA;">自由探索的一天</div>`; return; }
+events.forEach(event => {
+const item = document.createElement('div'); item.className = 'timeline-item';
+let tags = event.tags.map(t => `<span class="card-tag">${t}</span>`).join('');
+const navBtn = `<div class="card-nav-btn" onclick="event.stopPropagation(); openMapQuery('${event.address}')"><i class="fa-solid fa-location-arrow"></i></div>`;
+item.innerHTML = `<div class="card" onclick='openModal(${JSON.stringify(event).replace(/'/g, "'")})'>${navBtn}<span class="card-time">${event.time}</span><h3 class="card-title">${event.title}</h3><div class="tags">${tags}</div></div>`;
+container.appendChild(item);
+});
+container.appendChild(document.createElement('div')).style.height = "20px";
+}
+function renderInspiration(dayKey) {
+const container = document.getElementById('inspiration-container'); container.innerHTML = '';
+document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+document.querySelector('.filter-chip').classList.add('active');
+(scheduleData[dayKey].inspiration || []).forEach(item => { container.innerHTML += `<div class="inspire-card" data-tag="${item.tag}"><div class="inspire-badge">${item.tag}</div><h3>${item.title}</h3><p style="margin:5px 0 0 0; font-size:0.9rem; color:#666;">${item.note}</p></div>`; });
+}
+function filterInspiration(tag, btn) {
+document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active')); btn.classList.add('active');
+document.querySelectorAll('.inspire-card').forEach(card => { if(tag === 'all' || card.getAttribute('data-tag') === tag) card.classList.remove('hidden'); else card.classList.add('hidden'); });
+}
+function renderShopping(dayKey) {
+const container = document.getElementById('shopping-container'); container.innerHTML = '';
+(scheduleData[dayKey].shopping || []).forEach((item, idx) => { container.innerHTML += `<div class="shop-item"><input type="checkbox" id="s${idx}"><label for="s${idx}">${item}</label></div>`; });
+}
+function openMapQuery(address) { window.open(`https://www.google.com/maps/search/?api=1&query=$${encodeURIComponent(address)}`, '_blank'); }
+function openModal(data) {
+currentEventData = data;
+document.getElementById('modal-title').innerText = data.title;
+document.getElementById('modal-type').innerText = data.type;
+document.getElementById('modal-time').innerText = data.time;
+document.getElementById('modal-price').innerText = data.price;
+document.getElementById('modal-open-hours').innerText = data.open_hours || "待確認";
+document.getElementById('modal-address-short').innerText = data.address;
+document.getElementById('modal-note').innerText = data.note;
+document.getElementById('modal-nav-link').onclick = function() { openMapQuery(data.address); };
+const actionsContainer = document.getElementById('modal-actions');
+actionsContainer.innerHTML = '';
+if (data.type === '美食' || data.type.includes('餐')) {
+actionsContainer.innerHTML = `<button class="btn-action btn-black" onclick="searchGmail('${data.title}')">📧 搜尋預約信 (Gmail)</button>`;
+} else {
+const addr = data.address_jp || data.address;
+actionsContainer.innerHTML = `<button class="btn-action btn-black" onclick="showPhrase('${addr}', '請載我去這裡')">🚕 顯示的士卡 (地址)</button>`;
+}
+document.getElementById('detail-modal').classList.add('open');
+setTimeout(() => { if(modalMap) modalMap.remove(); modalMap = L.map('modal-mini-map', {zoomControl:false, dragging:false}).setView(data.coords, 15); L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(modalMap); L.marker(data.coords, {icon: L.divIcon({className:'custom-div-icon',html:"<div style='background:black;width:14px;height:14px;border-radius:50%;border:2px solid white;'></div>",iconSize:[14,14]})}).addTo(modalMap); modalMap.invalidateSize(); }, 100);
+}
+function closeModal() { document.getElementById('detail-modal').classList.remove('open'); }
+document.getElementById('detail-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+function searchGmail(query) { window.open(`https://mail.google.com/mail/u/0/#search/${encodeURIComponent(query)}`, '_blank'); }
+
+init();
+</script>
 </body>
 </html>
