@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Travel Prototype v9.0 (Polished)</title>
+    <title>Travel Prototype v10.0 (Connect)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -32,7 +32,7 @@
             display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* --- Header (Updated with Translate Btn) --- */
+        /* --- Header --- */
         header {
             padding: 0 15px;
             background-color: var(--bg-card);
@@ -50,7 +50,7 @@
         }
         .header-btn:active { background: #F0F0F0; }
 
-        /* --- Date Selector (Fixed Z-Index) --- */
+        /* --- Date Selector --- */
         .date-selector-container { 
             background: var(--bg-card); 
             padding: 10px 15px; 
@@ -65,7 +65,7 @@
         .date-selector { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
         .date-selector::-webkit-scrollbar { display: none; }
         .date-chip { 
-            flex: 1 0 auto; min-width: 70px; /* 稍微縮小寬度以適應8天 */
+            flex: 1 0 auto; min-width: 70px;
             padding: 10px 0; border-radius: 6px; cursor: pointer; 
             color: var(--text-sub); display: flex; flex-direction: column; 
             align-items: center; justify-content: center; background: #F9F9F9; 
@@ -106,24 +106,13 @@
         .nav-launcher:active { background: #F5F5F5; }
         .nav-launcher-icon { font-size: 1.2rem; color: var(--accent); width: 25px; text-align: center;}
         
-        /* Currency Converter (Polished Layout) */
+        /* Currency Converter */
         .tool-box { background: #F9F9F9; padding: 15px; border-radius: 12px; border: 1px solid #EEE; margin-bottom: 10px; }
-        
-        .currency-grid {
-            display: grid;
-            grid-template-columns: 1fr 30px 1fr; /* 輸入框 - 圖示 - 輸入框 */
-            align-items: center;
-            gap: 5px;
-            margin-bottom: 8px;
-        }
+        .currency-grid { display: grid; grid-template-columns: 1fr 30px 1fr; align-items: center; gap: 5px; margin-bottom: 8px; }
         .curr-group { display: flex; flex-direction: column; }
         .curr-label { font-size: 0.7rem; color: #888; font-weight: bold; margin-bottom: 4px; padding-left: 2px;}
-        .curr-input { 
-            width: 100%; padding: 10px; border: 1px solid #DDD; border-radius: 8px; 
-            font-size: 1.1rem; text-align: center; background: #FFF; font-weight: 500;
-        }
+        .curr-input { width: 100%; padding: 10px; border: 1px solid #DDD; border-radius: 8px; font-size: 1.1rem; text-align: center; background: #FFF; font-weight: 500; }
         .curr-icon { text-align: center; color: #AAA; font-size: 0.9rem; margin-top: 15px;} 
-
         .rate-info { font-size: 0.75rem; color: #AAA; text-align: right; margin-top: 5px; display: flex; justify-content: space-between; align-items: center;}
         .rate-status { font-weight: bold; color: #25D366; display: flex; align-items: center; gap: 4px; }
         .rate-status.manual { color: #FFA500; }
@@ -162,11 +151,18 @@
         .shop-item { background: #FFF; padding: 15px; border-bottom: 1px solid #EEE; display: flex; align-items: center; gap: 15px; }
         .shop-item input[type="checkbox"] { width: 20px; height: 20px; accent-color: #000; }
 
-        /* --- Info & Phrases --- */
+        /* --- Info & Phrases (Enhanced Contacts) --- */
         .info-card { background: #FFF; padding: 20px; border-radius: 12px; margin: 0 20px 15px 20px; border: 1px solid var(--border); }
         .info-row { display: flex; gap: 15px; margin-bottom: 12px; align-items: flex-start; font-size: 0.95rem; color: #333; }
         .info-link { color: #000; text-decoration: underline; font-weight: 600; cursor: pointer; }
         .nav-link-sm { margin-left: 8px; color: #666; text-decoration: none; font-size: 0.85rem; background: #F0F0F0; padding: 2px 6px; border-radius: 4px;}
+        
+        /* New: Contact Action Buttons */
+        .contact-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+        .btn-icon-sm { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 0.9rem; cursor: pointer; transition: transform 0.1s; }
+        .btn-icon-sm:active { transform: scale(0.9); }
+        .btn-call { background: #E8F5E9; color: #2E7D32; border: 1px solid #C8E6C9; }
+        .btn-wa { background: #25D366; color: white; border: 1px solid #20bd5a; }
         
         .phrase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
         .phrase-card { background: #FFF; border: 1px solid var(--border); padding: 25px 15px; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); aspect-ratio: 1.2; display: flex; flex-direction: column; justify-content: center; align-items: center; }
@@ -299,6 +295,7 @@
                 <div class="phrase-card" onclick="showPhrase('わさび抜きで', '請不要加芥末')"><div class="phrase-jp">わさび抜き</div><div class="phrase-zh">去芥末</div></div>
             </div>
         </div>
+        
         <div id="page-info" class="page">
             <div class="page-header"><h2 class="page-title">旅程資訊</h2></div>
             <div class="info-card">
@@ -308,11 +305,35 @@
                     <div class="info-icon"><i class="fa-solid fa-location-dot"></i></div>
                     <div><span class="info-label">地址</span><span class="info-value">京都市下京區東塩小路町 558-8</span><a href="javascript:void(0)" onclick="openMapQuery('Dormy Inn Premium Kyoto')" class="nav-link-sm"><i class="fa-solid fa-location-arrow"></i> 導航</a></div>
                 </div>
+                <div class="info-row">
+                    <div class="info-icon"><i class="fa-solid fa-phone"></i></div>
+                    <div>
+                        <span class="info-label">電話</span>
+                        <div class="contact-container">
+                            <span class="info-value" style="margin-right:10px;">+81-75-371-5489</span>
+                            <a href="javascript:void(0)" onclick="callNumber('+81753715489')" class="btn-icon-sm btn-call" title="撥打電話"><i class="fa-solid fa-phone"></i></a>
+                            <a href="javascript:void(0)" onclick="chatWhatsApp('+81753715489')" class="btn-icon-sm btn-wa" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                        </div>
+                    </div>
+                </div>
             </div>
+            
             <div class="info-card">
-                <div style="font-weight:bold; margin-bottom:15px; border-bottom:1px solid #EEE; padding-bottom:10px;">緊急聯絡</div>
-                <div class="info-row"><div class="info-icon"><i class="fa-solid fa-shield-halved"></i></div><div><span class="info-label">警察局</span><span class="info-link" onclick="window.location.href='tel:110'">110</span></div></div>
-                <div class="info-row"><div class="info-icon"><i class="fa-solid fa-truck-medical"></i></div><div><span class="info-label">救護 / 火警</span><span class="info-link" onclick="window.location.href='tel:119'">119</span></div></div>
+                <div style="font-weight:bold; margin-bottom:15px; border-bottom:1px solid #EEE; padding-bottom:10px;">緊急聯絡 (僅撥號)</div>
+                <div class="info-row">
+                    <div class="info-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div style="width:100%; display:flex; justify-content:space-between; align-items:center;">
+                        <div><span class="info-label">警察局</span><span class="info-value">110</span></div>
+                        <a href="javascript:void(0)" onclick="callNumber('110')" class="btn-icon-sm btn-call"><i class="fa-solid fa-phone"></i></a>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-icon"><i class="fa-solid fa-truck-medical"></i></div>
+                    <div style="width:100%; display:flex; justify-content:space-between; align-items:center;">
+                        <div><span class="info-label">救護 / 火警</span><span class="info-value">119</span></div>
+                        <a href="javascript:void(0)" onclick="callNumber('119')" class="btn-icon-sm btn-call"><i class="fa-solid fa-phone"></i></a>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -346,40 +367,24 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // --- 8-Day Data Simulation ---
-        const scheduleData = {};
-        const baseDate = new Date("2026-07-15");
-        const weekdays = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
-        
-        for (let i = 0; i < 8; i++) {
-            const currentDate = new Date(baseDate);
-            currentDate.setDate(baseDate.getDate() + i);
-            const dateStr = currentDate.toISOString().split('T')[0];
-            const dayKey = `day${i+1}`;
-            
-            // Generate dummy events for days 4-8
-            let events = [];
-            if(i < 3) {
-                // Use original data for first 3 days
-                if(i===0) events = [{ time: "14:00", title: "抵達 & Check-in", type: "住宿", price: "-", open_hours: "24H", address: "Dormy Inn", coords: [34.9868, 135.7599], note: "機場巴士直達。", tags: ["移動"] }];
-                if(i===1) events = [{ time: "09:00", title: "Ogawa Coffee", type: "美食", price: "¥1,200", open_hours: "07-21", address: "京都站", coords: [34.9852, 135.7584], note: "早餐。", tags: ["咖啡"] }];
-                if(i===2) events = [{ time: "08:30", title: "Inoda Coffee", type: "美食", price: "¥1,600", open_hours: "07-18", address: "三條", coords: [35.0090, 135.7650], note: "老舖早餐。", tags: ["老舖"] }];
-            } else {
-                events = [
-                    { time: "10:00", title: `第 ${i+1} 天景點 A`, type: "景點", price: "¥500", address: "京都市區", coords: [35.0000, 135.7600], note: "自由探索。", tags: ["散步"] },
-                    { time: "13:00", title: `第 ${i+1} 天午餐`, type: "美食", price: "¥1,500", address: "河原町", coords: [35.0040, 135.7680], note: "當地美食。", tags: ["美食"] }
-                ];
-            }
-
-            scheduleData[dayKey] = {
-                date: dateStr,
-                display: `Day 0${i+1}`,
-                weekday: weekdays[currentDate.getDay()],
-                events: events,
-                inspiration: [{title:"隨意逛逛", tag:"NEAR", note:"附近的公園或小店。"}],
-                shopping: ["便利商店零食"]
-            };
-        }
+        const scheduleData = {
+            "day1": { "date": "2026-07-15", "display": "Day 01", "weekday": "週三", "events": [ 
+                { time: "14:00", title: "抵達 & Check-in", type: "住宿", price: "-", open_hours: "24H", address: "Dormy Inn Premium Kyoto", address_jp: "京都市下京区東塩小路町558-8", coords: [34.9868, 135.7599], note: "機場巴士直達。\nCheck-in 後寄放行李。", tags: ["移動"] },
+                { time: "15:30", title: "月之藏人", type: "美食", price: "¥2,500", open_hours: "11:00-23:00", address: "伏見區上油掛町185-1", address_jp: "伏見区上油掛町185-1", coords: [34.9310, 135.7610], note: "自家製豆腐、酒粕烤雞。\n建議預約。", tags: ["美食"] },
+                { time: "16:30", title: "黃櫻 Kappa Country", type: "清酒", price: "¥2,000", open_hours: "11:30-22:00", address: "伏見區塩屋町228", address_jp: "伏見区塩屋町228", coords: [34.9305, 135.7615], note: "喝 Lucky Cat/Dog 精釀啤酒。", tags: ["微醺"] },
+                { time: "18:00", title: "AEON Mall 超市", type: "購物", price: "¥1,500", open_hours: "10:00-21:00", address: "京都站八條口", address_jp: "京都駅八条口", coords: [34.9835, 135.7560], note: "買宵夜：枝豆、刺身。", tags: ["超市"] }
+            ], "inspiration": [{title:"雨天：AEON Mall", tag:"RAINY", note:"如果下大雨，直接在這裡逛街吃飯。"}], "shopping": ["ICOCA 卡"] },
+            "day2": { "date": "2026-07-16", "display": "Day 02", "weekday": "週四", "events": [ 
+                { time: "09:00", title: "Ogawa Coffee", type: "美食", price: "¥1,200", open_hours: "07:00-21:00", address: "京都站前地下", address_jp: "京都駅前地下街ポルタ", coords: [34.9852, 135.7584], note: "京都早餐套餐。", tags: ["咖啡"] },
+                { time: "10:30", title: "月桂冠大倉紀念館", type: "景點", price: "¥600", open_hours: "09:30-16:30", address: "伏見區南浜町247", address_jp: "伏見区南浜町247", coords: [34.9298, 135.7618], note: "必喝中庭伏水。", tags: ["文化"] }
+            ], "inspiration": [{title:"疲累：Smart Coffee", tag:"TIRED", note:"在商店街內的老舖咖啡，布丁很好吃。"}], "shopping": ["月桂冠生酒"] },
+            "day3": { "date": "2026-07-17", "display": "Day 03", "weekday": "週五", "events": [], "inspiration": [], "shopping": [] },
+            "day4": { "date": "2026-07-18", "display": "Day 04", "weekday": "週六", "events": [], "inspiration": [], "shopping": [] },
+            "day5": { "date": "2026-07-19", "display": "Day 05", "weekday": "週日", "events": [], "inspiration": [], "shopping": [] },
+            "day6": { "date": "2026-07-20", "display": "Day 06", "weekday": "週一", "events": [], "inspiration": [], "shopping": [] },
+            "day7": { "date": "2026-07-21", "display": "Day 07", "weekday": "週二", "events": [], "inspiration": [], "shopping": [] },
+            "day8": { "date": "2026-07-22", "display": "Day 08", "weekday": "週三", "events": [], "inspiration": [], "shopping": [] }
+        };
 
         let currentDay = "day1";
         let modalMap = null;
@@ -446,6 +451,12 @@
                 });
             } else alert("瀏覽器不支援定位");
         }
+        function callNumber(num) { window.location.href = `tel:${num}`; }
+        function chatWhatsApp(num) {
+            let clean = num.replace(/\D/g, '');
+            window.open(`https://wa.me/${clean}`, '_blank');
+        }
+
         function showPhrase(jp, zh) { document.getElementById('overlay-jp').innerText = jp; document.getElementById('overlay-zh').innerText = zh; document.getElementById('phrase-overlay').classList.add('active'); }
         function closePhrase() { document.getElementById('phrase-overlay').classList.remove('active'); }
         function renderDateSelector() {
@@ -466,7 +477,12 @@
         }
         function renderTimeline(dayKey) {
             const container = document.getElementById('timeline-container'); container.innerHTML = '';
-            scheduleData[dayKey].events.forEach(event => {
+            const events = scheduleData[dayKey].events || [];
+            if(events.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:40px; color:#AAA;">自由探索的一天</div>`;
+                return;
+            }
+            events.forEach(event => {
                 const item = document.createElement('div'); item.className = 'timeline-item';
                 let tags = event.tags.map(t => `<span class="card-tag">${t}</span>`).join('');
                 const navBtn = `<div class="card-nav-btn" onclick="event.stopPropagation(); openMapQuery('${event.address}')"><i class="fa-solid fa-location-arrow"></i></div>`;
