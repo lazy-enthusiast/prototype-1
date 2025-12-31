@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Travel App v14.0 (Real-time Sync)</title>
+<title>Travel App v14.1 (Prototype Fixed)</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 
 <style>
 :root {
---bg-body: #F4F4F4;
---bg-card: #FFFFFF;
---text-main: #111111;
---text-sub: #666666;
---accent: #000000;
---border: #E5E5E5;
+--bg-body: #F4F4F4; 
+--bg-card: #FFFFFF; 
+--text-main: #111111; 
+--text-sub: #666666; 
+--accent: #000000; 
+--border: #E5E5E5; 
 --shadow: 0 4px 12px rgba(0,0,0,0.04);
 --sidebar-width: 320px;
 }
@@ -41,8 +41,8 @@ height: 60px; flex-shrink: 0; position: relative; z-index: 200;
 }
 header h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; }
 .header-actions { display: flex; align-items: center; gap: 5px; }
-.header-btn {
-font-size: 1.2rem; cursor: pointer; color: var(--text-main);
+.header-btn { 
+font-size: 1.2rem; cursor: pointer; color: var(--text-main); 
 border-radius: 50%; transition: background 0.2s; width: 44px; height: 44px;
 display: flex; justify-content: center; align-items: center;
 }
@@ -68,12 +68,12 @@ display: flex; flex-direction: column;
 .sidebar.open { transform: translateX(0); }
 
 .sidebar-section-title {
-font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px;
+font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; 
 margin-bottom: 10px; margin-top: 25px; font-weight: 600;
 }
 
-.whatsapp-box {
-background: #E8F5E9; border: 1px solid #C8E6C9; color: #1B5E20;
+.whatsapp-box { 
+background: #E8F5E9; border: 1px solid #C8E6C9; color: #1B5E20; 
 padding: 15px; border-radius: 12px; margin-bottom: 10px; margin-top: 20px;
 }
 .wa-input {
@@ -82,7 +82,7 @@ font-size: 0.95rem; background: #FFF;
 }
 .wa-btn {
 width: 100%; background: #25D366; color: white; border: none; padding: 10px;
-border-radius: 6px; font-weight: bold; cursor: pointer;
+border-radius: 6px; font-weight: bold; cursor: pointer; 
 display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 0.9rem;
 }
 
@@ -103,7 +103,7 @@ transition: all 0.2s;
 .curr-group { display: flex; flex-direction: column; }
 .curr-label { font-size: 0.7rem; color: #888; font-weight: bold; margin-bottom: 4px; padding-left: 2px;}
 .curr-input { width: 100%; padding: 10px; border: 1px solid #DDD; border-radius: 8px; font-size: 1.1rem; text-align: center; background: #FFF; font-weight: 500; }
-.curr-icon { text-align: center; color: #AAA; font-size: 0.9rem; margin-top: 15px;}
+.curr-icon { text-align: center; color: #AAA; font-size: 0.9rem; margin-top: 15px;} 
 
 .rate-info-container { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 0.75rem; color: #666;}
 .rate-status { display: flex; align-items: center; gap: 5px; font-weight: 500;}
@@ -163,7 +163,7 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .filter-chip { display: inline-block; padding: 8px 16px; margin-right: 8px; background: #FFF; border: 1px solid #DDD; border-radius: 20px; font-size: 0.85rem; color: #555; cursor: pointer; transition: all 0.2s; }
 .filter-chip.active { background: #000; color: #FFF; border-color: #000; }
 .inspiration-grid { padding: 0 20px; display: grid; gap: 15px; }
-.inspire-card { background: #FFF; border: 1px dashed #999; border-radius: 12px; padding: 20px; color: #444; position: relative; display: block;}
+.inspire-card { background: #FFF; border: 1px dashed #999; border-radius: 12px; padding: 20px; color: #444; position: relative; display: block;} 
 .inspire-card.hidden { display: none; }
 .inspire-badge { background: #000; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; position: absolute; top: -10px; left: 15px; }
 .shopping-list { padding: 0 20px; }
@@ -276,10 +276,10 @@ nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: #FFF
 <div id="page-inspiration" class="page">
 <div class="filter-bar-container">
 <span class="filter-chip active" onclick="filterInspiration('all', this)">全部</span>
-<span class="filter-chip" onclick="filterInspiration('RAINY', this)">☔ 雨天</span>
-<span class="filter-chip" onclick="filterInspiration('TIRED', this)">☕ 休息</span>
-<span class="filter-chip" onclick="filterInspiration('LATE', this)">🌙 深夜</span>
-<span class="filter-chip" onclick="filterInspiration('NEAR', this)">📍 順路</span>
+<span class="filter-chip" onclick="filterInspiration('RAINY', this)"> 雨天</span>
+<span class="filter-chip" onclick="filterInspiration('TIRED', this)"> 休息</span>
+<span class="filter-chip" onclick="filterInspiration('LATE', this)"> 深夜</span>
+<span class="filter-chip" onclick="filterInspiration('NEAR', this)"> 順路</span>
 </div>
 <div id="inspiration-container" class="inspiration-grid"></div>
 </div>
@@ -364,7 +364,7 @@ nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: #FFF
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// --- UPDATED SCHEDULE: Jan 07, 2026 START ---
+// --- SCHEDULE DATA (Prototype Placeholder: Jan 2026) ---
 const scheduleData = {
 "day1": { "date": "2026-01-07", "display": "Jan 07", "weekday": "週三", "events": [ { time: "14:00", title: "抵達 & Check-in", type: "住宿", price: "-", open_hours: "24H", address: "Dormy Inn Premium Kyoto", address_jp: "京都市下京区東塩小路町558-8", coords: [34.9868, 135.7599], note: "機場巴士直達。", tags: ["移動"] } ], "inspiration": [{title:"雨天：AEON Mall", tag:"RAINY", note:"雨天備案"}], "shopping": ["ICOCA"] },
 "day2": { "date": "2026-01-08", "display": "Jan 08", "weekday": "週四", "events": [ { time: "09:00", title: "Ogawa Coffee", type: "美食", price: "¥1,200", open_hours: "07-21", address: "京都站前地下", coords: [34.9852, 135.7584], note: "早餐。", tags: ["咖啡"] } ], "inspiration": [], "shopping": [] },
@@ -379,11 +379,11 @@ const scheduleData = {
 let currentDay = "day1";
 let modalMap = null;
 let currentEventData = null;
-let exchangeRate = 0.053;
+let exchangeRate = 0.053; 
 let weatherCache = null;
 
-function init() {
-renderDateSelector(); selectDay('day1');
+function init() { 
+renderDateSelector(); selectDay('day1'); 
 switchMainPage('itinerary', document.querySelector('.nav-item.active'));
 fetchRates(); fetchWeather();
 if(localStorage.getItem('travelMemo')) document.getElementById('quick-memo').value = localStorage.getItem('travelMemo');
@@ -410,13 +410,13 @@ const res = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@
 const data = await res.json();
 if(data.jpy && data.jpy.hkd) {
 exchangeRate = data.jpy.hkd;
-const apiDate = data.date;
+const apiDate = data.date; 
 localStorage.setItem('cachedRate', exchangeRate);
 localStorage.setItem('cachedRateTime', now);
 updateRateUI(exchangeRate, apiDate, true);
 convertCurrency();
 }
-} catch(e) {
+} catch(e) { 
 console.error(e);
 if(cachedRate) {
 exchangeRate = parseFloat(cachedRate);
@@ -433,25 +433,32 @@ const icon = isSuccess ? '<i class="fa-solid fa-check-circle" style="color:#25D3
 statusEl.innerHTML = `${icon} ${rate.toFixed(4)} (${dateLabel})`;
 }
 
-// --- Weather Module (Robust Logic) ---
+// --- Weather Module ---
 async function fetchWeather() {
 const lat = 35.0116; const lon = 135.7681;
 try {
-// Fetch 14 days forecast. Since today is Dec 31, 2025, it covers Jan 1 - Jan 13/14 approx.
+// Fetch 16 days forecast
 const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max&timezone=auto&forecast_days=16`;
 const res = await fetch(url);
 weatherCache = await res.json();
 if(document.getElementById('page-weather').classList.contains('active')) renderWeatherModule();
-} catch(e) { console.error("Weather Error", e); document.getElementById('weather-content').innerHTML = "無法載入天氣資訊"; }
+} catch(e) { 
+console.error("Weather Error", e); 
+document.getElementById('weather-content').innerHTML = "<div style='text-align:center; padding:30px;'>無法載入天氣<br><span style='font-size:0.8rem; color:#888;'>請檢查網絡連線</span></div>"; 
+}
 }
 
 function renderWeatherModule() {
-if(!weatherCache || !weatherCache.daily) return;
 const container = document.getElementById('weather-content');
 const noticeEl = document.getElementById('weather-notice');
 
+if(!weatherCache || !weatherCache.daily) {
+ container.innerHTML = "<div style='text-align:center; padding:30px;'>無天氣資料</div>";
+ return;
+}
+
 // 1. Get the target date string for the currently selected schedule day
-const targetDate = scheduleData[currentDay].date; // e.g., "2026-01-07"
+const targetDate = scheduleData[currentDay].date; 
 
 // 2. Find this date in the API response list
 const apiIndex = weatherCache.daily.time.indexOf(targetDate);
@@ -461,8 +468,8 @@ if (apiIndex === -1) {
 container.innerHTML = `
 <div style='text-align:center; padding:40px; color:#666;'>
 <i class="fa-regular fa-calendar-xmark fa-2x" style="margin-bottom:10px;"></i><br>
-暫無 ${scheduleData[currentDay].display} 的預報數據<br>
-<span style="font-size:0.8rem; color:#999;">(僅提供未來14天內預報)</span>
+無法顯示 ${scheduleData[currentDay].display} 預報<br>
+<span style="font-size:0.8rem; color:#999;">(API 僅提供未來 16 天內之數據)</span>
 </div>`;
 noticeEl.style.display = 'none';
 return;
@@ -532,7 +539,7 @@ document.getElementById('page-' + pageId).classList.add('active');
 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 if(navEl) navEl.classList.add('active');
 const ds = document.querySelector('.date-selector-container');
-if(pageId === 'itinerary' || pageId === 'shopping' || pageId === 'inspiration' || pageId === 'weather') ds.style.display = 'block';
+if(pageId === 'itinerary' || pageId === 'shopping' || pageId === 'inspiration' || pageId === 'weather') ds.style.display = 'block'; 
 else ds.style.display = 'none';
 if(pageId === 'weather') renderWeatherModule();
 }
@@ -543,23 +550,31 @@ if(!isNaN(jpy)) { document.getElementById('curr-hkd').value = (jpy * exchangeRat
 }
 function editRate() {
 const newRate = prompt("手動設定匯率 (覆蓋自動抓取):", exchangeRate);
-if(newRate && !isNaN(newRate)) {
-exchangeRate = parseFloat(newRate);
+if(newRate && !isNaN(newRate)) { 
+exchangeRate = parseFloat(newRate); 
 updateRateUI(exchangeRate, '手動', false);
-convertCurrency();
+convertCurrency(); 
 }
 }
 function saveMemo() { localStorage.setItem('travelMemo', document.getElementById('quick-memo').value); }
+
+// --- FIXED: WhatsApp Location Logic ---
 function sendWhatsApp() {
 let phone = document.getElementById('wa-phone').value.replace(/\D/g, '');
 if(!phone) { alert("請輸入對方電話號碼"); return; }
 if (navigator.geolocation) {
 navigator.geolocation.getCurrentPosition((pos) => {
-const url = `https://wa.me/${phone}?text=${encodeURIComponent(`我現在在這裡，一切平安！\nhttps://www.google.com/maps/search/?api=1&query=${pos.coords.latitude},${pos.coords.longitude}`)}`;
-window.location.href = url;
+ // FIX: Use standard Google Maps Search URL
+ const mapLink = `https://www.google.com/maps/search/?api=1&query=${pos.coords.latitude},${pos.coords.longitude}`;
+ const text = `我現在在這裡，一切平安！\n${mapLink}`;
+ const url = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+ window.location.href = url;
+}, () => {
+ alert("無法獲取位置，請檢查瀏覽器權限");
 });
 } else alert("瀏覽器不支援定位");
 }
+
 function callNumber(num) { window.location.href = `tel:${num}`; }
 function chatWhatsApp(num) { let clean = num.replace(/\D/g, ''); window.open(`https://wa.me/${clean}`, '_blank'); }
 function showPhrase(jp, zh) { document.getElementById('overlay-jp').innerText = jp; document.getElementById('overlay-zh').innerText = zh; document.getElementById('phrase-overlay').classList.add('active'); }
@@ -599,6 +614,7 @@ if(events.length === 0) { container.innerHTML = `<div style="text-align:center; 
 events.forEach(event => {
 const item = document.createElement('div'); item.className = 'timeline-item';
 let tags = event.tags.map(t => `<span class="card-tag">${t}</span>`).join('');
+// FIX: Use standard map link
 const navBtn = `<div class="card-nav-btn" onclick="event.stopPropagation(); openMapQuery('${event.address}')"><i class="fa-solid fa-location-arrow"></i></div>`;
 item.innerHTML = `<div class="card" onclick='openModal(${JSON.stringify(event).replace(/'/g, "'")})'>${navBtn}<span class="card-time">${event.time}</span><h3 class="card-title">${event.title}</h3><div class="tags">${tags}</div></div>`;
 container.appendChild(item);
@@ -619,7 +635,12 @@ function renderShopping(dayKey) {
 const container = document.getElementById('shopping-container'); container.innerHTML = '';
 (scheduleData[dayKey].shopping || []).forEach((item, idx) => { container.innerHTML += `<div class="shop-item"><input type="checkbox" id="s${idx}"><label for="s${idx}">${item}</label></div>`; });
 }
-function openMapQuery(address) { window.open(`https://www.google.com/maps/search/?api=1&query=$${encodeURIComponent(address)}`, '_blank'); }
+
+// --- FIXED: Map Query Logic ---
+function openMapQuery(address) { 
+ window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank'); 
+}
+
 function openModal(data) {
 currentEventData = data;
 document.getElementById('modal-title').innerText = data.title;
@@ -633,10 +654,10 @@ document.getElementById('modal-nav-link').onclick = function() { openMapQuery(da
 const actionsContainer = document.getElementById('modal-actions');
 actionsContainer.innerHTML = '';
 if (data.type === '美食' || data.type.includes('餐')) {
-actionsContainer.innerHTML = `<button class="btn-action btn-black" onclick="searchGmail('${data.title}')">📧 搜尋預約信 (Gmail)</button>`;
+ actionsContainer.innerHTML = `<button class="btn-action btn-black" onclick="searchGmail('${data.title}')"> 搜尋預約信 (Gmail)</button>`;
 } else {
-const addr = data.address_jp || data.address;
-actionsContainer.innerHTML = `<button class="btn-action btn-black" onclick="showPhrase('${addr}', '請載我去這裡')">🚕 顯示的士卡 (地址)</button>`;
+ const addr = data.address_jp || data.address;
+ actionsContainer.innerHTML = `<button class="btn-action btn-black" onclick="showPhrase('${addr}', '請載我去這裡')"> 顯示的士卡 (地址)</button>`;
 }
 document.getElementById('detail-modal').classList.add('open');
 setTimeout(() => { if(modalMap) modalMap.remove(); modalMap = L.map('modal-mini-map', {zoomControl:false, dragging:false}).setView(data.coords, 15); L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(modalMap); L.marker(data.coords, {icon: L.divIcon({className:'custom-div-icon',html:"<div style='background:black;width:14px;height:14px;border-radius:50%;border:2px solid white;'></div>",iconSize:[14,14]})}).addTo(modalMap); modalMap.invalidateSize(); }, 100);
