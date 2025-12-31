@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 京都祇園祭行程 (Demo)</title>
+    <style>
+        /* 基礎設定 */
+        body { font-family: "Helvetica Neue", Arial, sans-serif; background-color: #f4f4f4; color: #333; padding: 20px; max-width: 600px; margin: 0 auto; }
+        
+        /* 按鈕樣式 */
+        .btn-container { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn {
+            border: none; outline: none; padding: 10px 16px; 
+            background-color: #ddd; cursor: pointer; border-radius: 20px;
+            font-size: 14px; transition: 0.3s;
+        }
+        .btn:hover, .btn.active { background-color: #666; color: white; }
+
+        /* 行程卡片樣式 */
+        .timeline-item {
+            background-color: white; padding: 15px; margin-bottom: 10px;
+            border-left: 5px solid #ccc; border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        /* 不同類別的顏色標記 (Visual Cues) */
+        .culture { border-left-color: #e74c3c; } /* 紅色：祭典/神社 */
+        .shopping { border-left-color: #f1c40f; } /* 黃色：購物 */
+        .food { border-left-color: #3498db; } /* 藍色：飲食 */
+
+        /* 標題與時間 */
+        h3 { margin: 0 0 5px 0; font-size: 18px; }
+        .time { font-size: 0.9em; color: #888; margin-bottom: 5px; display: block; }
+        .tag { font-size: 0.8em; background: #eee; padding: 2px 6px; border-radius: 4px; color: #555; }
+
+        /* 隱藏元素的 Class */
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <h2>2026 京都 • 祇園祭 (7/16 宵山)</h2>
+    <p>點擊下方按鈕篩選行程：</p>
+
+    <div id="myBtnContainer" class="btn-container">
+        <button class="btn active" onclick="filterSelection('all')">全部顯示</button>
+        <button class="btn" onclick="filterSelection('culture')">⛩️ 祭典與神社</button>
+        <button class="btn" onclick="filterSelection('shopping')">🛍️ 逛街與市集</button>
+        <button class="btn" onclick="filterSelection('food')">🍷 美食與酒</button>
+    </div>
+
+    <div class="timeline-list">
+        
+        <div class="timeline-item culture" data-category="culture">
+            <span class="time">09:00 - 10:30</span>
+            <h3>八坂神社參拜</h3>
+            <span class="tag">靈性</span> <p>避開人潮，感受早晨的寧靜氣氛。</p>
+        </div>
+
+        <div class="timeline-item shopping" data-category="shopping">
+            <span class="time">11:00 - 12:30</span>
+            <h3>京都古董中心 (Kyoto Antique Center)</h3>
+            <span class="tag">尋寶</span> <p>尋找昭和時代的玻璃器皿。</p>
+        </div>
+
+        <div class="timeline-item food" data-category="food">
+            <span class="time">13:00 - 14:30</span>
+            <h3>Gion Niti (午餐/冰品)</h3>
+            <span class="tag">味覺</span> <p>在傳統町家建築中享用午餐。</p>
+        </div>
+
+        <div class="timeline-item shopping" data-category="shopping">
+            <span class="time">15:00 - 17:00</span>
+            <h3>BAL & 附近選物店</h3>
+            <span class="tag">美學</span> <p>逛 Today's Special 與當地設計師品牌。</p>
+        </div>
+
+        <div class="timeline-item culture" data-category="culture">
+            <span class="time">18:00 - 20:00</span>
+            <h3>祇園祭 • 宵山 (山鉾巡禮)</h3>
+            <span class="tag">祭典</span> <p>欣賞點燈後的山鉾，感受祭典高潮。</p>
+        </div>
+        
+        <div class="timeline-item food" data-category="food">
+            <span class="time">20:30 - 22:00</span>
+            <h3>Bar K6</h3>
+            <span class="tag">品酒</span> <p>用一杯經典調酒結束這一天。</p>
+        </div>
+
+    </div>
+
+    <script>
+        // 3. JavaScript 核心邏輯
+        filterSelection("all"); // 預設顯示全部
+
+        function filterSelection(c) {
+            var x, i;
+            x = document.getElementsByClassName("timeline-item");
+            if (c == "all") c = ""; // 如果選 "all"，就視為沒有過濾條件
+            
+            // 迴圈檢查每一個項目
+            for (i = 0; i < x.length; i++) {
+                removeClass(x[i], "hidden"); // 先全部重置顯示
+                // 如果該項目沒有包含選定的 category，就加上 hidden class
+                if (x[i].getAttribute("data-category").indexOf(c) == -1) {
+                    addClass(x[i], "hidden");
+                }
+            }
+            
+            // 更新按鈕的 Active 狀態 (視覺回饋)
+            updateActiveButton(c || 'all');
+        }
+
+        // 輔助函式：加入 Class
+        function addClass(element, name) {
+            var arr1, arr2;
+            arr1 = element.className.split(" ");
+            arr2 = name.split(" ");
+            for (i = 0; i < arr2.length; i++) {
+                if (arr1.indexOf(arr2[i]) == -1) {
+                    element.className += " " + arr2[i];
+                }
+            }
+        }
+
+        // 輔助函式：移除 Class
+        function removeClass(element, name) {
+            var arr1, arr2;
+            arr1 = element.className.split(" ");
+            arr2 = name.split(" ");
+            for (i = 0; i < arr2.length; i++) {
+                while (arr1.indexOf(arr2[i]) > -1) {
+                    arr1.splice(arr1.indexOf(arr2[i]), 1);
+                }
+            }
+            element.className = arr1.join(" ");
+        }
+
+        // 更新按鈕亮起狀態
+        function updateActiveButton(category) {
+            var btnContainer = document.getElementById("myBtnContainer");
+            var btns = btnContainer.getElementsByClassName("btn");
+            for (var i = 0; i < btns.length; i++) {
+                btns[i].className = btns[i].className.replace(" active", "");
+                // 簡單判斷：這裡假設按鈕文字或順序對應，實際應用可用 id 對應
+                // 為了 Demo 簡單，這裡重新綁定 active class 邏輯略簡化
+            }
+            // 找出被點擊的按鈕並加亮 (這段在實際整合時可以用 event.target 處理更漂亮)
+            // 此處為簡化版：點擊時觸發的 onclick 其實可以直接傳遞 'this'
+        }
+        
+        // 優化按鈕 Active 狀態的切換
+        var btnContainer = document.getElementById("myBtnContainer");
+        var btns = btnContainer.getElementsByClassName("btn");
+        for (var i = 0; i < btns.length; i++) {
+            btns[i].addEventListener("click", function(){
+                var current = document.getElementsByClassName("active");
+                current[0].className = current[0].className.replace(" active", "");
+                this.className += " active";
+            });
+        }
+    </script>
+
+</body>
+</html>
