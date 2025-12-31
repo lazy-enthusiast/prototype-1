@@ -3,164 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 京都祇園祭行程 (Demo)</title>
+    <title>2026 京都 • 自由策展</title>
     <style>
-        /* 基礎設定 */
-        body { font-family: "Helvetica Neue", Arial, sans-serif; background-color: #f4f4f4; color: #333; padding: 20px; max-width: 600px; margin: 0 auto; }
+        /* 共用設定 */
+        body { font-family: "Helvetica Neue", sans-serif; background-color: #f8f9fa; color: #333; margin: 0; padding-bottom: 70px; /* 留給底部導航 */ }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
         
-        /* 按鈕樣式 */
-        .btn-container { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
-        .btn {
-            border: none; outline: none; padding: 10px 16px; 
-            background-color: #ddd; cursor: pointer; border-radius: 20px;
-            font-size: 14px; transition: 0.3s;
-        }
-        .btn:hover, .btn.active { background-color: #666; color: white; }
+        /* 隱藏/顯示控制 */
+        .view-section { display: none; animation: fadeIn 0.3s; }
+        .view-section.active-view { display: block; }
 
-        /* 行程卡片樣式 */
-        .timeline-item {
-            background-color: white; padding: 15px; margin-bottom: 10px;
-            border-left: 5px solid #ccc; border-radius: 4px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        /* 導航列樣式 */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: white; border-top: 1px solid #ddd;
+            display: flex; justify-content: space-around; padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000;
         }
+        .nav-item {
+            border: none; background: none; font-size: 16px; color: #888;
+            cursor: pointer; display: flex; flex-direction: column; align-items: center;
+        }
+        .nav-item.active { color: #d35400; font-weight: bold; }
         
-        /* 不同類別的顏色標記 (Visual Cues) */
-        .culture { border-left-color: #e74c3c; } /* 紅色：祭典/神社 */
-        .shopping { border-left-color: #f1c40f; } /* 黃色：購物 */
-        .food { border-left-color: #3498db; } /* 藍色：飲食 */
-
-        /* 標題與時間 */
-        h3 { margin: 0 0 5px 0; font-size: 18px; }
-        .time { font-size: 0.9em; color: #888; margin-bottom: 5px; display: block; }
-        .tag { font-size: 0.8em; background: #eee; padding: 2px 6px; border-radius: 4px; color: #555; }
-
-        /* 隱藏元素的 Class */
+        /* 篩選按鈕樣式 (延續上一版) */
+        .filter-btn {
+            border: 1px solid #ddd; background: white; padding: 8px 12px;
+            border-radius: 20px; margin: 0 5px 10px 0; cursor: pointer; font-size: 13px;
+        }
+        .filter-btn.active { background: #333; color: white; border-color: #333; }
+        
+        /* 卡片樣式 */
+        .card {
+            background: white; padding: 15px; margin-bottom: 12px;
+            border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 4px solid #ccc;
+        }
+        .tag-rain { border-left-color: #3498db; } /* 雨天備案 */
+        .tag-chill { border-left-color: #27ae60; } /* 休息/咖啡 */
+        .tag-buy { border-left-color: #f1c40f; }  /* 購物 */
+        
         .hidden { display: none; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <h2>2026 京都 • 祇園祭 (7/16 宵山)</h2>
-    <p>點擊下方按鈕篩選行程：</p>
-
-    <div id="myBtnContainer" class="btn-container">
-        <button class="btn active" onclick="filterSelection('all')">全部顯示</button>
-        <button class="btn" onclick="filterSelection('culture')">⛩️ 祭典與神社</button>
-        <button class="btn" onclick="filterSelection('shopping')">🛍️ 逛街與市集</button>
-        <button class="btn" onclick="filterSelection('food')">🍷 美食與酒</button>
+<div class="container">
+    
+    <div id="view-schedule" class="view-section active-view">
+        <h2>📅 2026 行程表</h2>
+        <p style="font-size:0.9em; color:#666;">按計畫執行的主線任務。</p>
+        
+        <div class="card" style="border-left-color: #d35400;">
+            <strong>07/16 (週四)</strong>
+            <p>09:00 八坂神社<br>13:00 Gion Niti 午餐</p>
+        </div>
+        <div class="card" style="border-left-color: #d35400;">
+            <strong>07/17 (週五)</strong>
+            <p>10:00 山鉾巡行<br>15:00 飯店休息</p>
+        </div>
     </div>
 
-    <div class="timeline-list">
-        
-        <div class="timeline-item culture" data-category="culture">
-            <span class="time">09:00 - 10:30</span>
-            <h3>八坂神社參拜</h3>
-            <span class="tag">靈性</span> <p>避開人潮，感受早晨的寧靜氣氛。</p>
+    <div id="view-backup" class="view-section">
+        <h2>📂 彈性靈感庫</h2>
+        <p style="font-size:0.9em; color:#666;">根據當下狀態選擇替代方案。</p>
+
+        <div id="filterContainer">
+            <button class="filter-btn active" onclick="filterSelection('all')">全部</button>
+            <button class="filter-btn" onclick="filterSelection('rain')">☔ 雨天備案</button>
+            <button class="filter-btn" onclick="filterSelection('chill')">☕ 累了想休息</button>
+            <button class="filter-btn" onclick="filterSelection('antique')">🏺 古董/逛街</button>
         </div>
 
-        <div class="timeline-item shopping" data-category="shopping">
-            <span class="time">11:00 - 12:30</span>
-            <h3>京都古董中心 (Kyoto Antique Center)</h3>
-            <span class="tag">尋寶</span> <p>尋找昭和時代的玻璃器皿。</p>
-        </div>
+        <div class="backup-list">
+            <div class="card tag-rain" data-category="rain antique">
+                <strong>京都國立博物館</strong>
+                <div style="font-size:0.8em; color:#555;">📍 東山區 | 室內冷氣</div>
+                <p style="margin:5px 0 0 0; font-size:0.9em;">如果下大雨或太熱，這裡可以待一下午。平成知新館建築很美。</p>
+            </div>
 
-        <div class="timeline-item food" data-category="food">
-            <span class="time">13:00 - 14:30</span>
-            <h3>Gion Niti (午餐/冰品)</h3>
-            <span class="tag">味覺</span> <p>在傳統町家建築中享用午餐。</p>
-        </div>
+            <div class="card tag-chill" data-category="chill">
+                <strong>Wanderers Stand</strong>
+                <div style="font-size:0.8em; color:#555;">📍 五條 | 咖啡</div>
+                <p style="margin:5px 0 0 0; font-size:0.9em;">吐司很好吃，適合避開祭典人潮喘口氣。</p>
+            </div>
 
-        <div class="timeline-item shopping" data-category="shopping">
-            <span class="time">15:00 - 17:00</span>
-            <h3>BAL & 附近選物店</h3>
-            <span class="tag">美學</span> <p>逛 Today's Special 與當地設計師品牌。</p>
+            <div class="card tag-buy" data-category="antique">
+                <strong>70B Antiques</strong>
+                <div style="font-size:0.8em; color:#555;">📍 三條 | 西洋古董</div>
+                <p style="margin:5px 0 0 0; font-size:0.9em;">大型地下倉庫，有很多燈具和舊玻璃。</p>
+            </div>
+            
+             <div class="card tag-rain" data-category="rain chill">
+                <strong>Ace Hotel Lobby</strong>
+                <div style="font-size:0.8em; color:#555;">📍 烏丸御池 | 休息</div>
+                <p style="margin:5px 0 0 0; font-size:0.9em;">開放式大廳，有插座，下雨天在那邊看書很舒服。</p>
+            </div>
         </div>
-
-        <div class="timeline-item culture" data-category="culture">
-            <span class="time">18:00 - 20:00</span>
-            <h3>祇園祭 • 宵山 (山鉾巡禮)</h3>
-            <span class="tag">祭典</span> <p>欣賞點燈後的山鉾，感受祭典高潮。</p>
-        </div>
-        
-        <div class="timeline-item food" data-category="food">
-            <span class="time">20:30 - 22:00</span>
-            <h3>Bar K6</h3>
-            <span class="tag">品酒</span> <p>用一杯經典調酒結束這一天。</p>
-        </div>
-
     </div>
 
-    <script>
-        // 3. JavaScript 核心邏輯
-        filterSelection("all"); // 預設顯示全部
+</div>
 
-        function filterSelection(c) {
-            var x, i;
-            x = document.getElementsByClassName("timeline-item");
-            if (c == "all") c = ""; // 如果選 "all"，就視為沒有過濾條件
-            
-            // 迴圈檢查每一個項目
-            for (i = 0; i < x.length; i++) {
-                removeClass(x[i], "hidden"); // 先全部重置顯示
-                // 如果該項目沒有包含選定的 category，就加上 hidden class
-                if (x[i].getAttribute("data-category").indexOf(c) == -1) {
-                    addClass(x[i], "hidden");
-                }
-            }
-            
-            // 更新按鈕的 Active 狀態 (視覺回饋)
-            updateActiveButton(c || 'all');
+<div class="bottom-nav">
+    <button class="nav-item active" onclick="switchView('view-schedule', this)">
+        <span>📅</span>
+        <span style="font-size:12px">行程表</span>
+    </button>
+    <button class="nav-item" onclick="switchView('view-backup', this)">
+        <span>📂</span>
+        <span style="font-size:12px">靈感庫</span>
+    </button>
+</div>
+
+<script>
+    // 1. 頁面切換功能
+    function switchView(viewId, btnElement) {
+        // 隱藏所有頁面
+        var sections = document.getElementsByClassName("view-section");
+        for (var i = 0; i < sections.length; i++) {
+            sections[i].className = sections[i].className.replace(" active-view", "");
         }
+        // 顯示目標頁面
+        document.getElementById(viewId).className += " active-view";
 
-        // 輔助函式：加入 Class
-        function addClass(element, name) {
-            var arr1, arr2;
-            arr1 = element.className.split(" ");
-            arr2 = name.split(" ");
-            for (i = 0; i < arr2.length; i++) {
-                if (arr1.indexOf(arr2[i]) == -1) {
-                    element.className += " " + arr2[i];
-                }
-            }
+        // 更新導航按鈕狀態
+        var navItems = document.getElementsByClassName("nav-item");
+        for (var i = 0; i < navItems.length; i++) {
+            navItems[i].className = navItems[i].className.replace(" active", "");
         }
+        btnElement.className += " active";
+    }
 
-        // 輔助函式：移除 Class
-        function removeClass(element, name) {
-            var arr1, arr2;
-            arr1 = element.className.split(" ");
-            arr2 = name.split(" ");
-            for (i = 0; i < arr2.length; i++) {
-                while (arr1.indexOf(arr2[i]) > -1) {
-                    arr1.splice(arr1.indexOf(arr2[i]), 1);
-                }
+    // 2. 篩選功能 (與之前邏輯相同，針對 view-backup 內的項目)
+    function filterSelection(c) {
+        var x, i;
+        x = document.querySelectorAll("#view-backup .card"); // 只抓備用頁面的卡片
+        if (c == "all") c = "";
+        
+        for (i = 0; i < x.length; i++) {
+            removeClass(x[i], "hidden");
+            if (x[i].getAttribute("data-category").indexOf(c) == -1) {
+                addClass(x[i], "hidden");
             }
-            element.className = arr1.join(" ");
-        }
-
-        // 更新按鈕亮起狀態
-        function updateActiveButton(category) {
-            var btnContainer = document.getElementById("myBtnContainer");
-            var btns = btnContainer.getElementsByClassName("btn");
-            for (var i = 0; i < btns.length; i++) {
-                btns[i].className = btns[i].className.replace(" active", "");
-                // 簡單判斷：這裡假設按鈕文字或順序對應，實際應用可用 id 對應
-                // 為了 Demo 簡單，這裡重新綁定 active class 邏輯略簡化
-            }
-            // 找出被點擊的按鈕並加亮 (這段在實際整合時可以用 event.target 處理更漂亮)
-            // 此處為簡化版：點擊時觸發的 onclick 其實可以直接傳遞 'this'
         }
         
-        // 優化按鈕 Active 狀態的切換
-        var btnContainer = document.getElementById("myBtnContainer");
-        var btns = btnContainer.getElementsByClassName("btn");
-        for (var i = 0; i < btns.length; i++) {
-            btns[i].addEventListener("click", function(){
-                var current = document.getElementsByClassName("active");
-                current[0].className = current[0].className.replace(" active", "");
-                this.className += " active";
-            });
+        // 更新按鈕樣式
+        var btns = document.querySelectorAll("#filterContainer .filter-btn");
+        for (i = 0; i < btns.length; i++) {
+            btns[i].className = btns[i].className.replace(" active", "");
         }
-    </script>
+        // 這裡簡單處理：點擊事件觸發時，找出對應按鈕加 active (若需精確控制可傳 this)
+        event.currentTarget.className += " active";
+    }
+
+    function addClass(element, name) {
+        var arr1 = element.className.split(" ");
+        var arr2 = name.split(" ");
+        for (var i = 0; i < arr2.length; i++) {
+            if (arr1.indexOf(arr2[i]) == -1) {element.className += " " + arr2[i];}
+        }
+    }
+
+    function removeClass(element, name) {
+        var arr1 = element.className.split(" ");
+        var arr2 = name.split(" ");
+        for (var i = 0; i < arr2.length; i++) {
+            while (arr1.indexOf(arr2[i]) > -1) {
+                arr1.splice(arr1.indexOf(arr2[i]), 1);
+            }
+        }
+        element.className = arr1.join(" ");
+    }
+</script>
 
 </body>
 </html>
