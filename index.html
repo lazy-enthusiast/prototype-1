@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Travel Prototype v8.1 (Fixed)</title>
+    <title>Travel Prototype v9.0 (Polished)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            /* --- 配色系統 --- */
+            /* --- 極簡黑白灰配色系統 --- */
             --bg-body: #F4F4F4;        
             --bg-card: #FFFFFF;        
             --text-main: #111111;      
@@ -32,16 +32,23 @@
             display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* --- Header --- */
+        /* --- Header (Updated with Translate Btn) --- */
         header {
-            padding: 0 20px;
+            padding: 0 15px;
             background-color: var(--bg-card);
             border-bottom: 1px solid var(--border);
             display: flex; justify-content: space-between; align-items: center;
             height: 60px; flex-shrink: 0; position: relative; z-index: 200;
         }
         header h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; }
-        .header-btn { font-size: 1.3rem; cursor: pointer; padding: 10px; color: var(--text-main); }
+        
+        .header-actions { display: flex; align-items: center; gap: 5px; }
+        .header-btn { 
+            font-size: 1.2rem; cursor: pointer; padding: 10px; color: var(--text-main); 
+            border-radius: 50%; transition: background 0.2s; width: 44px; height: 44px;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .header-btn:active { background: #F0F0F0; }
 
         /* --- Date Selector (Fixed Z-Index) --- */
         .date-selector-container { 
@@ -51,14 +58,14 @@
             width: 100%; 
             flex-shrink: 0; 
             position: relative; 
-            z-index: 90; /* 確保在主內容之上 */
-            min-height: 70px; /* 防止塌陷 */
-            display: block; /* 預設顯示 */
+            z-index: 90; 
+            min-height: 70px;
+            display: block; 
         }
         .date-selector { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
         .date-selector::-webkit-scrollbar { display: none; }
         .date-chip { 
-            flex: 1 0 auto; min-width: 80px; max-width: 100%; 
+            flex: 1 0 auto; min-width: 70px; /* 稍微縮小寬度以適應8天 */
             padding: 10px 0; border-radius: 6px; cursor: pointer; 
             color: var(--text-sub); display: flex; flex-direction: column; 
             align-items: center; justify-content: center; background: #F9F9F9; 
@@ -99,9 +106,24 @@
         .nav-launcher:active { background: #F5F5F5; }
         .nav-launcher-icon { font-size: 1.2rem; color: var(--accent); width: 25px; text-align: center;}
         
+        /* Currency Converter (Polished Layout) */
         .tool-box { background: #F9F9F9; padding: 15px; border-radius: 12px; border: 1px solid #EEE; margin-bottom: 10px; }
-        .currency-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .curr-input { flex: 1; padding: 8px; border: 1px solid #DDD; border-radius: 6px; font-size: 1rem; text-align: right; }
+        
+        .currency-grid {
+            display: grid;
+            grid-template-columns: 1fr 30px 1fr; /* 輸入框 - 圖示 - 輸入框 */
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+        .curr-group { display: flex; flex-direction: column; }
+        .curr-label { font-size: 0.7rem; color: #888; font-weight: bold; margin-bottom: 4px; padding-left: 2px;}
+        .curr-input { 
+            width: 100%; padding: 10px; border: 1px solid #DDD; border-radius: 8px; 
+            font-size: 1.1rem; text-align: center; background: #FFF; font-weight: 500;
+        }
+        .curr-icon { text-align: center; color: #AAA; font-size: 0.9rem; margin-top: 15px;} 
+
         .rate-info { font-size: 0.75rem; color: #AAA; text-align: right; margin-top: 5px; display: flex; justify-content: space-between; align-items: center;}
         .rate-status { font-weight: bold; color: #25D366; display: flex; align-items: center; gap: 4px; }
         .rate-status.manual { color: #FFA500; }
@@ -183,7 +205,10 @@
 
     <header>
         <h1>KYOTO <span style="font-weight:300; opacity:0.5;">2026</span></h1>
-        <div class="header-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></div>
+        <div class="header-actions">
+            <div class="header-btn" onclick="openTranslate()"><i class="fa-solid fa-language"></i></div>
+            <div class="header-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></div>
+        </div>
     </header>
 
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
@@ -208,12 +233,23 @@
             <div class="nav-launcher-text"><h3>旅程資訊</h3><p>航班、酒店、緊急聯絡</p></div>
         </div>
         <div class="sidebar-section-title">Utilities</div>
+        
         <div class="tool-box">
-            <div style="font-weight:bold; margin-bottom:10px;"><i class="fa-solid fa-coins"></i> 匯率計算 (JPY → HKD)</div>
-            <div class="currency-row"><span class="curr-label">JPY</span><input type="number" id="curr-jpy" class="curr-input" placeholder="¥" oninput="convertCurrency()"></div>
-            <div class="currency-row"><span class="curr-label">HKD</span><input type="number" id="curr-hkd" class="curr-input" placeholder="$" readonly style="background:#EEE;"></div>
+            <div style="font-weight:bold; margin-bottom:15px;"><i class="fa-solid fa-coins"></i> 匯率計算 (JPY ⇄ HKD)</div>
+            <div class="currency-grid">
+                <div class="curr-group">
+                    <span class="curr-label">JPY (日幣)</span>
+                    <input type="number" id="curr-jpy" class="curr-input" placeholder="0" oninput="convertCurrency()">
+                </div>
+                <div class="curr-icon"><i class="fa-solid fa-right-left"></i></div>
+                <div class="curr-group">
+                    <span class="curr-label">HKD (港幣)</span>
+                    <input type="number" id="curr-hkd" class="curr-input" placeholder="0" readonly style="background:#EEE;">
+                </div>
+            </div>
             <div class="rate-info"><span id="rate-status" class="rate-status"><i class="fa-solid fa-circle-notch fa-spin"></i> 載入中...</span><span style="cursor:pointer; text-decoration:underline;" onclick="editRate()">手動修改</span></div>
         </div>
+
         <div class="tool-box">
             <div style="font-weight:bold; margin-bottom:10px;"><i class="fa-solid fa-pen"></i> 旅行隨手記</div>
             <textarea id="quick-memo" class="memo-area" placeholder="房號、Wifi密碼、提醒事項..." oninput="saveMemo()"></textarea>
@@ -310,18 +346,40 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const scheduleData = {
-            "day1": { "date": "2026-07-15", "display": "Day 01", "weekday": "週三", "events": [ 
-                { time: "14:00", title: "抵達 & Check-in", type: "住宿", price: "-", open_hours: "24H", address: "Dormy Inn Premium Kyoto", address_jp: "京都市下京区東塩小路町558-8", coords: [34.9868, 135.7599], note: "機場巴士直達。\nCheck-in 後寄放行李。", tags: ["移動"] },
-                { time: "15:30", title: "月之藏人", type: "美食", price: "¥2,500", open_hours: "11:00-23:00", address: "伏見區上油掛町185-1", address_jp: "伏見区上油掛町185-1", coords: [34.9310, 135.7610], note: "自家製豆腐、酒粕烤雞。\n建議預約。", tags: ["美食"] },
-                { time: "16:30", title: "黃櫻 Kappa Country", type: "清酒", price: "¥2,000", open_hours: "11:30-22:00", address: "伏見區塩屋町228", address_jp: "伏見区塩屋町228", coords: [34.9305, 135.7615], note: "喝 Lucky Cat/Dog 精釀啤酒。", tags: ["微醺"] },
-                { time: "18:00", title: "AEON Mall 超市", type: "購物", price: "¥1,500", open_hours: "10:00-21:00", address: "京都站八條口", address_jp: "京都駅八条口", coords: [34.9835, 135.7560], note: "買宵夜：枝豆、刺身。", tags: ["超市"] }
-            ], "inspiration": [{title:"雨天：AEON Mall", tag:"RAINY", note:"如果下大雨，直接在這裡逛街吃飯。"}], "shopping": ["ICOCA 卡"] },
-            "day2": { "date": "2026-07-16", "display": "Day 02", "weekday": "週四", "events": [ 
-                { time: "09:00", title: "Ogawa Coffee", type: "美食", price: "¥1,200", open_hours: "07:00-21:00", address: "京都站前地下", address_jp: "京都駅前地下街ポルタ", coords: [34.9852, 135.7584], note: "京都早餐套餐。", tags: ["咖啡"] },
-                { time: "10:30", title: "月桂冠大倉紀念館", type: "景點", price: "¥600", open_hours: "09:30-16:30", address: "伏見區南浜町247", address_jp: "伏見区南浜町247", coords: [34.9298, 135.7618], note: "必喝中庭伏水。", tags: ["文化"] }
-            ], "inspiration": [{title:"疲累：Smart Coffee", tag:"TIRED", note:"在商店街內的老舖咖啡，布丁很好吃。"}], "shopping": ["月桂冠生酒"] }
-        };
+        // --- 8-Day Data Simulation ---
+        const scheduleData = {};
+        const baseDate = new Date("2026-07-15");
+        const weekdays = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
+        
+        for (let i = 0; i < 8; i++) {
+            const currentDate = new Date(baseDate);
+            currentDate.setDate(baseDate.getDate() + i);
+            const dateStr = currentDate.toISOString().split('T')[0];
+            const dayKey = `day${i+1}`;
+            
+            // Generate dummy events for days 4-8
+            let events = [];
+            if(i < 3) {
+                // Use original data for first 3 days
+                if(i===0) events = [{ time: "14:00", title: "抵達 & Check-in", type: "住宿", price: "-", open_hours: "24H", address: "Dormy Inn", coords: [34.9868, 135.7599], note: "機場巴士直達。", tags: ["移動"] }];
+                if(i===1) events = [{ time: "09:00", title: "Ogawa Coffee", type: "美食", price: "¥1,200", open_hours: "07-21", address: "京都站", coords: [34.9852, 135.7584], note: "早餐。", tags: ["咖啡"] }];
+                if(i===2) events = [{ time: "08:30", title: "Inoda Coffee", type: "美食", price: "¥1,600", open_hours: "07-18", address: "三條", coords: [35.0090, 135.7650], note: "老舖早餐。", tags: ["老舖"] }];
+            } else {
+                events = [
+                    { time: "10:00", title: `第 ${i+1} 天景點 A`, type: "景點", price: "¥500", address: "京都市區", coords: [35.0000, 135.7600], note: "自由探索。", tags: ["散步"] },
+                    { time: "13:00", title: `第 ${i+1} 天午餐`, type: "美食", price: "¥1,500", address: "河原町", coords: [35.0040, 135.7680], note: "當地美食。", tags: ["美食"] }
+                ];
+            }
+
+            scheduleData[dayKey] = {
+                date: dateStr,
+                display: `Day 0${i+1}`,
+                weekday: weekdays[currentDate.getDay()],
+                events: events,
+                inspiration: [{title:"隨意逛逛", tag:"NEAR", note:"附近的公園或小店。"}],
+                shopping: ["便利商店零食"]
+            };
+        }
 
         let currentDay = "day1";
         let modalMap = null;
@@ -329,9 +387,7 @@
         let exchangeRate = 0.053; 
 
         function init() { 
-            // 關鍵修復：初始化時強制渲染並切換到行程頁，確保日期列顯示
-            renderDateSelector(); 
-            selectDay('day1'); 
+            renderDateSelector(); selectDay('day1'); 
             switchMainPage('itinerary', document.querySelector('.nav-item.active'));
             fetchRates();
             if(localStorage.getItem('travelMemo')) document.getElementById('quick-memo').value = localStorage.getItem('travelMemo');
@@ -347,16 +403,17 @@
                     statusEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> 實時匯率: ${exchangeRate.toFixed(4)}`;
                     statusEl.classList.remove('manual');
                 }
-            } catch(e) { console.error("Rate fetch failed", e); document.getElementById('rate-status').innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 離線 (預設: ${exchangeRate})`; }
+            } catch(e) { document.getElementById('rate-status').innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 離線 (預設: ${exchangeRate})`; }
         }
 
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('open'); }
+        function openTranslate() { window.open("https://translate.google.com/?sl=auto&tl=zh-TW", "_blank"); }
+        
         function navigateTo(pageId) {
             toggleSidebar();
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page-' + pageId).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            // 進入工具頁時隱藏日期列
             document.querySelector('.date-selector-container').style.display = 'none';
         }
 
@@ -365,7 +422,6 @@
             document.getElementById('page-' + pageId).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             if(navEl) navEl.classList.add('active');
-            // 回到主功能時顯示日期列
             const ds = document.querySelector('.date-selector-container');
             if(pageId === 'itinerary' || pageId === 'shopping' || pageId === 'inspiration') ds.style.display = 'block'; 
             else ds.style.display = 'none';
@@ -405,7 +461,7 @@
         }
         function selectDay(dayKey, chipEl) {
             currentDay = dayKey;
-            if(chipEl) { document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('active')); chipEl.classList.add('active'); }
+            if(chipEl) { document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('active')); chipEl.classList.add('active'); chipEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); }
             renderTimeline(dayKey); renderInspiration(dayKey); renderShopping(dayKey);
         }
         function renderTimeline(dayKey) {
