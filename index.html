@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Travel Prototype v8.0 (Live Rate)</title>
+    <title>Travel Prototype v8.1 (Fixed)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            /* --- 極簡黑白灰配色系統 --- */
+            /* --- 配色系統 --- */
             --bg-body: #F4F4F4;        
             --bg-card: #FFFFFF;        
             --text-main: #111111;      
@@ -43,7 +43,31 @@
         header h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; }
         .header-btn { font-size: 1.3rem; cursor: pointer; padding: 10px; color: var(--text-main); }
 
-        /* --- Sidebar (Toolkit) --- */
+        /* --- Date Selector (Fixed Z-Index) --- */
+        .date-selector-container { 
+            background: var(--bg-card); 
+            padding: 10px 15px; 
+            border-bottom: 1px solid var(--border); 
+            width: 100%; 
+            flex-shrink: 0; 
+            position: relative; 
+            z-index: 90; /* 確保在主內容之上 */
+            min-height: 70px; /* 防止塌陷 */
+            display: block; /* 預設顯示 */
+        }
+        .date-selector { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+        .date-selector::-webkit-scrollbar { display: none; }
+        .date-chip { 
+            flex: 1 0 auto; min-width: 80px; max-width: 100%; 
+            padding: 10px 0; border-radius: 6px; cursor: pointer; 
+            color: var(--text-sub); display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; background: #F9F9F9; 
+        }
+        .date-chip.active { background: #000; color: #FFF; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .day-num { font-weight: 600; font-size: 0.9rem; } 
+        .day-week { font-size: 0.7rem; margin-top: 2px; text-transform: uppercase; }
+
+        /* --- Sidebar --- */
         .sidebar-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); z-index: 1000;
@@ -61,126 +85,72 @@
             display: flex; flex-direction: column;
         }
         .sidebar.open { transform: translateX(0); }
-
-        .sidebar-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
-        }
-        .sidebar-header h2 { margin: 0; font-size: 1.2rem; font-weight: 700; }
-
-        .sidebar-section-title {
-            font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; 
-            margin-bottom: 10px; margin-top: 20px; font-weight: 600;
-        }
+        
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+        .sidebar-section-title { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; margin-top: 20px; font-weight: 600; }
         .sidebar-section-title:first-child { margin-top: 0; }
 
-        /* WhatsApp Box */
-        .whatsapp-box { 
-            background: #E8F5E9; border: 1px solid #C8E6C9; color: #1B5E20; 
-            padding: 15px; border-radius: 12px; margin-bottom: 10px; 
-        }
-        .wa-input {
-            width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #CCC; border-radius: 6px;
-            font-size: 0.95rem; background: #FFF;
-        }
-        .wa-btn {
-            width: 100%; background: #25D366; color: white; border: none; padding: 10px;
-            border-radius: 6px; font-weight: bold; cursor: pointer; 
-            display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 0.9rem;
-        }
-
-        /* Nav Launchers */
-        .nav-launcher {
-            display: flex; align-items: center; gap: 15px;
-            background: #FFF; border: 1px solid #EEE; padding: 15px;
-            border-radius: 12px; margin-bottom: 10px; cursor: pointer;
-            transition: all 0.2s;
-        }
+        /* Tools CSS */
+        .whatsapp-box { background: #E8F5E9; border: 1px solid #C8E6C9; color: #1B5E20; padding: 15px; border-radius: 12px; margin-bottom: 10px; }
+        .wa-input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #CCC; border-radius: 6px; font-size: 0.95rem; background: #FFF; }
+        .wa-btn { width: 100%; background: #25D366; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 0.9rem; }
+        
+        .nav-launcher { display: flex; align-items: center; gap: 15px; background: #FFF; border: 1px solid #EEE; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
         .nav-launcher:active { background: #F5F5F5; }
         .nav-launcher-icon { font-size: 1.2rem; color: var(--accent); width: 25px; text-align: center;}
-        .nav-launcher h3 { margin: 0; font-size: 0.95rem; font-weight: 600; }
-        .nav-launcher p { margin: 2px 0 0 0; font-size: 0.8rem; color: #888; }
-
-        /* Currency Converter (Enhanced) */
+        
         .tool-box { background: #F9F9F9; padding: 15px; border-radius: 12px; border: 1px solid #EEE; margin-bottom: 10px; }
         .currency-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .currency-row:last-child { margin-bottom: 0; }
-        .curr-label { font-size: 0.8rem; color: #666; width: 30px; font-weight: bold; }
         .curr-input { flex: 1; padding: 8px; border: 1px solid #DDD; border-radius: 6px; font-size: 1rem; text-align: right; }
         .rate-info { font-size: 0.75rem; color: #AAA; text-align: right; margin-top: 5px; display: flex; justify-content: space-between; align-items: center;}
         .rate-status { font-weight: bold; color: #25D366; display: flex; align-items: center; gap: 4px; }
         .rate-status.manual { color: #FFA500; }
-
-        /* Quick Memo */
-        .memo-area { 
-            width: 100%; height: 100px; padding: 10px; border: 1px solid #DDD; border-radius: 6px; 
-            font-family: inherit; font-size: 0.9rem; resize: none; background: #FFF;
-        }
+        
+        .memo-area { width: 100%; height: 100px; padding: 10px; border: 1px solid #DDD; border-radius: 6px; font-family: inherit; font-size: 0.9rem; resize: none; background: #FFF; }
 
         /* --- Pages --- */
         main { flex: 1; overflow-y: hidden; position: relative; }
-        .page { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            overflow-y: auto; padding: 20px 0 100px 0; 
-            display: none; opacity: 0; transition: opacity 0.2s ease; 
-            background-color: var(--bg-body); 
-        }
+        .page { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto; padding: 20px 0 100px 0; display: none; opacity: 0; transition: opacity 0.2s ease; background-color: var(--bg-body); }
         .page.active { display: block; opacity: 1; z-index: 10; }
-        
         .page-header { padding: 0 20px; margin-bottom: 20px; }
         .page-title { font-size: 1.5rem; font-weight: 700; margin: 0; }
         .page-subtitle { color: #666; font-size: 0.9rem; margin-top: 5px; }
 
-        /* --- Timeline (with Universal Nav) --- */
+        /* --- Timeline --- */
         .timeline-container { padding: 0 20px; max-width: 800px; margin: 0 auto; }
         .timeline-item { position: relative; padding-left: 24px; padding-bottom: 24px; border-left: 1px solid #DDD; }
         .timeline-item:last-child { border-left: 1px solid transparent; }
         .timeline-item::before { content: ''; position: absolute; left: -5px; top: 22px; width: 9px; height: 9px; background: #FFF; border: 2px solid #000; border-radius: 50%; }
-        
         .card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); cursor: pointer; position: relative; }
         .card-time { font-size: 0.75rem; color: #888; font-weight: 600; margin-bottom: 6px; display: block; }
-        .card-title { font-size: 1.1rem; font-weight: 600; margin: 0 0 8px 0; padding-right: 30px; } 
+        .card-title { font-size: 1.1rem; font-weight: 600; margin: 0 0 8px 0; padding-right: 30px; }
         .tags { display: flex; gap: 6px; flex-wrap: wrap; }
         .card-tag { font-size: 0.7rem; background: #F2F2F2; padding: 4px 10px; border-radius: 20px; color: #555; }
+        .card-nav-btn { position: absolute; top: 20px; right: 20px; width: 30px; height: 30px; border-radius: 50%; background: #F4F4F4; color: #000; display: flex; justify-content: center; align-items: center; font-size: 0.9rem; transition: background 0.2s; z-index: 5; }
         
-        /* Universal Nav Button */
-        .card-nav-btn {
-            position: absolute; top: 20px; right: 20px;
-            width: 30px; height: 30px; border-radius: 50%;
-            background: #F4F4F4; color: #000;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 0.9rem; transition: background 0.2s;
-            z-index: 5;
-        }
-        .card-nav-btn:active { background: #000; color: #FFF; }
-
         /* --- Inspiration & Shopping --- */
         .filter-bar-container { padding: 0 20px 15px 20px; position: sticky; top: 0; z-index: 50; background: var(--bg-body); overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
         .filter-chip { display: inline-block; padding: 8px 16px; margin-right: 8px; background: #FFF; border: 1px solid #DDD; border-radius: 20px; font-size: 0.85rem; color: #555; cursor: pointer; transition: all 0.2s; }
         .filter-chip.active { background: #000; color: #FFF; border-color: #000; }
-        
         .inspiration-grid { padding: 0 20px; display: grid; gap: 15px; }
         .inspire-card { background: #FFF; border: 1px dashed #999; border-radius: 12px; padding: 20px; color: #444; position: relative; display: block;} 
         .inspire-card.hidden { display: none; }
         .inspire-badge { background: #000; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; position: absolute; top: -10px; left: 15px; }
-
         .shopping-list { padding: 0 20px; }
         .shop-item { background: #FFF; padding: 15px; border-bottom: 1px solid #EEE; display: flex; align-items: center; gap: 15px; }
         .shop-item input[type="checkbox"] { width: 20px; height: 20px; accent-color: #000; }
 
-        /* --- Info Page --- */
+        /* --- Info & Phrases --- */
         .info-card { background: #FFF; padding: 20px; border-radius: 12px; margin: 0 20px 15px 20px; border: 1px solid var(--border); }
         .info-row { display: flex; gap: 15px; margin-bottom: 12px; align-items: flex-start; font-size: 0.95rem; color: #333; }
         .info-link { color: #000; text-decoration: underline; font-weight: 600; cursor: pointer; }
         .nav-link-sm { margin-left: 8px; color: #666; text-decoration: none; font-size: 0.85rem; background: #F0F0F0; padding: 2px 6px; border-radius: 4px;}
-
-        /* --- Phrase Cards --- */
+        
         .phrase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
         .phrase-card { background: #FFF; border: 1px solid var(--border); padding: 25px 15px; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); aspect-ratio: 1.2; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .phrase-card:active { transform: scale(0.96); background: #F5F5F5; }
         .phrase-jp { font-weight: bold; font-size: 1.1rem; margin-bottom: 8px; }
         .phrase-zh { font-size: 0.85rem; color: #888; }
-        
         .phrase-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 5000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(5px); }
         .phrase-overlay.active { opacity: 1; pointer-events: all; }
         .phrase-content { text-align: center; width: 85%; }
@@ -193,17 +163,14 @@
         .modal-content { background: #FFF; color: #000; width: 100%; max-width: 600px; max-height: 90vh; border-radius: 20px 20px 0 0; padding: 30px; overflow-y: auto; animation: slideUp 0.3s ease; cursor: default; display: flex; flex-direction: column;}
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         #modal-mini-map { width: 100%; height: 200px; background: #EEE; border-radius: 12px; margin-bottom: 25px; border: 1px solid #DDD; flex-shrink: 0;}
-
         .modal-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }
         .modal-label { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; }
         .modal-value { font-size: 0.95rem; font-weight: 500; }
         .modal-note-box { background: #F8F8F8; padding: 15px; border-radius: 8px; border-left: 4px solid #000; margin: 15px 0; }
         .modal-note-content { font-size: 0.95rem; line-height: 1.6; white-space: pre-line; color: #333; }
-        
         .modal-actions { margin-top: 20px; }
         .btn-action { width: 100%; padding: 15px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1rem; text-align: center; }
         .btn-black { background: #000; color: #FFF; }
-        
         .nav-link { font-size:0.85rem; color:#000; text-decoration:none; margin-left:5px; background:#EEE; padding:2px 8px; border-radius:4px; display:inline-block;}
 
         nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: #FFF; display: flex; justify-content: space-around; padding: 12px 0 25px 0; border-top: 1px solid var(--border); z-index: 100; }
@@ -225,54 +192,36 @@
             <h2>旅行百寶箱</h2>
             <div class="header-btn" onclick="toggleSidebar()"><i class="fa-solid fa-xmark"></i></div>
         </div>
-
         <div class="sidebar-section-title">Priority</div>
         <div class="whatsapp-box">
             <div style="font-weight:bold; margin-bottom:5px;"><i class="fa-brands fa-whatsapp"></i> 安全 Check-in</div>
             <input type="tel" id="wa-phone" class="wa-input" placeholder="對方電話 (如 85291234567)">
             <button class="wa-btn" id="wa-btn" onclick="sendWhatsApp()"><i class="fa-solid fa-paper-plane"></i> 發送位置</button>
         </div>
-
         <div class="sidebar-section-title">Navigation</div>
         <div class="nav-launcher" onclick="navigateTo('phrases')">
             <div class="nav-launcher-icon"><i class="fa-solid fa-comments"></i></div>
-            <div class="nav-launcher-text"><h3>對話卡片</h3><p>溝通無障礙</p></div>
+            <div class="nav-launcher-text"><h3>對話卡片</h3><p>手指指溝通無障礙</p></div>
         </div>
         <div class="nav-launcher" onclick="navigateTo('info')">
             <div class="nav-launcher-icon"><i class="fa-solid fa-suitcase"></i></div>
             <div class="nav-launcher-text"><h3>旅程資訊</h3><p>航班、酒店、緊急聯絡</p></div>
         </div>
-
         <div class="sidebar-section-title">Utilities</div>
-        
         <div class="tool-box">
             <div style="font-weight:bold; margin-bottom:10px;"><i class="fa-solid fa-coins"></i> 匯率計算 (JPY → HKD)</div>
-            <div class="currency-row">
-                <span class="curr-label">JPY</span>
-                <input type="number" id="curr-jpy" class="curr-input" placeholder="¥" oninput="convertCurrency()">
-            </div>
-            <div class="currency-row">
-                <span class="curr-label">HKD</span>
-                <input type="number" id="curr-hkd" class="curr-input" placeholder="$" readonly style="background:#EEE;">
-            </div>
-            <div class="rate-info">
-                <span id="rate-status" class="rate-status"><i class="fa-solid fa-circle-notch fa-spin"></i> 載入中...</span>
-                <span style="cursor:pointer; text-decoration:underline;" onclick="editRate()">手動修改</span>
-            </div>
+            <div class="currency-row"><span class="curr-label">JPY</span><input type="number" id="curr-jpy" class="curr-input" placeholder="¥" oninput="convertCurrency()"></div>
+            <div class="currency-row"><span class="curr-label">HKD</span><input type="number" id="curr-hkd" class="curr-input" placeholder="$" readonly style="background:#EEE;"></div>
+            <div class="rate-info"><span id="rate-status" class="rate-status"><i class="fa-solid fa-circle-notch fa-spin"></i> 載入中...</span><span style="cursor:pointer; text-decoration:underline;" onclick="editRate()">手動修改</span></div>
         </div>
-
         <div class="tool-box">
             <div style="font-weight:bold; margin-bottom:10px;"><i class="fa-solid fa-pen"></i> 旅行隨手記</div>
             <textarea id="quick-memo" class="memo-area" placeholder="房號、Wifi密碼、提醒事項..." oninput="saveMemo()"></textarea>
         </div>
-
     </div>
 
     <div id="phrase-overlay" class="phrase-overlay" onclick="closePhrase()">
-        <div class="phrase-content">
-            <div id="overlay-jp" class="phrase-big"></div>
-            <div id="overlay-zh" class="phrase-sub"></div>
-        </div>
+        <div class="phrase-content"><div id="overlay-jp" class="phrase-big"></div><div id="overlay-zh" class="phrase-sub"></div></div>
         <div class="close-phrase">點擊關閉</div>
     </div>
 
@@ -284,7 +233,6 @@
         <div id="page-itinerary" class="page active">
             <div class="timeline-container" id="timeline-container"></div>
         </div>
-
         <div id="page-inspiration" class="page">
             <div class="filter-bar-container">
                 <span class="filter-chip active" onclick="filterInspiration('all', this)">全部</span>
@@ -295,18 +243,15 @@
             </div>
             <div id="inspiration-container" class="inspiration-grid"></div>
         </div>
-
         <div id="page-shopping" class="page">
             <div class="page-header"><h2 class="page-title">購物清單</h2></div>
             <div id="shopping-container" class="shopping-list"></div>
         </div>
-
         <div id="page-weather" class="page">
             <div style="padding: 20px; text-align:center; margin-top:50px; opacity:0.5;">
                 <i class="fa-solid fa-cloud" style="font-size:3rem; margin-bottom:20px;"></i><p>天氣模組 (API)</p>
             </div>
         </div>
-
         <div id="page-phrases" class="page">
             <div class="page-header"><h2 class="page-title">溝通對話卡</h2></div>
             <div class="phrase-grid">
@@ -318,7 +263,6 @@
                 <div class="phrase-card" onclick="showPhrase('わさび抜きで', '請不要加芥末')"><div class="phrase-jp">わさび抜き</div><div class="phrase-zh">去芥末</div></div>
             </div>
         </div>
-
         <div id="page-info" class="page">
             <div class="page-header"><h2 class="page-title">旅程資訊</h2></div>
             <div class="info-card">
@@ -326,11 +270,7 @@
                 <div class="info-row"><div class="info-icon"><i class="fa-solid fa-hotel"></i></div><div><span class="info-label">酒店</span><span class="info-value">Dormy Inn Premium Kyoto</span></div></div>
                 <div class="info-row">
                     <div class="info-icon"><i class="fa-solid fa-location-dot"></i></div>
-                    <div>
-                        <span class="info-label">地址</span>
-                        <span class="info-value">京都市下京區東塩小路町 558-8</span>
-                        <a href="javascript:void(0)" onclick="openMapQuery('Dormy Inn Premium Kyoto')" class="nav-link-sm"><i class="fa-solid fa-location-arrow"></i> 導航</a>
-                    </div>
+                    <div><span class="info-label">地址</span><span class="info-value">京都市下京區東塩小路町 558-8</span><a href="javascript:void(0)" onclick="openMapQuery('Dormy Inn Premium Kyoto')" class="nav-link-sm"><i class="fa-solid fa-location-arrow"></i> 導航</a></div>
                 </div>
             </div>
             <div class="info-card">
@@ -360,11 +300,7 @@
                 <div><span class="modal-label">時間</span><span class="modal-value" id="modal-time"></span></div>
                 <div><span class="modal-label">預算</span><span class="modal-value" id="modal-price"></span></div>
                 <div><span class="modal-label">開放時間</span><span class="modal-value" id="modal-open-hours"></span></div>
-                <div>
-                    <span class="modal-label">地址</span>
-                    <span class="modal-value" id="modal-address-short" style="font-size:0.85rem;"></span>
-                    <a href="javascript:void(0)" id="modal-nav-link" class="nav-link"><i class="fa-solid fa-location-arrow"></i> 導航</a>
-                </div>
+                <div><span class="modal-label">地址</span><span class="modal-value" id="modal-address-short" style="font-size:0.85rem;"></span><a href="javascript:void(0)" id="modal-nav-link" class="nav-link"><i class="fa-solid fa-location-arrow"></i> 導航</a></div>
             </div>
             <div class="modal-label">備註與攻略</div>
             <div class="modal-note-box"><div id="modal-note" class="modal-note-content"></div></div>
@@ -390,18 +326,19 @@
         let currentDay = "day1";
         let modalMap = null;
         let currentEventData = null;
-        let exchangeRate = 0.053; // Default fallback
+        let exchangeRate = 0.053; 
 
         function init() { 
-            renderDateSelector(); selectDay('day1'); 
+            // 關鍵修復：初始化時強制渲染並切換到行程頁，確保日期列顯示
+            renderDateSelector(); 
+            selectDay('day1'); 
+            switchMainPage('itinerary', document.querySelector('.nav-item.active'));
             fetchRates();
             if(localStorage.getItem('travelMemo')) document.getElementById('quick-memo').value = localStorage.getItem('travelMemo');
         }
 
-        // --- Fetch Live Rate ---
         async function fetchRates() {
             try {
-                // Using fawazahmed0/currency-api (Free, No Key, CDN)
                 const res = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/jpy.json');
                 const data = await res.json();
                 if(data.jpy && data.jpy.hkd) {
@@ -410,49 +347,39 @@
                     statusEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> 實時匯率: ${exchangeRate.toFixed(4)}`;
                     statusEl.classList.remove('manual');
                 }
-            } catch(e) {
-                console.error("Rate fetch failed", e);
-                document.getElementById('rate-status').innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 離線/失敗 (預設: ${exchangeRate})`;
-            }
+            } catch(e) { console.error("Rate fetch failed", e); document.getElementById('rate-status').innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 離線 (預設: ${exchangeRate})`; }
         }
 
-        // --- Sidebar & Toolkit ---
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.getElementById('sidebar-overlay').classList.toggle('open');
-        }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('open'); }
         function navigateTo(pageId) {
             toggleSidebar();
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page-' + pageId).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            // 進入工具頁時隱藏日期列
+            document.querySelector('.date-selector-container').style.display = 'none';
+        }
+
+        function switchMainPage(pageId, navEl) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + pageId).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            if(navEl) navEl.classList.add('active');
+            // 回到主功能時顯示日期列
             const ds = document.querySelector('.date-selector-container');
-            if(pageId !== 'itinerary' && pageId !== 'shopping' && pageId !== 'inspiration') ds.style.display = 'none'; else ds.style.display = 'block';
+            if(pageId === 'itinerary' || pageId === 'shopping' || pageId === 'inspiration') ds.style.display = 'block'; 
+            else ds.style.display = 'none';
         }
 
         function convertCurrency() {
             const jpy = parseFloat(document.getElementById('curr-jpy').value);
-            if(!isNaN(jpy)) {
-                document.getElementById('curr-hkd').value = (jpy * exchangeRate).toFixed(1);
-            } else {
-                document.getElementById('curr-hkd').value = "";
-            }
+            if(!isNaN(jpy)) { document.getElementById('curr-hkd').value = (jpy * exchangeRate).toFixed(1); } else { document.getElementById('curr-hkd').value = ""; }
         }
         function editRate() {
-            const newRate = prompt("手動設定匯率 (JPY -> HKD):", exchangeRate);
-            if(newRate && !isNaN(newRate)) {
-                exchangeRate = parseFloat(newRate);
-                const statusEl = document.getElementById('rate-status');
-                statusEl.innerHTML = `<i class="fa-solid fa-lock"></i> 手動鎖定: ${exchangeRate}`;
-                statusEl.classList.add('manual');
-                convertCurrency();
-            }
+            const newRate = prompt("手動設定匯率:", exchangeRate);
+            if(newRate && !isNaN(newRate)) { exchangeRate = parseFloat(newRate); document.getElementById('rate-status').innerHTML = `<i class="fa-solid fa-lock"></i> 手動: ${exchangeRate}`; document.getElementById('rate-status').classList.add('manual'); convertCurrency(); }
         }
-        function saveMemo() {
-            localStorage.setItem('travelMemo', document.getElementById('quick-memo').value);
-        }
-
-        // WhatsApp
+        function saveMemo() { localStorage.setItem('travelMemo', document.getElementById('quick-memo').value); }
         function sendWhatsApp() {
             let phone = document.getElementById('wa-phone').value.replace(/\D/g, '');
             if(!phone) { alert("請輸入對方電話號碼"); return; }
@@ -463,15 +390,8 @@
                 });
             } else alert("瀏覽器不支援定位");
         }
-
-        function showPhrase(jp, zh) {
-            document.getElementById('overlay-jp').innerText = jp;
-            document.getElementById('overlay-zh').innerText = zh;
-            document.getElementById('phrase-overlay').classList.add('active');
-        }
+        function showPhrase(jp, zh) { document.getElementById('overlay-jp').innerText = jp; document.getElementById('overlay-zh').innerText = zh; document.getElementById('phrase-overlay').classList.add('active'); }
         function closePhrase() { document.getElementById('phrase-overlay').classList.remove('active'); }
-
-        // Core Renders
         function renderDateSelector() {
             const container = document.getElementById('date-selector'); container.innerHTML = '';
             Object.keys(scheduleData).forEach(dayKey => {
@@ -494,12 +414,7 @@
                 const item = document.createElement('div'); item.className = 'timeline-item';
                 let tags = event.tags.map(t => `<span class="card-tag">${t}</span>`).join('');
                 const navBtn = `<div class="card-nav-btn" onclick="event.stopPropagation(); openMapQuery('${event.address}')"><i class="fa-solid fa-location-arrow"></i></div>`;
-                item.innerHTML = `<div class="card" onclick='openModal(${JSON.stringify(event).replace(/'/g, "'")})'>
-                    ${navBtn}
-                    <span class="card-time">${event.time}</span>
-                    <h3 class="card-title">${event.title}</h3>
-                    <div class="tags">${tags}</div>
-                </div>`;
+                item.innerHTML = `<div class="card" onclick='openModal(${JSON.stringify(event).replace(/'/g, "'")})'>${navBtn}<span class="card-time">${event.time}</span><h3 class="card-title">${event.title}</h3><div class="tags">${tags}</div></div>`;
                 container.appendChild(item);
             });
             container.appendChild(document.createElement('div')).style.height = "20px";
@@ -508,27 +423,17 @@
             const container = document.getElementById('inspiration-container'); container.innerHTML = '';
             document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
             document.querySelector('.filter-chip').classList.add('active');
-            (scheduleData[dayKey].inspiration || []).forEach(item => {
-                container.innerHTML += `<div class="inspire-card" data-tag="${item.tag}"><div class="inspire-badge">${item.tag}</div><h3>${item.title}</h3><p style="margin:5px 0 0 0; font-size:0.9rem; color:#666;">${item.note}</p></div>`;
-            });
+            (scheduleData[dayKey].inspiration || []).forEach(item => { container.innerHTML += `<div class="inspire-card" data-tag="${item.tag}"><div class="inspire-badge">${item.tag}</div><h3>${item.title}</h3><p style="margin:5px 0 0 0; font-size:0.9rem; color:#666;">${item.note}</p></div>`; });
         }
         function filterInspiration(tag, btn) {
-            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-            btn.classList.add('active');
-            document.querySelectorAll('.inspire-card').forEach(card => {
-                const cardTag = card.getAttribute('data-tag');
-                if(tag === 'all' || cardTag === tag) card.classList.remove('hidden'); else card.classList.add('hidden');
-            });
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active')); btn.classList.add('active');
+            document.querySelectorAll('.inspire-card').forEach(card => { if(tag === 'all' || card.getAttribute('data-tag') === tag) card.classList.remove('hidden'); else card.classList.add('hidden'); });
         }
         function renderShopping(dayKey) {
             const container = document.getElementById('shopping-container'); container.innerHTML = '';
-            (scheduleData[dayKey].shopping || []).forEach((item, idx) => {
-                container.innerHTML += `<div class="shop-item"><input type="checkbox" id="s${idx}"><label for="s${idx}">${item}</label></div>`;
-            });
+            (scheduleData[dayKey].shopping || []).forEach((item, idx) => { container.innerHTML += `<div class="shop-item"><input type="checkbox" id="s${idx}"><label for="s${idx}">${item}</label></div>`; });
         }
-
         function openMapQuery(address) { window.open(`https://www.google.com/maps/search/?api=1&query=$${encodeURIComponent(address)}`, '_blank'); }
-
         function openModal(data) {
             currentEventData = data;
             document.getElementById('modal-title').innerText = data.title;
@@ -539,7 +444,6 @@
             document.getElementById('modal-address-short').innerText = data.address;
             document.getElementById('modal-note').innerText = data.note;
             document.getElementById('modal-nav-link').onclick = function() { openMapQuery(data.address); };
-
             const actionsContainer = document.getElementById('modal-actions');
             actionsContainer.innerHTML = '';
             if (data.type === '美食' || data.type.includes('餐')) {
@@ -548,27 +452,13 @@
                 const addr = data.address_jp || data.address;
                 actionsContainer.innerHTML = `<button class="btn-action btn-black" onclick="showPhrase('${addr}', '請載我去這裡')">🚕 顯示的士卡 (地址)</button>`;
             }
-
             document.getElementById('detail-modal').classList.add('open');
-            setTimeout(() => {
-                if(modalMap) modalMap.remove();
-                modalMap = L.map('modal-mini-map', {zoomControl:false, dragging:false}).setView(data.coords, 15);
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(modalMap);
-                L.marker(data.coords, {icon: L.divIcon({className:'custom-div-icon',html:"<div style='background:black;width:14px;height:14px;border-radius:50%;border:2px solid white;'></div>",iconSize:[14,14]})}).addTo(modalMap);
-                modalMap.invalidateSize();
-            }, 100);
+            setTimeout(() => { if(modalMap) modalMap.remove(); modalMap = L.map('modal-mini-map', {zoomControl:false, dragging:false}).setView(data.coords, 15); L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(modalMap); L.marker(data.coords, {icon: L.divIcon({className:'custom-div-icon',html:"<div style='background:black;width:14px;height:14px;border-radius:50%;border:2px solid white;'></div>",iconSize:[14,14]})}).addTo(modalMap); modalMap.invalidateSize(); }, 100);
         }
         function closeModal() { document.getElementById('detail-modal').classList.remove('open'); }
         document.getElementById('detail-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
         function searchGmail(query) { window.open(`https://mail.google.com/mail/u/0/#search/${encodeURIComponent(query)}`, '_blank'); }
-        function switchMainPage(pageId, navEl) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page-' + pageId).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            navEl.classList.add('active');
-            const ds = document.querySelector('.date-selector-container');
-            if(pageId !== 'itinerary' && pageId !== 'shopping' && pageId !== 'inspiration') ds.style.display = 'none'; else ds.style.display = 'block';
-        }
+        
         init();
     </script>
 </body>
