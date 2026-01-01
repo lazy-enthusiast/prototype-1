@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Travel App v22.0 (Final Test)</title>
+<title>Travel App v23.0 (Flight Info)</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
@@ -95,14 +95,11 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .inspire-card.hidden { display: none; }
 .inspire-badge { background: var(--accent); color: var(--accent-text); padding: 5px 12px; border-radius: 0; font-size: 0.65rem; font-weight: 700; position: absolute; top: -12px; left: 20px; text-transform: uppercase; letter-spacing: 1px; }
 
-/* Info & Modal - [UI FIXED] */
+/* Info & Modal */
 .info-card { background: var(--bg-card); padding: 25px; border-radius: 0; margin: 0 20px 20px 20px; border: 1px solid var(--border); }
 .info-row { display: flex; gap: 20px; margin-bottom: 20px; align-items: flex-start; font-size: 0.95rem; color: var(--text-main); line-height: 1.6; }
 .info-icon { width: 20px; text-align: center; color: var(--text-sub); padding-top: 3px; flex-shrink: 0; }
-
-/* FIXED: Contact Container */
-.contact-container { display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; margin-top: 0; }
-
+.contact-container { display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; margin-top: 0; } /* Fixed wrap */
 .btn-icon-sm { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 0.9rem; cursor: pointer; transition: transform 0.1s; border: 1px solid var(--border); color: var(--text-main); background: var(--bg-body); flex-shrink: 0; }
 .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 3000; justify-content: center; align-items: end; backdrop-filter: blur(5px); cursor: pointer; } 
 .modal.open { display: flex; }
@@ -115,6 +112,16 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .btn-action { width: 100%; padding: 18px; border-radius: 0; border: none; font-weight: 600; cursor: pointer; font-size: 0.9rem; text-align: center; margin-bottom:12px; text-transform: uppercase; letter-spacing: 1px; }
 .btn-black { background: var(--accent); color: var(--accent-text); }
 .btn-outline { background: var(--bg-card); border: 1px solid var(--text-main); color: var(--text-main); }
+
+/* NEW: Flight Info Styles */
+.flight-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+.flight-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border); padding-bottom: 15px; margin-bottom: 15px; }
+.flight-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.flight-leg { display: flex; flex-direction: column; }
+.flight-code { font-size: 1.2rem; font-weight: 800; font-family: var(--font-heading); }
+.flight-time { font-size: 0.9rem; font-weight: 600; margin-top: 2px; }
+.flight-meta { font-size: 0.7rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+.flight-arrow { color: var(--text-sub); font-size: 0.9rem; }
 
 /* Nav */
 nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: var(--bg-card); opacity: 0.98; display: flex; justify-content: space-around; padding: 15px 0 calc(15px + var(--safe-bottom)) 0; border-top: 1px solid var(--border); z-index: 100; backdrop-filter: blur(10px); }
@@ -157,7 +164,14 @@ const CONFIG = {
     startDate: "2026-01-07" // YYYY-MM-DD
 };
 
-// --- 3. [行程資料 - 完整測試版] ---
+// --- 3. [航班資訊] (NEW) ---
+// 填寫後會自動在「資訊頁」顯示。若不需要，將陣列留空 [] 即可。
+const FLIGHTS = [
+    { type: "去程", flight: "CX506", date: "01/07", dep: "HKG 10:00", arr: "KIX 14:30", note: "T1 登機" },
+    { type: "回程", flight: "CX507", date: "01/14", dep: "KIX 18:00", arr: "HKG 21:30", note: "提早 2 小時" }
+];
+
+// --- 4. [行程資料] ---
 const USER_ITINERARY = {
     "day1": { 
         "events": [
@@ -170,7 +184,7 @@ const USER_ITINERARY = {
                 "address": "京都市下京區東塩小路町558-8", 
                 "address_jp": "京都市下京区東塩小路町558-8", 
                 "coords": [34.9868, 135.7599], 
-                "phone": "+81753715489", // 測試電話功能
+                "phone": "+81753715489", 
                 "note": "機場巴士直達。有免費拉麵宵夜。", 
                 "tags": ["移動"] 
             },
@@ -184,7 +198,7 @@ const USER_ITINERARY = {
                 "address_jp": "京都市下京区東塩小路町579-24", 
                 "coords": [34.9872, 135.7588], 
                 "phone": "+81753434129",
-                "note": "已預約 18:00。\n推薦菜單：史上最強里肌、生牛肉壽司。\n記得出示 Gmail 預約信。", 
+                "note": "已預約 18:00。推薦菜單：史上最強里肌、生牛肉壽司。", 
                 "tags": ["晚餐"] 
             }
         ],
@@ -284,6 +298,8 @@ const USER_ITINERARY = {
     </div>
     <div id="page-info" class="page">
         <div class="page-header"><h2 class="page-title">旅程資訊</h2></div>
+        <div id="flight-info-section"></div>
+        
         <div class="info-card">
             <div style="font-weight:bold; margin-bottom:15px; border-bottom:1px solid var(--border); padding-bottom:10px;">住宿</div>
             <div class="info-row"><div class="info-icon"><i class="fa-solid fa-hotel"></i></div><div><span class="info-label">酒店</span><div>Dormy Inn Premium Kyoto</div></div></div>
@@ -369,6 +385,18 @@ function init() {
     if(localStorage.getItem('travelMemo')) document.getElementById('quick-memo').value = localStorage.getItem('travelMemo');
     if(localStorage.getItem('shopState')) shopState = JSON.parse(localStorage.getItem('shopState'));
     document.getElementById('quick-memo').addEventListener('input', function() { localStorage.setItem('travelMemo', this.value); });
+    renderFlightInfo(); // New
+}
+function renderFlightInfo() {
+    const container = document.getElementById('flight-info-section');
+    if(!FLIGHTS || FLIGHTS.length === 0) return;
+    let html = `<div class="info-card"><div style="font-weight:bold; margin-bottom:15px; border-bottom:1px solid var(--border); padding-bottom:10px;">航班資料</div><div class="flight-grid">`;
+    FLIGHTS.forEach(f => {
+        const icon = f.type === "去程" ? "fa-plane-departure" : "fa-plane-arrival";
+        html += `<div class="flight-row"><div class="flight-leg"><div class="flight-meta"><i class="fa-solid ${icon}"></i> ${f.type} (${f.date})</div><div class="flight-code">${f.flight}</div><div class="flight-meta" style="color:var(--text-main)">${f.note}</div></div><div style="text-align:right;"><div class="flight-time">${f.dep}</div><div class="flight-arrow">↓</div><div class="flight-time">${f.arr}</div></div></div>`;
+    });
+    html += `</div></div>`;
+    container.innerHTML = html;
 }
 function showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
 async function fetchRates(force = false) {
