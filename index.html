@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Travel App v31.2 (Fixed Maps)</title>
+<title>Travel App v31.3 (Code Fixed)</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
@@ -526,7 +526,7 @@ function switchMainPage(pageId, navEl) {
 }
 
 // ============================================
-// 🛠️ [已修正] Google Maps & WhatsApp 連結邏輯
+//   🛠️ [Fixed] Maps Logic (Backticks)
 // ============================================
 
 function sendWhatsApp() { 
@@ -534,20 +534,18 @@ function sendWhatsApp() {
     if(!phone) { alert("請輸入電話"); return; } 
     
     if (navigator.geolocation) { 
-        // 顯示載入狀態
         const btn = document.getElementById('wa-btn');
         const orgText = btn.innerHTML;
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 定位中...';
         
         navigator.geolocation.getCurrentPosition((pos) => { 
-            // 修正 1: 改用標準 Google Maps 短連結格式，並修正 ${} 語法錯誤
-            // 這種格式在 WhatsApp 裡會自動產生漂亮的地圖預覽
-            const mapLink = `https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`; 
+            // Fixed: Use backticks ` for string interpolation
+            const mapLink = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`; 
             
             const text = `我平安抵達了！位置：${mapLink}`;
             window.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`; 
             
-            btn.innerHTML = orgText; // 恢復按鈕文字
+            btn.innerHTML = orgText; 
         }, (err) => { 
             alert("無法定位: " + err.message); 
             btn.innerHTML = orgText;
@@ -562,8 +560,7 @@ function sendWhatsApp() {
 }
 
 function openMapQuery(address) { 
-    // 修正 2: 改用 Google Maps Search API 標準格式
-    // api=1 參數能確保在支援的裝置上嘗試呼叫原生 App
+    // Fixed: Use backticks ` for string interpolation and standard Search API
     const query = encodeURIComponent(address);
     window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank'); 
 }
