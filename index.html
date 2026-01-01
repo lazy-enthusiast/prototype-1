@@ -3,32 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Travel App v31.0 (Compact)</title>
+<title>Travel App v31.2 (Fixed Maps)</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
 <style>
-/* ⛔ [系統核心樣式 - 緊湊版] */
+/* ⛔ [系統核心樣式 - 緊湊版 v31.1] */
 :root {
     --bg-body: #FFFFFF; --bg-card: #F9F9F9; 
     --text-main: #111111; --text-sub: #777777; 
     --accent: #000000; --accent-text: #FFFFFF; 
     --border: #EEEEEE; 
     --font-heading: sans-serif; --font-body: sans-serif;
-    --shadow: 0 1px 3px rgba(0,0,0,0.05); /* 陰影變淺，更平整 */
+    --shadow: 0 1px 3px rgba(0,0,0,0.05);
     --safe-top: env(safe-area-inset-top);
     --safe-bottom: env(safe-area-inset-bottom);
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 body { font-family: var(--font-body); background-color: var(--bg-body); color: var(--text-main); margin: 0; padding: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; transition: all 0.3s ease; line-height: 1.4; }
 
-/* Header (稍微縮減高度) */
-header { background-color: var(--bg-card); opacity: 0.98; backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 0 15px; padding-top: var(--safe-top); height: calc(50px + var(--safe-top)); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; position: relative; z-index: 200; }
-header h1 { margin: 0; font-size: 1.1rem; font-weight: 800; letter-spacing: 0.5px; color: var(--text-main); font-family: var(--font-heading); text-transform: uppercase; }
+/* Header */
+header { background-color: var(--bg-card); opacity: 0.98; backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 0 15px; padding-top: var(--safe-top); height: calc(56px + var(--safe-top)); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; position: relative; z-index: 200; }
+header h1 { margin: 0; font-size: 1.1rem; font-weight: 800; letter-spacing: 0.5px; color: var(--text-main); font-family: var(--font-heading); text-transform: uppercase; line-height: 1; }
+#local-clock { font-size: 0.65rem; color: var(--text-sub); font-weight: 600; letter-spacing: 1px; margin-top: 3px; font-variant-numeric: tabular-nums; }
+
 .header-actions { display: flex; align-items: center; gap: 8px; }
 .header-btn { font-size: 1rem; cursor: pointer; color: var(--text-main); border-radius: 50%; width: 36px; height: 36px; display: flex; justify-content: center; align-items: center; background: transparent; transition: background 0.2s; }
 
-/* Date Selector (更緊湊) */
+/* Date Selector */
 .date-selector-container { background: var(--bg-card); opacity: 0.98; padding: 5px 0; border-bottom: 1px solid var(--border); width: 100%; flex-shrink: 0; position: relative; z-index: 90; }
 .date-selector { display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; padding: 0 10px; }
 .date-chip { flex: 1 0 auto; min-width: 55px; max-width: 100px; padding: 8px 0; border-radius: 0; cursor: pointer; color: var(--text-sub); display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; border: 1px solid transparent; transition: all 0.2s; }
@@ -43,7 +45,7 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .page-header { padding: 0 15px; margin-bottom: 15px; }
 .page-title { font-size: 1.5rem; font-weight: 800; margin: 0; letter-spacing: -0.5px; font-family: var(--font-heading); }
 
-/* Timeline (大幅縮減間距) */
+/* Timeline */
 .timeline-container { padding: 5px 15px; max-width: 800px; margin: 0 auto; }
 .timeline-item { position: relative; padding-left: 25px; padding-bottom: 12px; border-left: 1px solid var(--border); }
 .timeline-item:last-child { border-left: 1px solid transparent; }
@@ -55,8 +57,9 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .card-time { font-size: 0.7rem; color: var(--text-sub); font-weight: 600; margin-bottom: 4px; display: block; font-family: var(--font-body); letter-spacing: 0.5px; text-transform: uppercase;}
 .card-tag { font-size: 0.6rem; background: var(--bg-body); padding: 2px 6px; border-radius: 0; color: var(--text-sub); font-weight: 500; border: 1px solid var(--border); letter-spacing: 0.5px; }
 
-/* Weather (緊湊版) */
+/* Weather */
 .weather-main-card { background: var(--text-main); color: var(--bg-body); border-radius: 0; padding: 20px; margin: 0 15px 20px 15px; text-align: center; position: relative; overflow: hidden;}
+.weather-tag-badge { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.2); padding: 2px 8px; font-size: 0.6rem; border-radius: 10px; font-weight: 600; }
 .weather-header-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px; }
 .weather-big-temp { font-size: 3.5rem; font-weight: 300; line-height: 1; letter-spacing: -2px; font-family: var(--font-heading); }
 .weather-condition { font-size: 0.9rem; font-weight: 600; opacity: 0.9; margin-bottom: 2px; letter-spacing: 1px; text-transform: uppercase;}
@@ -81,14 +84,14 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .ws-value { font-size: 1.1rem; font-weight: 400; color: var(--text-main); font-family: var(--font-heading); }
 .ws-sub { font-size: 0.65rem; color: var(--text-sub); margin-top: 2px; }
 
-/* Shopping (緊湊版) */
+/* Shopping */
 .shopping-list { padding: 0 15px; }
 .shop-item { background: var(--bg-card); padding: 15px; border-radius: 0; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--border); }
 .shop-item.checked { opacity: 0.4; background: var(--bg-body); }
 .shop-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); border-radius: 0; }
 .shop-item label { flex: 1; font-size: 0.95rem; color: var(--text-main); font-family: var(--font-body); }
 
-/* Inspiration (緊湊版) */
+/* Inspiration */
 .filter-bar-container { padding: 0 15px 15px 15px; position: sticky; top: 0; z-index: 50; background: var(--bg-body); overflow-x: auto; white-space: nowrap; scrollbar-width: none; border-bottom: 1px solid var(--border); margin-bottom: 15px; }
 .filter-chip { display: inline-block; padding: 8px 16px; margin-right: 8px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 0; font-size: 0.75rem; color: var(--text-sub); cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
 .filter-chip.active { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
@@ -99,7 +102,7 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .inspire-title { font-size: 1rem; font-weight: 700; margin: 0 0 4px 0; font-family: var(--font-heading); }
 .inspire-note { font-size: 0.85rem; color: var(--text-sub); line-height: 1.4; }
 
-/* Info Page (緊湊版) */
+/* Info Page */
 .info-card { background: var(--bg-card); padding: 20px; border-radius: 0; margin: 0 15px 15px 15px; border: 1px solid var(--border); }
 .info-header { font-weight: bold; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; font-family: var(--font-heading); display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; }
 .info-row { display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-start; font-size: 0.9rem; color: var(--text-main); line-height: 1.5; }
@@ -113,7 +116,7 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .flight-time { font-size: 0.85rem; font-weight: 600; margin-top: 2px; color: var(--text-main); }
 .flight-meta { font-size: 0.65rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
 
-/* Modal (緊湊版) */
+/* Modal */
 .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; justify-content: center; align-items: end; backdrop-filter: blur(5px); cursor: pointer; } 
 .modal.open { display: flex; }
 .modal-content { background: var(--bg-card); color: var(--text-main); width: 100%; max-width: 600px; max-height: 90vh; border-radius: 0; padding: 0 0 30px 0; overflow-y: auto; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); cursor: default; display: flex; flex-direction: column; border-top: 1px solid var(--border); box-shadow: 0 -10px 40px rgba(0,0,0,0.05); transition: transform 0.2s ease-out; }
@@ -147,9 +150,10 @@ nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: var(
 <body>
 
 <script>
-// --- 1. [主題設定] ---
+// ============================================
+//   ⚙️ 1. [主題與全域設定]
+// ============================================
 const THEME_CONFIG = {
-    // 預設：極簡黑白 (Minimalist)
     accentColor: "#000000",       
     accentText: "#FFFFFF",        
     backgroundColor: "#FFFFFF",   
@@ -157,20 +161,19 @@ const THEME_CONFIG = {
     textColor: "#111111",         
     textSubColor: "#777777",      
     borderColor: "#EEEEEE",       
-
-    // 動態字體庫
     googleFontsUrl: "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;500;700&display=swap",
     fontHeading: '"Noto Sans JP", sans-serif', 
     fontBody: '"Noto Sans JP", sans-serif'
 };
 
-// --- 2. [旅程設定] ---
+// ============================================
+//   🗺️ 2. [旅程資料核心]
+// ============================================
 const CONFIG = {
-    startDate: "2026-01-07", // YYYY-MM-DD
-    duration: 8 // 天數
+    startDate: "2026-01-07", // 旅程開始 YYYY-MM-DD
+    duration: 8 // 總天數
 };
 
-// --- 3. [地點與工具] ---
 const DESTINATION = {
     name: "京都 Kyoto",       
     lat: 35.0116,             
@@ -182,7 +185,6 @@ const DESTINATION = {
     appTitle: "KYOTO <span>2026</span>" 
 };
 
-// --- 4. [實用資訊] ---
 const TRIP_INFO = {
     visa: null,
     flights: [
@@ -198,7 +200,6 @@ const TRIP_INFO = {
     ]
 };
 
-// --- 5. [行程資料] ---
 const USER_ITINERARY = {
     "day1": { 
         "events": [
@@ -236,7 +237,10 @@ const USER_ITINERARY = {
 
 <div id="toast"><i class="fa-solid fa-circle-check"></i> <span id="toast-msg">Action Completed</span></div>
 <header>
-    <h1 id="app-title">TRIP PLANNER</h1>
+    <div>
+        <h1 id="app-title">TRIP PLANNER</h1>
+        <div id="local-clock">--:--</div>
+    </div>
     <div class="header-actions">
         <div class="header-btn" onclick="openTranslate()"><i class="fa-solid fa-language"></i></div>
         <div class="header-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></div>
@@ -335,7 +339,7 @@ const USER_ITINERARY = {
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// --- [System Core] Logic Implementation ---
+// --- [System Logic] ---
 function applyTheme() {
     const root = document.documentElement;
     if(THEME_CONFIG.accentColor) root.style.setProperty('--accent', THEME_CONFIG.accentColor);
@@ -377,19 +381,32 @@ let currentEventData = null;
 let exchangeRate = 0.053; 
 let weatherCache = null;
 let shopState = {}; 
+
 function init() { 
     // Init Config UI
     document.getElementById('app-title').innerHTML = DESTINATION.appTitle;
     document.getElementById('lbl-curr-target').innerText = DESTINATION.currencyLabel;
     document.getElementById('lbl-curr-base').innerText = DESTINATION.baseCurrency;
 
-    renderDateSelector(); selectDay('day1'); switchMainPage('itinerary', document.querySelector('.nav-item.active')); fetchRates(); fetchWeather();
+    renderDateSelector(); selectDay('day1'); switchMainPage('itinerary', document.querySelector('.nav-item.active')); fetchRates(); 
+    // Weather fetch is now handled lazily in switchMainPage
+    
     if(localStorage.getItem('travelMemo')) document.getElementById('quick-memo').value = localStorage.getItem('travelMemo');
     if(localStorage.getItem('shopState')) shopState = JSON.parse(localStorage.getItem('shopState'));
     document.getElementById('quick-memo').addEventListener('input', function() { localStorage.setItem('travelMemo', this.value); });
     renderInfoPage(); 
     initSwipeClose();
+    setInterval(updateLocalClock, 1000); // Start clock
+    updateLocalClock();
 }
+
+function updateLocalClock() {
+    if(!DESTINATION.timezone) return;
+    const options = { timeZone: DESTINATION.timezone, hour: '2-digit', minute: '2-digit', hour12: false };
+    const timeString = new Date().toLocaleTimeString('en-US', options);
+    document.getElementById('local-clock').innerText = `${DESTINATION.name.split(' ')[0]} ${timeString}`;
+}
+
 function renderInfoPage() {
     const container = document.getElementById('dynamic-info-content');
     if(!container) return;
@@ -456,6 +473,7 @@ async function fetchWeather() {
         const res = await fetch(url); const data = await res.json();
         if(isArchive) { if(!data.daily.precipitation_probability_max) data.daily.precipitation_probability_max = [20]; if(!data.daily.uv_index_max) data.daily.uv_index_max = [3]; if(!data.hourly.precipitation_probability) data.hourly.precipitation_probability = new Array(24).fill(0); }
         weatherCache = data; weatherCache.isArchive = isArchive;
+        localStorage.setItem('weatherLastFetch', new Date().getTime()); // Set Cache TS
         if(document.getElementById('page-weather').classList.contains('active')) renderWeatherModule();
     } catch(e) { console.error(e); document.getElementById('weather-content').innerHTML = "<div style='text-align:center; padding:30px;'>暫時無法取得天氣</div>"; }
 }
@@ -486,8 +504,70 @@ function renderWeatherModule() {
 }
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('open'); }
 function openTranslate() { window.open("https://translate.google.com/?sl=auto&tl=zh-TW", "_blank"); }
-function switchMainPage(pageId, navEl) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById('page-' + pageId).classList.add('active'); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); if(navEl) navEl.classList.add('active'); const ds = document.querySelector('.date-selector-container'); if(pageId === 'info') ds.style.display = 'none'; else ds.style.display = 'block'; if(pageId === 'weather') fetchWeather(); }
-function sendWhatsApp() { let phone = document.getElementById('wa-phone').value.replace(/\D/g, ''); if(!phone) { alert("請輸入電話"); return; } if (navigator.geolocation) { navigator.geolocation.getCurrentPosition((pos) => { const mapLink = `https://www.google.com/maps/search/?api=1&query=${pos.coords.latitude},${pos.coords.longitude}`; window.location.href = `https://wa.me/${phone}?text=${encodeURIComponent("我平安抵達了！位置：" + mapLink)}`; }); } else alert("無法定位"); }
+function switchMainPage(pageId, navEl) { 
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); 
+    document.getElementById('page-' + pageId).classList.add('active'); 
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); 
+    if(navEl) navEl.classList.add('active'); 
+    const ds = document.querySelector('.date-selector-container'); 
+    if(pageId === 'info') ds.style.display = 'none'; else ds.style.display = 'block'; 
+    
+    // Optimized Weather Fetch
+    if(pageId === 'weather') {
+        const now = new Date().getTime();
+        const lastFetch = localStorage.getItem('weatherLastFetch');
+        // Fetch only if no cache or cache older than 1 hour (3600000 ms)
+        if (!weatherCache || !lastFetch || (now - lastFetch > 3600000)) {
+            fetchWeather();
+        } else {
+            renderWeatherModule(); // Just render from cache
+        }
+    }
+}
+
+// ============================================
+// 🛠️ [已修正] Google Maps & WhatsApp 連結邏輯
+// ============================================
+
+function sendWhatsApp() { 
+    let phone = document.getElementById('wa-phone').value.replace(/\D/g, ''); 
+    if(!phone) { alert("請輸入電話"); return; } 
+    
+    if (navigator.geolocation) { 
+        // 顯示載入狀態
+        const btn = document.getElementById('wa-btn');
+        const orgText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 定位中...';
+        
+        navigator.geolocation.getCurrentPosition((pos) => { 
+            // 修正 1: 改用標準 Google Maps 短連結格式，並修正 ${} 語法錯誤
+            // 這種格式在 WhatsApp 裡會自動產生漂亮的地圖預覽
+            const mapLink = `https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`; 
+            
+            const text = `我平安抵達了！位置：${mapLink}`;
+            window.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`; 
+            
+            btn.innerHTML = orgText; // 恢復按鈕文字
+        }, (err) => { 
+            alert("無法定位: " + err.message); 
+            btn.innerHTML = orgText;
+        }, {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+        }); 
+    } else {
+        alert("瀏覽器不支援定位"); 
+    }
+}
+
+function openMapQuery(address) { 
+    // 修正 2: 改用 Google Maps Search API 標準格式
+    // api=1 參數能確保在支援的裝置上嘗試呼叫原生 App
+    const query = encodeURIComponent(address);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank'); 
+}
+
 function callNumber(num) { window.location.href = `tel:${num}`; }
 function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => { showToast("已複製"); }); }
 function searchGmail(query) { window.open(`https://mail.google.com/mail/u/0/#search/${encodeURIComponent(query)}`, '_blank'); }
@@ -521,7 +601,7 @@ function openModal(data) {
     document.getElementById('detail-modal').classList.add('open'); 
     setTimeout(() => { if(modalMap) modalMap.remove(); modalMap = L.map('modal-mini-map', {zoomControl:false, dragging:false, attributionControl: false}).setView(data.coords, 15); L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(modalMap); L.marker(data.coords, {icon: L.divIcon({className:'custom-div-icon',html:"<div style='background:black;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);'></div>",iconSize:[12,12]})}).addTo(modalMap); modalMap.invalidateSize(); }, 150); 
 }
-function openMapQuery(address) { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank'); }
+
 function closeModal() { document.getElementById('detail-modal').classList.remove('open'); document.querySelector('.modal-content').style.transform = ''; }
 document.getElementById('detail-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
 function initSwipeClose() {
