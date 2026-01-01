@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Travel App v29.0 (Swipe Close)</title>
+<title>Travel App v30.0 (Layout Perfected)</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
@@ -86,9 +86,23 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .shop-item.checked label { text-decoration: line-through; }
 .shop-item input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent); border-radius: 0; }
 .shop-item label { flex: 1; font-size: 1rem; color: var(--text-main); font-family: var(--font-body); }
-.filter-bar-container { padding: 0 20px 20px 20px; position: sticky; top: 0; z-index: 50; background: var(--bg-body); overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+
+/* [FIXED] Filter Bar Styles */
+.filter-bar-container { 
+    padding: 10px 20px; 
+    position: sticky; 
+    top: 0; 
+    z-index: 50; 
+    background: var(--bg-body); /* 確保背景不透明 */
+    overflow-x: auto; 
+    white-space: nowrap; 
+    scrollbar-width: none; 
+    border-bottom: 1px solid var(--border); /* 視覺分隔 */
+    margin-bottom: 20px; /* 增加與第一張卡片的距離 */
+}
 .filter-chip { display: inline-block; padding: 10px 20px; margin-right: 10px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 0; font-size: 0.8rem; color: var(--text-sub); cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
 .filter-chip.active { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+
 .inspire-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 0; padding: 30px; color: var(--text-main); position: relative; display: flex; flex-direction: column; justify-content: center; margin-bottom: 20px; cursor: pointer; min-height: 100px; box-shadow: var(--shadow); }
 .inspire-card:active { transform: scale(0.99); opacity: 0.9; }
 .inspire-card.hidden { display: none; }
@@ -111,15 +125,13 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .flight-time { font-size: 0.9rem; font-weight: 600; margin-top: 2px; color: var(--text-main); }
 .flight-meta { font-size: 0.7rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
 .flight-arrow { color: var(--text-sub); font-size: 0.9rem; }
-
-/* MODAL with Swipe Bar */
 .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; justify-content: center; align-items: end; backdrop-filter: blur(5px); cursor: pointer; } 
 .modal.open { display: flex; }
 .modal-content { background: var(--bg-card); color: var(--text-main); width: 100%; max-width: 600px; max-height: 90vh; border-radius: 0; padding: 0 0 40px 0; overflow-y: auto; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); cursor: default; display: flex; flex-direction: column; border-top: 1px solid var(--border); box-shadow: 0 -10px 40px rgba(0,0,0,0.05); transition: transform 0.2s ease-out; }
-/* NEW: Swipe Handle */
+/* Modal Swipe Handle */
 .modal-handle-container { width: 100%; height: 30px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; touch-action: none; cursor: grab; }
 .modal-handle { width: 40px; height: 5px; background: #CCCCCC; border-radius: 10px; }
-.modal-body { padding: 0 30px 30px 30px; } /* Adjusted top padding */
+.modal-body { padding: 0 30px 30px 30px; }
 .modal-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin: 25px 0; }
 .modal-label { font-size: 0.7rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1.5px; display: block; margin-bottom: 8px; font-weight: 700; }
 .modal-value { font-size: 1rem; font-weight: 400; color: var(--text-main); font-family: var(--font-body); }
@@ -322,7 +334,6 @@ const USER_ITINERARY = {
 <div id="detail-modal" class="modal">
     <div class="modal-content">
         <div class="modal-handle-container" id="modal-drag-area"><div class="modal-handle"></div></div>
-        
         <div id="modal-mini-map"></div>
         <div class="modal-body">
             <div style="margin-bottom:20px;"><span class="modal-label" id="modal-type">Type</span><h2 id="modal-title" style="margin:0; font-size:1.6rem; font-family:var(--font-heading);">Title</h2></div>
@@ -392,7 +403,7 @@ function init() {
     if(localStorage.getItem('shopState')) shopState = JSON.parse(localStorage.getItem('shopState'));
     document.getElementById('quick-memo').addEventListener('input', function() { localStorage.setItem('travelMemo', this.value); });
     renderInfoPage(); 
-    initSwipeClose(); // Init Drag
+    initSwipeClose();
 }
 function renderInfoPage() {
     const container = document.getElementById('dynamic-info-content');
