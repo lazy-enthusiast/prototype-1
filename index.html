@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Travel App v27.0 (Auto Layout)</title>
+<title>Travel App v27.0 (Global)</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
@@ -39,34 +39,13 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .page-header { padding: 0 20px; margin-bottom: 25px; }
 .page-title { font-size: 2rem; font-weight: 800; margin: 0; letter-spacing: -1px; font-family: var(--font-heading); }
 
-/* [SMART LAYOUT ENGINE] 日期選擇器 - 自動平衡 */
+/* Components */
 .date-selector-container { background: var(--bg-card); opacity: 0.98; padding: 10px 0; border-bottom: 1px solid var(--border); width: 100%; flex-shrink: 0; position: relative; z-index: 90; }
 .date-selector { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding: 0 15px; }
-.date-chip { 
-    /* 關鍵設定：flex-grow: 1 讓它自動長大，flex-basis: auto 自動計算 */
-    flex: 1 0 auto; 
-    /* 關鍵設定：設定最小寬度，防止太擠時變形 */
-    min-width: 60px; 
-    padding: 12px 0; 
-    border-radius: 0; 
-    cursor: pointer; 
-    color: var(--text-sub); 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: center; 
-    background: transparent; 
-    border: 1px solid transparent; 
-    transition: all 0.2s; 
-}
-/* 當天數少時，最大寬度不超過 100px，避免 2 天行程時按鈕大得離譜 */
-.date-chip { max-width: 120px; }
-
+.date-chip { flex: 1 0 auto; min-width: 60px; max-width: 120px; padding: 12px 0; border-radius: 0; cursor: pointer; color: var(--text-sub); display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; border: 1px solid transparent; transition: all 0.2s; }
 .date-chip.active { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
 .day-num { font-weight: 700; font-size: 1.2rem; line-height: 1; margin-bottom: 4px; font-family: var(--font-heading); } 
 .day-week { font-size: 0.65rem; font-weight: 500; opacity: 0.8; letter-spacing: 1px; text-transform: uppercase;}
-
-/* Timeline & Cards */
 .timeline-container { padding: 10px 20px; max-width: 800px; margin: 0 auto; }
 .timeline-item { position: relative; padding-left: 30px; padding-bottom: 30px; border-left: 1px solid var(--border); }
 .timeline-item:last-child { border-left: 1px solid transparent; }
@@ -77,8 +56,6 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .card-title { font-size: 1.1rem; font-weight: 700; margin: 0 0 10px 0; line-height: 1.4; font-family: var(--font-heading); color: var(--text-main); letter-spacing: 0.5px; }
 .card-time { font-size: 0.75rem; color: var(--text-sub); font-weight: 600; margin-bottom: 6px; display: block; font-family: var(--font-body); letter-spacing: 1px; text-transform: uppercase;}
 .card-tag { font-size: 0.65rem; background: var(--bg-body); padding: 4px 8px; border-radius: 0; color: var(--text-sub); font-weight: 500; border: 1px solid var(--border); letter-spacing: 0.5px; }
-
-/* Weather */
 .weather-main-card { background: var(--text-main); color: var(--bg-body); border-radius: 0; padding: 30px; margin: 0 20px 30px 20px; text-align: center; position: relative; overflow: hidden;}
 .weather-header-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; }
 .weather-big-temp { font-size: 4.5rem; font-weight: 300; line-height: 1; letter-spacing: -3px; font-family: var(--font-heading); }
@@ -103,8 +80,6 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .ws-icon { color: var(--text-sub); font-size: 0.9rem; }
 .ws-value { font-size: 1.3rem; font-weight: 400; color: var(--text-main); font-family: var(--font-heading); }
 .ws-sub { font-size: 0.7rem; color: var(--text-sub); margin-top: 2px; }
-
-/* Shopping */
 .shopping-list { padding: 0 20px; }
 .shop-item { background: var(--bg-card); padding: 20px; border-radius: 0; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border); }
 .shop-item.checked { opacity: 0.4; background: var(--bg-body); }
@@ -117,8 +92,6 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .inspire-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 0; padding: 30px; color: var(--text-main); position: relative; display: block; margin-bottom: 20px;}
 .inspire-card.hidden { display: none; }
 .inspire-badge { background: var(--accent); color: var(--accent-text); padding: 5px 12px; border-radius: 0; font-size: 0.65rem; font-weight: 700; position: absolute; top: -12px; left: 20px; text-transform: uppercase; letter-spacing: 1px; }
-
-/* Info */
 .info-card { background: var(--bg-card); padding: 25px; border-radius: 0; margin: 0 20px 20px 20px; border: 1px solid var(--border); }
 .info-header { font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; font-family: var(--font-heading); display: flex; justify-content: space-between; align-items: center; }
 .info-row { display: flex; gap: 20px; margin-bottom: 20px; align-items: flex-start; font-size: 0.95rem; color: var(--text-main); line-height: 1.6; }
@@ -146,21 +119,19 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .btn-action { width: 100%; padding: 18px; border-radius: 0; border: none; font-weight: 600; cursor: pointer; font-size: 0.9rem; text-align: center; margin-bottom:12px; text-transform: uppercase; letter-spacing: 1px; }
 .btn-black { background: var(--accent); color: var(--accent-text); }
 .btn-outline { background: var(--bg-card); border: 1px solid var(--text-main); color: var(--text-main); }
-
-/* Utility */
-#toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: var(--text-main); color: var(--bg-card); padding: 12px 24px; border-radius: 30px; font-size: 0.9rem; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-weight: 500; } #toast.show { opacity: 1; }
 .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.2); z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); } .sidebar-overlay.open { opacity: 1; pointer-events: all; }
 .sidebar { position: fixed; top: 0; right: 0; width: 85%; max-width: 300px; height: 100%; background: var(--bg-card); color: var(--text-main); z-index: 1001; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow-y: auto; padding: 25px 20px 100px 20px; padding-top: calc(25px + var(--safe-top)); box-shadow: -5px 0 20px rgba(0,0,0,0.05); display: flex; flex-direction: column; border-left: 1px solid var(--border); } .sidebar.open { transform: translateX(0); } .sidebar-section-title { font-size: 0.75rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; margin-top: 30px; font-weight: 600; }
 .whatsapp-box { background: var(--bg-body); border: 1px solid var(--border); color: var(--text-main); padding: 15px; border-radius: 0; margin-top: 20px; } .wa-input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border); border-radius: 0; font-size: 1rem; background: var(--bg-card); } .wa-btn { width: 100%; background: var(--accent); color: var(--accent-text); border: none; padding: 12px; border-radius: 0; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 0.95rem; }
 .tool-box { background: var(--bg-card); padding: 15px; border-radius: 0; border: 1px solid var(--border); margin-bottom: 10px; box-shadow: var(--shadow); } .currency-grid { display: grid; grid-template-columns: 1fr 30px 1fr; align-items: center; gap: 5px; margin-bottom: 8px; } .curr-group { display: flex; flex-direction: column; } .curr-label { font-size: 0.7rem; color: var(--text-sub); font-weight: bold; margin-bottom: 4px; padding-left: 2px;} .curr-input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 0; font-size: 1.2rem; text-align: center; background: var(--bg-body); font-weight: 600; color: var(--text-main); } .rate-info-container { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 0.75rem; color: var(--text-sub);} .memo-area { width: 100%; height: 120px; padding: 12px; border: 1px solid var(--border); border-radius: 0; font-family: inherit; font-size: 0.95rem; resize: none; background: var(--bg-body); line-height: 1.5; color: var(--text-main); }
 .phrase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; } .phrase-card { background: var(--bg-card); border: 1px solid var(--border); padding: 20px 15px; border-radius: 0; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow); aspect-ratio: 1.3; display: flex; flex-direction: column; justify-content: center; align-items: center; } .phrase-jp { font-weight: 700; font-size: 1.2rem; margin-bottom: 8px; color: var(--text-main); } .phrase-zh { font-size: 0.85rem; color: var(--text-sub); } .phrase-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); z-index: 5000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; } .phrase-overlay.active { opacity: 1; pointer-events: all; } .phrase-content { text-align: center; width: 90%; } .phrase-big { font-size: 3.5rem; font-weight: 800; color: #000; line-height: 1.2; margin-bottom: 20px; word-break: break-all; font-family: var(--font-heading); } .close-phrase { position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); border: 1px solid #E5E5EA; padding: 12px 40px; border-radius: 30px; color: var(--text-main); cursor: pointer; background: var(--bg-card); font-weight: 600; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+#toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: var(--text-main); color: var(--bg-card); padding: 12px 24px; border-radius: 30px; font-size: 0.9rem; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-weight: 500; } #toast.show { opacity: 1; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 </style>
 </head>
 <body>
 
 <script>
-// --- 1. [主題設定] ---
+// --- 1. [設計語言] ---
 const THEME_CONFIG = {
     // 預設：極簡黑白 (Minimalist)
     accentColor: "#000000",       
@@ -177,36 +148,50 @@ const THEME_CONFIG = {
     fontBody: '"Noto Sans JP", sans-serif'
 };
 
-// --- 2. [旅程日期與天數] (NEW: duration) ---
+// --- 2. [旅程設定] ---
 const CONFIG = {
     startDate: "2026-01-07", // YYYY-MM-DD
-    duration: 8 // 設定天數，排版會自動適應
+    duration: 8 // 天數 (Layout 會自動適應)
 };
 
-// --- 3. [實用資訊] ---
+// --- 3. [地點與工具 (NEW! 徹底抽離)] ---
+const DESTINATION = {
+    name: "京都 Kyoto",       // 天氣卡片顯示名稱
+    lat: 35.0116,             // 緯度 (用於天氣)
+    lon: 135.7681,            // 經度 (用於天氣)
+    timezone: "Asia/Tokyo",   // 時區 (Open-Meteo 格式)
+    
+    currency: "jpy",          // 當地貨幣代碼 (API用, 小寫)
+    currencyLabel: "JPY",     // 當地貨幣顯示名稱
+    baseCurrency: "HKD",      // 您的本幣 (計算匯率用)
+    
+    appTitle: "KYOTO <span>2026</span>" // 頂部顯示的標題 (支援 HTML)
+};
+
+// --- 4. [實用資訊] ---
 const TRIP_INFO = {
-    // [簽證資料] 若免簽請設為 null
+    // [簽證] 若免簽設為 null
     visa: null,
 
-    // [航班資訊] (可留空 [])
+    // [航班] (留空 [] 則隱藏)
     flights: [
         { type: "去程", flight: "CX506", date: "01/07", dep: "HKG 10:00", arr: "KIX 14:30", note: "T1 登機", bookingRef: "6XYZ99" },
         { type: "回程", flight: "CX507", date: "01/14", dep: "KIX 18:00", arr: "HKG 21:30", note: "提早 2 小時", bookingRef: "6XYZ99" }
     ],
 
-    // [住宿] (支援多間)
+    // [住宿]
     hotels: [
         { name: "Dormy Inn Premium Kyoto", address: "京都市下京區東塩小路町558-8", phone: "+81753715489" }
     ],
 
-    // [緊急聯絡]
+    // [緊急]
     emergency: [
         { name: "警察局 (Police)", phone: "110" },
-        { name: "救護車/火警 (Fire)", phone: "119" }
+        { name: "救護車 (Ambulance)", phone: "119" }
     ]
 };
 
-// --- 4. [行程資料] ---
+// --- 5. [行程資料] ---
 const USER_ITINERARY = {
     "day1": { 
         "events": [
@@ -220,33 +205,21 @@ const USER_ITINERARY = {
                 "address_jp": "京都市下京区東塩小路町558-8", 
                 "coords": [34.9868, 135.7599], 
                 "phone": "+81753715489", 
-                "note": "機場巴士直達。有免費拉麵宵夜。", 
-                "tags": ["移動"] 
-            },
-            { 
-                "time": "18:00", 
-                "title": "京の焼肉処 弘 (京都站前)", 
-                "type": "美食", 
-                "price": "¥5,000", 
-                "open_hours": "17:00-23:00", 
-                "address": "京都市下京區東塩小路町579-24", 
-                "address_jp": "京都市下京区東塩小路町579-24", 
-                "coords": [34.9872, 135.7588], 
-                "phone": "+81753434129",
-                "note": "已預約 18:00。推薦菜單：史上最強里肌、生牛肉壽司。", 
-                "tags": ["晚餐"] 
+                "note": "機場巴士直達。", 
+                "tags": ["移動"],
+                "moodColor": "#000000"
             }
         ],
-        "inspiration": [{title:"備案：AEON Mall", tag:"RAINY", note:"超大購物中心。"}], 
+        "inspiration": [], 
         "shopping": ["ICOCA 卡"] 
-    },
-    // ... day2, day3 (若未填寫會自動生成空白頁)
+    }
+    // ... day2-day8 generated by loop
 };
 </script>
 
 <div id="toast"><i class="fa-solid fa-circle-check"></i> <span id="toast-msg">Action Completed</span></div>
 <header>
-    <h1>TRIP <span style="font-weight:300; opacity:0.5;">PLANNER</span></h1>
+    <h1 id="app-title">TRIP PLANNER</h1>
     <div class="header-actions">
         <div class="header-btn" onclick="openTranslate()"><i class="fa-solid fa-language"></i></div>
         <div class="header-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></div>
@@ -261,11 +234,11 @@ const USER_ITINERARY = {
     </div>
     <div class="sidebar-section-title">工具箱</div>
     <div class="tool-box">
-        <div style="font-weight:bold; margin-bottom:15px;">匯率 (JPY ⇄ HKD)</div>
+        <div style="font-weight:bold; margin-bottom:15px;">匯率換算</div>
         <div class="currency-grid">
-            <div class="curr-group"><span class="curr-label">JPY</span><input type="number" id="curr-jpy" class="curr-input" placeholder="0" oninput="convertCurrency()"></div>
+            <div class="curr-group"><span class="curr-label" id="lbl-curr-target">TARGET</span><input type="number" id="curr-jpy" class="curr-input" placeholder="0" oninput="convertCurrency()"></div>
             <div class="curr-icon"><i class="fa-solid fa-right-left"></i></div>
-            <div class="curr-group"><span class="curr-label">HKD</span><input type="number" id="curr-hkd" class="curr-input" placeholder="0" readonly></div>
+            <div class="curr-group"><span class="curr-label" id="lbl-curr-base">BASE</span><input type="number" id="curr-hkd" class="curr-input" placeholder="0" readonly></div>
         </div>
         <div class="rate-info-container">
             <div id="rate-status" class="rate-status">載入中...</div>
@@ -364,7 +337,7 @@ function applyTheme() {
 function generateScheduleData() {
     const dates = {};
     const baseDate = new Date(CONFIG.startDate);
-    const duration = CONFIG.duration || 8; // Default 8 if not set
+    const duration = CONFIG.duration || 8; 
     const weekDays = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
     for(let i=0; i<duration; i++) {
         const d = new Date(baseDate); d.setDate(baseDate.getDate() + i);
@@ -388,6 +361,11 @@ let exchangeRate = 0.053;
 let weatherCache = null;
 let shopState = {}; 
 function init() { 
+    // Init Config UI
+    document.getElementById('app-title').innerHTML = DESTINATION.appTitle;
+    document.getElementById('lbl-curr-target').innerText = DESTINATION.currencyLabel;
+    document.getElementById('lbl-curr-base').innerText = DESTINATION.baseCurrency;
+
     renderDateSelector(); selectDay('day1'); switchMainPage('itinerary', document.querySelector('.nav-item.active')); fetchRates(); fetchWeather();
     if(localStorage.getItem('travelMemo')) document.getElementById('quick-memo').value = localStorage.getItem('travelMemo');
     if(localStorage.getItem('shopState')) shopState = JSON.parse(localStorage.getItem('shopState'));
@@ -398,8 +376,6 @@ function renderInfoPage() {
     const container = document.getElementById('dynamic-info-content');
     if(!container) return;
     let html = '';
-
-    // Visa
     if(TRIP_INFO.visa && TRIP_INFO.visa.number) {
         html += `<div class="info-card"><div class="info-header">簽證資料 (Visa)</div>`;
         html += `<div class="info-row"><div><span class="info-label">類型</span><div>${TRIP_INFO.visa.type}</div></div></div>`;
@@ -408,8 +384,6 @@ function renderInfoPage() {
         if(TRIP_INFO.visa.note) html += `<div class="info-row" style="color:var(--text-sub); font-size:0.85rem;"><i class="fa-solid fa-circle-info" style="margin-right:5px;"></i> ${TRIP_INFO.visa.note}</div>`;
         html += `</div>`;
     }
-
-    // Flights
     if(TRIP_INFO.flights && TRIP_INFO.flights.length > 0) {
         html += `<div class="info-card"><div class="info-header">航班資料</div><div class="flight-grid">`;
         TRIP_INFO.flights.forEach(f => {
@@ -419,8 +393,6 @@ function renderInfoPage() {
         });
         html += `</div></div>`;
     }
-
-    // Hotels
     if(TRIP_INFO.hotels && TRIP_INFO.hotels.length > 0) {
         html += `<div class="info-card"><div class="info-header">住宿</div>`;
         TRIP_INFO.hotels.forEach(h => {
@@ -433,8 +405,6 @@ function renderInfoPage() {
         });
         html += `</div>`;
     }
-
-    // Emergency
     if(TRIP_INFO.emergency && TRIP_INFO.emergency.length > 0) {
         html += `<div class="info-card"><div class="info-header">緊急聯絡</div>`;
         TRIP_INFO.emergency.forEach(e => {
@@ -449,19 +419,21 @@ function showToast(msg) { const t = document.getElementById('toast'); document.g
 async function fetchRates(force = false) {
     const statusEl = document.getElementById('rate-status'); statusEl.innerText = '更新中...';
     try {
-        const res = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/jpy.json');
+        const res = await fetch(`https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${DESTINATION.currency}.json`);
         const data = await res.json();
-        if(data.jpy && data.jpy.hkd) { exchangeRate = data.jpy.hkd; statusEl.innerHTML = `HKD 1 = JPY ${(1/exchangeRate).toFixed(1)}`; convertCurrency(); if(force) showToast("匯率已更新"); }
+        const rate = data[DESTINATION.currency][DESTINATION.baseCurrency.toLowerCase()];
+        if(rate) { exchangeRate = rate; statusEl.innerHTML = `1 ${DESTINATION.baseCurrency} = ${(1/exchangeRate).toFixed(2)} ${DESTINATION.currencyLabel}`; convertCurrency(); if(force) showToast("匯率已更新"); }
     } catch(e) { statusEl.innerText = '離線模式'; }
 }
 function convertCurrency() { const jpy = parseFloat(document.getElementById('curr-jpy').value); if(!isNaN(jpy)) { document.getElementById('curr-hkd').value = (jpy * exchangeRate).toFixed(1); } else { document.getElementById('curr-hkd').value = ""; } }
 async function fetchWeather() {
-    const lat = 35.0116; const lon = 135.7681; const targetDateStr = scheduleData[currentDay].date; 
+    const lat = DESTINATION.lat; const lon = DESTINATION.lon; const targetDateStr = scheduleData[currentDay].date; 
     const today = new Date(); const targetDate = new Date(targetDateStr);
     const diffTime = targetDate - today; const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
     let url = ""; let isArchive = false;
-    if (diffDays >= -1 && diffDays <= 15) { url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max&hourly=temperature_2m,weathercode,precipitation_probability,relative_humidity_2m&timezone=Asia%2FTokyo&forecast_days=16`; } 
-    else { isArchive = true; const pastYear = targetDate.getFullYear() - 1; const pastDateStr = targetDateStr.replace(/^\d{4}/, pastYear); url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${pastDateStr}&end_date=${pastDateStr}&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset&hourly=temperature_2m,weathercode,relative_humidity_2m&timezone=Asia%2FTokyo`; }
+    const tz = encodeURIComponent(DESTINATION.timezone);
+    if (diffDays >= -1 && diffDays <= 15) { url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max&hourly=temperature_2m,weathercode,precipitation_probability,relative_humidity_2m&timezone=${tz}&forecast_days=16`; } 
+    else { isArchive = true; const pastYear = targetDate.getFullYear() - 1; const pastDateStr = targetDateStr.replace(/^\d{4}/, pastYear); url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${pastDateStr}&end_date=${pastDateStr}&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset&hourly=temperature_2m,weathercode,relative_humidity_2m&timezone=${tz}`; }
     try {
         const res = await fetch(url); const data = await res.json();
         if(isArchive) { if(!data.daily.precipitation_probability_max) data.daily.precipitation_probability_max = [20]; if(!data.daily.uv_index_max) data.daily.uv_index_max = [3]; if(!data.hourly.precipitation_probability) data.hourly.precipitation_probability = new Array(24).fill(0); }
@@ -478,7 +450,7 @@ function renderWeatherModule() {
     const wmo = { 0:{i:'fa-sun',t:'晴朗'}, 1:{i:'fa-cloud-sun',t:'多雲'}, 2:{i:'fa-cloud-sun',t:'多雲'}, 3:{i:'fa-cloud',t:'陰天'}, 45:{i:'fa-smog',t:'霧'}, 51:{i:'fa-cloud-rain',t:'毛毛雨'}, 61:{i:'fa-cloud-showers-heavy',t:'陣雨'}, 80:{i:'fa-cloud-showers-water',t:'雷陣雨'}, 95:{i:'fa-bolt',t:'雷雨'} };
     const w = wmo[code] || {i:'fa-cloud',t:'多雲'};
     const maxTemp = Math.round(d.temperature_2m_max[apiIndex]); const minTemp = Math.round(d.temperature_2m_min[apiIndex]); const rainProb = d.precipitation_probability_max ? d.precipitation_probability_max[apiIndex] : 0; const tagText = weatherCache.isArchive ? "歷史平均 (去年)" : "即時預報";
-    container.innerHTML = `<div class="weather-main-card"><div class="weather-tag-badge">${tagText}</div><div class="weather-header-row"><div><div class="weather-condition"><i class="fa-solid fa-location-arrow" style="font-size:0.8rem;"></i> 京都 Kyoto</div><div class="weather-hl">H:${maxTemp}° L:${minTemp}°</div></div><div class="weather-main-icon" style="color:inherit"><i class="fa-solid ${w.i}"></i></div></div><div class="weather-big-temp">${maxTemp}°</div><div style="font-weight:500;">${w.t} • 降雨 ${rainProb}%</div></div>`;
+    container.innerHTML = `<div class="weather-main-card"><div class="weather-tag-badge">${tagText}</div><div class="weather-header-row"><div><div class="weather-condition"><i class="fa-solid fa-location-arrow" style="font-size:0.8rem;"></i> ${DESTINATION.name}</div><div class="weather-hl">H:${maxTemp}° L:${minTemp}°</div></div><div class="weather-main-icon" style="color:inherit"><i class="fa-solid ${w.i}"></i></div></div><div class="weather-big-temp">${maxTemp}°</div><div style="font-weight:500;">${w.t} • 降雨 ${rainProb}%</div></div>`;
     const hContainer = document.getElementById('weather-hourly'); hContainer.innerHTML = '';
     const startHour = weatherCache.isArchive ? 0 : apiIndex * 24; 
     [9, 12, 15, 18, 21].forEach(hour => {
@@ -510,18 +482,12 @@ function openModal(data) {
     document.getElementById('modal-open-hours').innerText = data.open_hours || "待確認"; 
     document.getElementById('modal-address-short').innerText = data.address; 
     document.getElementById('modal-note').innerText = data.note; 
-    
     const infoGrid = document.querySelector('.modal-info-grid');
     const existingPhone = document.getElementById('dynamic-phone-row');
     if(existingPhone) existingPhone.remove();
-    
     if(data.phone) {
-        const phoneRow = document.createElement('div');
-        phoneRow.id = 'dynamic-phone-row';
-        phoneRow.innerHTML = `<span class="modal-label">電話</span><div class="contact-container"><span class="modal-value" style="margin-right:10px;">${data.phone}</span><a href="javascript:void(0)" onclick="callNumber('${data.phone}')" class="btn-icon-sm" style="border:1px solid var(--border);"><i class="fa-solid fa-phone"></i></a></div>`;
-        infoGrid.appendChild(phoneRow);
+        const phoneRow = document.createElement('div'); phoneRow.id = 'dynamic-phone-row'; phoneRow.innerHTML = `<span class="modal-label">電話</span><div class="contact-container"><span class="modal-value" style="margin-right:10px;">${data.phone}</span><a href="javascript:void(0)" onclick="callNumber('${data.phone}')" class="btn-icon-sm" style="border:1px solid var(--border);"><i class="fa-solid fa-phone"></i></a></div>`; infoGrid.appendChild(phoneRow);
     }
-
     const actionsContainer = document.getElementById('modal-actions'); actionsContainer.innerHTML = ''; 
     const addr = data.address_jp || data.address; 
     actionsContainer.innerHTML += `<button class="btn-action btn-outline" onclick="copyToClipboard('${addr}')"><i class="fa-regular fa-copy"></i> 複製地址</button>`; 
