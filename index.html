@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Kyoto 2026 (v16.0 Weather Enhanced)</title>
+<title>Kyoto Travel (v17.0 Real Data)</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -105,7 +105,7 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .card-tag { font-size: 0.7rem; background: #F2F2F7; padding: 4px 10px; border-radius: 6px; color: #666; font-weight: 500; }
 .card-nav-btn { position: absolute; top: 50%; right: 15px; transform: translateY(-50%); width: 36px; height: 36px; border-radius: 50%; background: #F2F2F7; color: #000; display: flex; justify-content: center; align-items: center; font-size: 1rem; transition: background 0.2s; z-index: 5; }
 
-/* --- Enhanced Weather Section (NEW) --- */
+/* --- Weather UI --- */
 .weather-main-card { 
     background: linear-gradient(135deg, #1c1c1e, #3a3a3c); color: white; 
     border-radius: 24px; padding: 25px; margin: 0 20px 25px 20px; 
@@ -116,39 +116,28 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .weather-condition { font-size: 1.2rem; font-weight: 500; opacity: 0.9; margin-bottom: 4px; }
 .weather-hl { font-size: 0.9rem; opacity: 0.7; }
 .weather-main-icon { font-size: 3.5rem; color: #FFD700; }
+.weather-tag-badge { 
+    position: absolute; top: 15px; right: 15px; 
+    background: rgba(255,255,255,0.2); backdrop-filter: blur(5px);
+    padding: 4px 10px; border-radius: 12px; font-size: 0.65rem; font-weight: 600; 
+}
 
 .section-label { padding: 0 20px; font-size: 0.85rem; font-weight: 600; color: #86868B; margin-bottom: 10px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
 
-/* Hourly Scroll */
-.hourly-container { 
-    display: flex; gap: 12px; overflow-x: auto; padding: 0 20px 20px 20px; 
-    scrollbar-width: none; -webkit-overflow-scrolling: touch; 
-}
-.hourly-item { 
-    flex: 0 0 auto; width: 70px; background: #FFF; border-radius: 16px; 
-    padding: 15px 5px; text-align: center; border: 1px solid #E5E5EA; 
-    display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 110px;
-}
+.hourly-container { display: flex; gap: 12px; overflow-x: auto; padding: 0 20px 20px 20px; scrollbar-width: none; }
+.hourly-item { flex: 0 0 auto; width: 70px; background: #FFF; border-radius: 16px; padding: 15px 5px; text-align: center; border: 1px solid #E5E5EA; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 110px; }
 .hourly-time { font-size: 0.8rem; color: #666; font-weight: 600; margin-bottom: 5px; }
 .hourly-icon { font-size: 1.2rem; margin: 5px 0; color: #333; }
 .hourly-temp { font-size: 1rem; font-weight: 700; color: #000; }
 .hourly-rain { font-size: 0.65rem; color: #007AFF; font-weight: 500; margin-top: 5px; }
 
-/* Advice Card */
-.advice-card { 
-    background: #FFF; margin: 0 20px 25px 20px; padding: 20px; border-radius: 18px; 
-    border: 1px solid #E5E5EA; display: flex; gap: 15px; align-items: flex-start; 
-}
+.advice-card { background: #FFF; margin: 0 20px 25px 20px; padding: 20px; border-radius: 18px; border: 1px solid #E5E5EA; display: flex; gap: 15px; align-items: flex-start; }
 .advice-icon { width: 40px; height: 40px; background: #F2F2F7; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.1rem; color: #1D1D1F; }
 .advice-content h4 { margin: 0 0 5px 0; font-size: 1rem; }
 .advice-content p { margin: 0; font-size: 0.9rem; color: #666; line-height: 1.5; }
 
-/* Grid Details */
 .weather-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 20px 30px 20px; }
-.weather-stat-card { 
-    background: #FFF; padding: 15px 20px; border-radius: 16px; border: 1px solid #E5E5EA; 
-    display: flex; flex-direction: column; justify-content: center; height: 90px;
-}
+.weather-stat-card { background: #FFF; padding: 15px 20px; border-radius: 16px; border: 1px solid #E5E5EA; display: flex; flex-direction: column; justify-content: center; height: 90px; }
 .ws-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
 .ws-label { font-size: 0.75rem; color: #8E8E93; text-transform: uppercase; font-weight: 600; }
 .ws-icon { color: #8E8E93; font-size: 0.9rem; }
@@ -163,7 +152,7 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .shop-item input[type="checkbox"] { width: 22px; height: 22px; accent-color: #000; }
 .shop-item label { flex: 1; font-size: 1rem; }
 
-/* --- Phrases & Others --- */
+/* --- Phrases & Modal & Nav (Same as before) --- */
 .phrase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
 .phrase-card { background: #FFF; border: 1px solid #E5E5EA; padding: 20px 15px; border-radius: 16px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow); aspect-ratio: 1.3; display: flex; flex-direction: column; justify-content: center; align-items: center; }
 .phrase-jp { font-weight: 700; font-size: 1.2rem; margin-bottom: 8px; color: #000; }
@@ -173,8 +162,6 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .phrase-content { text-align: center; width: 90%; }
 .phrase-big { font-size: 3.5rem; font-weight: 800; color: #000; line-height: 1.2; margin-bottom: 20px; word-break: break-all; }
 .close-phrase { position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); border: 1px solid #E5E5EA; padding: 12px 40px; border-radius: 30px; color: #000; cursor: pointer; background: #FFF; font-weight: 600; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
-
-/* --- Modal --- */
 .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; justify-content: center; align-items: end; backdrop-filter: blur(4px); cursor: pointer; }
 .modal.open { display: flex; }
 .modal-content { background: #FFF; color: #000; width: 100%; max-width: 600px; max-height: 90vh; border-radius: 24px 24px 0 0; padding: 0 0 40px 0; overflow-y: auto; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); cursor: default; display: flex; flex-direction: column; }
@@ -188,14 +175,10 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .btn-action { width: 100%; padding: 16px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; font-size: 1rem; text-align: center; margin-bottom:10px;}
 .btn-black { background: #000; color: #FFF; }
 .btn-outline { background: #FFF; border: 1px solid #E5E5EA; color: #000; }
-
-/* --- Bottom Nav --- */
 nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: rgba(255,255,255,0.95); display: flex; justify-content: space-around; padding: 10px 0 calc(10px + var(--safe-area-bottom)) 0; border-top: 1px solid rgba(0,0,0,0.1); z-index: 100; backdrop-filter: blur(10px); }
 .nav-item { color: #C7C7CC; text-align: center; font-size: 0.65rem; cursor: pointer; width: 25%; transition: color 0.2s; }
 .nav-item i { display: block; font-size: 1.4rem; margin-bottom: 4px; }
 .nav-item.active { color: var(--accent-black); }
-
-/* --- Info Page --- */
 .info-card { background: #FFF; padding: 20px; border-radius: 16px; margin: 0 20px 15px 20px; border: 1px solid #E5E5EA; box-shadow: var(--shadow); }
 .info-row { display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-start; font-size: 0.95rem; color: #333; }
 .info-icon { width: 24px; text-align: center; color: var(--text-sub); }
@@ -215,7 +198,7 @@ nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: rgba
 <div id="toast"><i class="fa-solid fa-circle-check"></i> <span id="toast-msg">Action Completed</span></div>
 
 <header>
-    <h1>KYOTO <span style="font-weight:300; opacity:0.5;">2026</span></h1>
+    <h1>KYOTO <span style="font-weight:300; opacity:0.5;">PLANNER</span></h1>
     <div class="header-actions">
         <div class="header-btn" onclick="openTranslate()"><i class="fa-solid fa-language"></i></div>
         <div class="header-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></div>
@@ -315,7 +298,7 @@ nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: rgba
             </div>
             
             <div style="text-align:center; padding-bottom:30px; color:#AAA; font-size:0.75rem;">
-                資料來源: Open-Meteo • 2026 模擬數據
+                資料來源: Open-Meteo <span id="data-source-tag"></span>
             </div>
         </div>
     </div>
@@ -379,88 +362,98 @@ nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: rgba
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// --- FULL DATA ---
+// --- DYNAMIC DATA GENERATION ---
+// Helper to create dates starting from Current Year's Jan 7
+function getTripDates() {
+    const today = new Date();
+    // Default to THIS YEAR's Jan 7. If today is Dec 2024, it means Jan 2025 (Next year).
+    let year = today.getFullYear();
+    // Logic: If today is after Jan 15, assume user is planning for NEXT year's Jan 7
+    // But for safety and prototype "now" testing, let's stick to Current Year or Next Year based on month.
+    if(today.getMonth() > 1) year += 1; // If it's March+, assume next year. 
+
+    const dates = {};
+    const baseDate = new Date(year, 0, 7); // Month is 0-indexed (0 = Jan)
+
+    for(let i=0; i<8; i++) {
+        const d = new Date(baseDate);
+        d.setDate(baseDate.getDate() + i);
+        const dayKey = `day${i+1}`;
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const dateStr = `${yyyy}-${mm}-${dd}`;
+        const weekDays = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
+        
+        dates[dayKey] = {
+            date: dateStr,
+            display: dd,
+            weekday: weekDays[d.getDay()]
+        };
+    }
+    return dates;
+}
+
+const tripDates = getTripDates();
+
+// Merge Dynamic Dates with Static Events
 const scheduleData = {
-    "day1": { 
-        "date": "2026-01-07", "display": "07", "weekday": "週三", 
+    "day1": { ...tripDates.day1, 
         "events": [ 
             { time: "14:00", title: "抵達 & Check-in", type: "住宿", price: "-", open_hours: "24H", address: "Dormy Inn Premium Kyoto", address_jp: "京都市下京区東塩小路町558-8", coords: [34.9868, 135.7599], note: "機場巴士直達京都站八條口，步行3分鐘。\n有免費宵夜拉麵 (21:30~)。", tags: ["移動"] },
             { time: "16:00", title: "京都塔", type: "景點", price: "¥800", open_hours: "10-21", address: "Kyoto Tower", address_jp: "京都タワー", coords: [34.9875, 135.7594], note: "看日落的好地方，天氣好可以看到大阪。", tags: ["地標"] },
             { time: "18:00", title: "拉麵小路", type: "晚餐", price: "¥1,200", open_hours: "11-22", address: "Kyoto Station Building 10F", address_jp: "京都駅ビル10F", coords: [34.9858, 135.7583], note: "推薦『東大』德島拉麵或『坂內食堂』。", tags: ["美食"] }
-        ], 
-        "inspiration": [{title:"雨天備案：AEON Mall", tag:"RAINY", note:"京都站後站，超大購物中心。"}, {title:"夜晚：大階梯燈光秀", tag:"PHOTO", note:"京都車站大階梯，免費觀賞。"}], 
-        "shopping": ["ICOCA 卡儲值", "便利商店水"] 
+        ], "inspiration": [{title:"雨天備案：AEON Mall", tag:"RAINY", note:"京都站後站，超大購物中心。"}, {title:"夜晚：大階梯燈光秀", tag:"PHOTO", note:"京都車站大階梯，免費觀賞。"}], "shopping": ["ICOCA 卡儲值", "便利商店水"] 
     },
-    "day2": { 
-        "date": "2026-01-08", "display": "08", "weekday": "週四", 
+    "day2": { ...tripDates.day2,
         "events": [ 
             { time: "08:30", title: "Ogawa Coffee", type: "早餐", price: "¥1,200", open_hours: "07-21", address: "Ogawa Coffee Kyoto Station", address_jp: "小川珈琲 京都駅店", coords: [34.9852, 135.7584], note: "京都老牌咖啡，推薦厚片吐司早餐。", tags: ["咖啡"] },
             { time: "10:30", title: "清水寺", type: "景點", price: "¥400", open_hours: "06-18", address: "Kiyomizu-dera", address_jp: "清水寺", coords: [34.9949, 135.7850], note: "人很多，建議早點去。順路去地主神社。", tags: ["世界遺產"] },
             { time: "13:00", title: "三年坂 & 二年坂", type: "逛街", price: "-", open_hours: "10-18", address: "Sannenzaka", address_jp: "三年坂", coords: [34.9965, 135.7805], note: "非常有京都風味的街道，小心不要跌倒。", tags: ["散步"] },
             { time: "15:00", title: "星巴克 二寧坂茶屋店", type: "休息", price: "¥600", open_hours: "08-20", address: "Starbucks Ninenzaka", address_jp: "スターバックス 京都二寧坂ヤサカ茶屋店", coords: [35.0003, 135.7807], note: "世界唯一有榻榻米的星巴克，需排隊。", tags: ["咖啡"] }
-        ], 
-        "inspiration": [{title:"拍照：八坂塔", tag:"PHOTO", note:"從法觀寺下坡拍最美。"}], 
-        "shopping": ["清水燒", "七味粉"] 
+        ], "inspiration": [{title:"拍照：八坂塔", tag:"PHOTO", note:"從法觀寺下坡拍最美。"}], "shopping": ["清水燒", "七味粉"] 
     },
-    "day3": { 
-        "date": "2026-01-09", "display": "09", "weekday": "週五", 
+    "day3": { ...tripDates.day3,
         "events": [ 
             { time: "09:00", title: "嵐山竹林小徑", type: "景點", price: "免費", open_hours: "24H", address: "Arashiyama Bamboo Grove", address_jp: "嵐山 竹林の小径", coords: [35.0172, 135.6713], note: "早晨空氣最好，遊客較少。", tags: ["自然"] },
             { time: "10:30", title: "% Arabica Arashiyama", type: "咖啡", price: "¥600", open_hours: "09-17", address: "% Arabica Kyoto Arashiyama", address_jp: "% アラビカ 京都嵐山", coords: [35.0129, 135.6775], note: "渡月橋旁，網紅店，通常需排隊 20 分鐘。", tags: ["咖啡"] },
             { time: "12:00", title: "廣川鰻魚飯", type: "午餐", price: "¥5,000", open_hours: "11-14:30", address: "Unagi Hirokawa", address_jp: "うなぎ屋 廣川", coords: [35.0145, 135.6795], note: "米其林一星，強烈建議事前預約。", tags: ["美食"] },
             { time: "14:00", title: "天龍寺", type: "景點", price: "¥500", open_hours: "08:30-17", address: "Tenryu-ji", address_jp: "天龍寺", coords: [35.0157, 135.6738], note: "曹源池庭園非常美。", tags: ["庭園"] }
-        ], 
-        "inspiration": [{title:"休息：嵐電足湯", tag:"TIRED", note:"嵐山站內，¥250 附毛巾。"}], 
-        "shopping": ["嵐山限定 抹茶"] 
+        ], "inspiration": [{title:"休息：嵐電足湯", tag:"TIRED", note:"嵐山站內，¥250 附毛巾。"}], "shopping": ["嵐山限定 抹茶"] 
     },
-    "day4": { 
-        "date": "2026-01-10", "display": "10", "weekday": "週六", 
+    "day4": { ...tripDates.day4,
         "events": [ 
             { time: "11:00", title: "錦市場", type: "逛街", price: "-", open_hours: "10-18", address: "Nishiki Market", address_jp: "錦市場", coords: [35.0050, 135.7631], note: "京都的廚房。推薦：豆乳甜甜圈、三木雞卵。", tags: ["市集"] },
             { time: "14:00", title: "河原町 Shopping", type: "購物", price: "-", open_hours: "11-20", address: "Shijo Kawaramachi", address_jp: "四条河原町", coords: [35.0039, 135.7694], note: "BAL, 藤井大丸, 高島屋都在這。", tags: ["購物"] },
             { time: "18:00", title: "先斗町", type: "晚餐", price: "¥4,000", open_hours: "17-23", address: "Pontocho", address_jp: "先斗町", coords: [35.0062, 135.7712], note: "鴨川旁的小巷，氣氛極佳。找間居酒屋試試。", tags: ["夜生活"] }
-        ], 
-        "inspiration": [{title:"雨天：新京極商店街", tag:"RAINY", note:"有拱廊，淋不到雨。"}], 
-        "shopping": ["藥妝 (Sundrug)", "Uniqlo 京都限定"] 
+        ], "inspiration": [{title:"雨天：新京極商店街", tag:"RAINY", note:"有拱廊，淋不到雨。"}], "shopping": ["藥妝 (Sundrug)", "Uniqlo 京都限定"] 
     },
-    "day5": { 
-        "date": "2026-01-11", "display": "11", "weekday": "週日", 
+    "day5": { ...tripDates.day5,
         "events": [ 
             { time: "08:00", title: "伏見稻荷大社", type: "景點", price: "免費", open_hours: "24H", address: "Fushimi Inari Taisha", address_jp: "伏見稲荷大社", coords: [34.9671, 135.7727], note: "千本鳥居。要拍空景必須 8 點前到。", tags: ["健行"] },
             { time: "11:00", title: "Vermillion Cafe", type: "休息", price: "¥1,000", open_hours: "09-17", address: "Vermillion Cafe", coords: [34.9680, 135.7750], note: "稻荷山半山腰，澳洲風格咖啡，露台很舒服。", tags: ["咖啡"] },
             { time: "14:00", title: "月桂冠大倉紀念館", type: "體驗", price: "¥600", open_hours: "09-16", address: "Gekkeikan Okura Sake Museum", address_jp: "月桂冠大倉記念館", coords: [34.9304, 135.7607], note: "伏見是清酒產區，可以試飲。", tags: ["酒"] }
-        ], 
-        "inspiration": [], 
-        "shopping": ["伏見清酒", "狐狸面具"] 
+        ], "inspiration": [], "shopping": ["伏見清酒", "狐狸面具"] 
     },
-    "day6": { 
-        "date": "2026-01-12", "display": "12", "weekday": "週一", 
+    "day6": { ...tripDates.day6,
         "events": [ 
             { time: "10:00", title: "金閣寺", type: "景點", price: "¥400", open_hours: "09-17", address: "Kinkaku-ji", address_jp: "金閣寺", coords: [35.0394, 135.7292], note: "票根是符咒，很特別。天氣好金光閃閃。", tags: ["世界遺產"] },
             { time: "12:30", title: "龍安寺", type: "景點", price: "¥500", open_hours: "08-17", address: "Ryoan-ji", address_jp: "龍安寺", coords: [35.0345, 135.7182], note: "著名的枯山水石庭，適合靜坐冥想。", tags: ["禪"] },
             { time: "16:00", title: "船岡溫泉", type: "放鬆", price: "¥450", open_hours: "15-01", address: "Funaoka Onsen", address_jp: "船岡温泉", coords: [35.0369, 135.7460], note: "有形文化財等級的錢湯，非常有歷史感。", tags: ["溫泉"] }
-        ], 
-        "inspiration": [{title:"美食：更科 蕎麥麵", tag:"TIRED", note:"當地人愛的老店。"}], 
-        "shopping": ["金閣寺御守"] 
+        ], "inspiration": [{title:"美食：更科 蕎麥麵", tag:"TIRED", note:"當地人愛的老店。"}], "shopping": ["金閣寺御守"] 
     },
-    "day7": { 
-        "date": "2026-01-13", "display": "13", "weekday": "週二", 
+    "day7": { ...tripDates.day7,
         "events": [ 
             { time: "09:00", title: "南禪寺", type: "景點", price: "免費", open_hours: "08-17", address: "Nanzen-ji", address_jp: "南禅寺", coords: [35.0112, 135.7937], note: "必看水路閣（紅磚拱橋），拍照聖地。", tags: ["古蹟"] },
             { time: "10:30", title: "Blue Bottle Kyoto", type: "咖啡", price: "¥700", open_hours: "09-18", address: "Blue Bottle Coffee Kyoto", address_jp: "ブルーボトルコーヒー 京都カフェ", coords: [35.0116, 135.7928], note: "町家改建的藍瓶咖啡，空間感極佳。", tags: ["咖啡"] },
             { time: "15:00", title: "最後採買 (AEON)", type: "購物", price: "-", open_hours: "10-21", address: "AEON MALL KYOTO", coords: [34.9806, 135.7554], note: "買零食、伴手禮最後衝刺。", tags: ["購物"] }
-        ], 
-        "inspiration": [], 
-        "shopping": ["北山茶之菓", "小山園抹茶捲"] 
+        ], "inspiration": [], "shopping": ["北山茶之菓", "小山園抹茶捲"] 
     },
-    "day8": { 
-        "date": "2026-01-14", "display": "14", "weekday": "週三", 
+    "day8": { ...tripDates.day8,
         "events": [ 
             { time: "10:00", title: "Check-out", type: "住宿", price: "-", open_hours: "-", address: "Dormy Inn", coords: [34.9868, 135.7599], note: "行李寄放櫃台。", tags: ["移動"] },
             { time: "13:00", title: "搭乘 Haruka", type: "交通", price: "¥3,000", open_hours: "-", address: "Kyoto Station", address_jp: "京都駅", coords: [34.9858, 135.7589], note: "前往關西機場。記得提前買票。", tags: ["回程"] }
-        ], 
-        "inspiration": [], 
-        "shopping": ["便利商店飯糰 (飛機上吃)"] 
+        ], "inspiration": [], "shopping": ["便利商店飯糰 (飛機上吃)"] 
     }
 };
 
@@ -495,43 +488,80 @@ async function fetchRates(force = false) {
 }
 function convertCurrency() { const jpy = parseFloat(document.getElementById('curr-jpy').value); if(!isNaN(jpy)) { document.getElementById('curr-hkd').value = (jpy * exchangeRate).toFixed(1); } else { document.getElementById('curr-hkd').value = ""; } }
 
+// --- SMART WEATHER FETCHING (Forecast vs Archive) ---
 async function fetchWeather() {
+    const lat = 35.0116; const lon = 135.7681;
+    const targetDateStr = scheduleData[currentDay].date; 
+    
+    // Check if target date is reachable by Forecast API (Today to +14 days)
+    const today = new Date();
+    const targetDate = new Date(targetDateStr);
+    const diffTime = targetDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+    
+    let url = "";
+    let isArchive = false;
+
+    if (diffDays >= -1 && diffDays <= 15) {
+        // Use FORECAST API
+        url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max&hourly=temperature_2m,weathercode,precipitation_probability,relative_humidity_2m&timezone=Asia%2FTokyo&forecast_days=16`;
+    } else {
+        // Use ARCHIVE API (Historical Data from Last Year to simulate)
+        isArchive = true;
+        // Use the same date but last year (e.g., 2025-01-07)
+        const pastYear = targetDate.getFullYear() - 1;
+        const pastDateStr = targetDateStr.replace(/^\d{4}/, pastYear);
+        // We need start/end date for archive
+        url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${pastDateStr}&end_date=${pastDateStr}&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset&hourly=temperature_2m,weathercode,relative_humidity_2m&timezone=Asia%2FTokyo`;
+    }
+
     try {
-        // Updated API call to include HOURLY data and humidity/uv
-        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=35.0116&longitude=135.7681&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max&hourly=temperature_2m,weathercode,precipitation_probability,relative_humidity_2m&timezone=Asia%2FTokyo&forecast_days=16`);
-        weatherCache = await res.json();
-    } catch(e) { console.log(e); }
+        const res = await fetch(url);
+        const data = await res.json();
+        
+        // Normalize Data Structure if Archive
+        if(isArchive) {
+            // Archive API doesn't have precipitation_probability, uv_index. We mock them or use precipitation sum.
+            if(!data.daily.precipitation_probability_max) data.daily.precipitation_probability_max = [20]; // Fallback
+            if(!data.daily.uv_index_max) data.daily.uv_index_max = [3]; // Fallback
+            if(!data.hourly.precipitation_probability) data.hourly.precipitation_probability = new Array(24).fill(0);
+        }
+        
+        weatherCache = data;
+        weatherCache.isArchive = isArchive; // Flag for UI
+        if(document.getElementById('page-weather').classList.contains('active')) renderWeatherModule();
+        
+    } catch(e) { console.error(e); document.getElementById('weather-content').innerHTML = "<div style='text-align:center; padding:30px;'>暫時無法取得天氣</div>"; }
 }
 
 function renderWeatherModule() {
     const container = document.getElementById('weather-content');
     const details = document.getElementById('weather-details-container');
+    const sourceTag = document.getElementById('data-source-tag');
     
     if(!weatherCache || !weatherCache.daily) { container.innerHTML = "<div style='text-align:center; padding:30px;'>無天氣資料</div>"; return; }
     
-    const targetDate = scheduleData[currentDay].date; 
-    const apiIndex = weatherCache.daily.time.indexOf(targetDate);
-    
-    if (apiIndex === -1) { 
-        container.innerHTML = `<div style='text-align:center; padding:40px; color:#666;'>尚無此日預報</div>`; 
-        details.style.display = 'none';
-        return; 
+    // For Archive, the array only has 1 day (index 0). For Forecast, we find the date index.
+    let apiIndex = 0;
+    if(!weatherCache.isArchive) {
+        const targetDate = scheduleData[currentDay].date; 
+        apiIndex = weatherCache.daily.time.indexOf(targetDate);
+        if (apiIndex === -1) { container.innerHTML = `<div style='text-align:center; padding:40px;'>尚無預報</div>`; return; }
     }
-    
-    // --- Render Main Card ---
+
     const d = weatherCache.daily; 
     const code = d.weathercode[apiIndex];
-    const wmo = { 
-        0:{i:'fa-sun',t:'晴朗'}, 1:{i:'fa-cloud-sun',t:'多雲'}, 2:{i:'fa-cloud-sun',t:'多雲'}, 3:{i:'fa-cloud',t:'陰天'}, 
-        45:{i:'fa-smog',t:'霧'}, 51:{i:'fa-cloud-rain',t:'毛毛雨'}, 61:{i:'fa-cloud-showers-heavy',t:'陣雨'}, 
-        80:{i:'fa-cloud-showers-water',t:'雷陣雨'}, 95:{i:'fa-bolt',t:'雷雨'} 
-    };
+    const wmo = { 0:{i:'fa-sun',t:'晴朗'}, 1:{i:'fa-cloud-sun',t:'多雲'}, 2:{i:'fa-cloud-sun',t:'多雲'}, 3:{i:'fa-cloud',t:'陰天'}, 45:{i:'fa-smog',t:'霧'}, 51:{i:'fa-cloud-rain',t:'毛毛雨'}, 61:{i:'fa-cloud-showers-heavy',t:'陣雨'}, 80:{i:'fa-cloud-showers-water',t:'雷陣雨'}, 95:{i:'fa-bolt',t:'雷雨'} };
     const w = wmo[code] || {i:'fa-cloud',t:'多雲'};
     const maxTemp = Math.round(d.temperature_2m_max[apiIndex]);
     const minTemp = Math.round(d.temperature_2m_min[apiIndex]);
+    const rainProb = d.precipitation_probability_max ? d.precipitation_probability_max[apiIndex] : 0; // Archive might lack this
 
+    const tagText = weatherCache.isArchive ? "歷史平均 (去年)" : "即時預報";
+    
     container.innerHTML = `
     <div class="weather-main-card">
+        <div class="weather-tag-badge">${tagText}</div>
         <div class="weather-header-row">
             <div>
                 <div class="weather-condition"><i class="fa-solid fa-location-arrow" style="font-size:0.8rem;"></i> 京都 Kyoto</div>
@@ -540,21 +570,21 @@ function renderWeatherModule() {
             <div class="weather-main-icon" style="color:#FFD700"><i class="fa-solid ${w.i}"></i></div>
         </div>
         <div class="weather-big-temp">${maxTemp}°</div>
-        <div style="font-weight:500;">${w.t} • 降雨 ${d.precipitation_probability_max[apiIndex]}%</div>
+        <div style="font-weight:500;">${w.t} • 降雨 ${rainProb}%</div>
     </div>`;
     
-    // --- Render Hourly ---
+    // --- Hourly ---
     const hContainer = document.getElementById('weather-hourly');
     hContainer.innerHTML = '';
-    const startHour = apiIndex * 24; // Start index for this day in hourly array
-    // Select specific hours: 9, 12, 15, 18, 21
+    // Archive has 0-23 hours. Forecast has 0-(16*24) hours.
+    const startHour = weatherCache.isArchive ? 0 : apiIndex * 24; 
     const hoursOfInterest = [9, 12, 15, 18, 21];
     
     hoursOfInterest.forEach(hour => {
         const idx = startHour + hour;
-        if(weatherCache.hourly.time[idx]) {
+        if(weatherCache.hourly.time[idx] || (weatherCache.isArchive && idx < 24)) {
             const hTemp = Math.round(weatherCache.hourly.temperature_2m[idx]);
-            const hRain = weatherCache.hourly.precipitation_probability[idx];
+            const hRain = weatherCache.hourly.precipitation_probability ? weatherCache.hourly.precipitation_probability[idx] : 0;
             const hCode = weatherCache.hourly.weathercode[idx];
             const hw = wmo[hCode] || {i:'fa-cloud'};
             
@@ -568,24 +598,23 @@ function renderWeatherModule() {
         }
     });
 
-    // --- Render Advice ---
+    // --- Advice ---
     let advice = "";
-    if (d.precipitation_probability_max[apiIndex] > 40) advice += "攜帶雨具：降雨機率高，請隨身攜帶折傘。<br>";
+    if (rainProb > 40) advice += "攜帶雨具：降雨機率高，請隨身攜帶折傘。<br>";
     if (maxTemp < 5) advice += "極寒保暖：建議穿著羽絨服、圍巾、手套，並使用暖暖包。<br>";
     else if (maxTemp < 12) advice += "洋蔥穿搭：早晚溫差大，建議大衣搭配發熱衣。<br>";
     else advice += "舒適涼爽：穿著輕便外套即可。<br>";
-    if (d.uv_index_max[apiIndex] > 5) advice += "注意防曬：紫外線較強。";
-    
+    if (d.uv_index_max && d.uv_index_max[apiIndex] > 5) advice += "注意防曬：紫外線較強。";
     document.getElementById('weather-advice-text').innerHTML = advice || "天氣舒適，適合旅遊的一天！";
 
-    // --- Render Stats ---
-    // Average humidity for the day (taking noon value)
+    // --- Stats ---
     const noonIdx = startHour + 12;
     document.getElementById('ws-humidity').innerText = weatherCache.hourly.relative_humidity_2m[noonIdx] + '%';
-    document.getElementById('ws-uv').innerText = d.uv_index_max[apiIndex];
+    document.getElementById('ws-uv').innerText = d.uv_index_max ? d.uv_index_max[apiIndex] : "-";
     document.getElementById('ws-sunrise').innerText = d.sunrise[apiIndex].split('T')[1];
     document.getElementById('ws-sunset').innerText = d.sunset[apiIndex].split('T')[1];
-
+    
+    sourceTag.innerText = weatherCache.isArchive ? "(歷史回溯模式)" : "(即時預報)";
     details.style.display = 'block';
 }
 
@@ -598,7 +627,9 @@ function switchMainPage(pageId, navEl) {
     if(navEl) navEl.classList.add('active');
     const ds = document.querySelector('.date-selector-container');
     if(pageId === 'info') ds.style.display = 'none'; else ds.style.display = 'block';
-    if(pageId === 'weather') renderWeatherModule();
+    
+    // Re-fetch weather if switching day (because Archive API needs specific date URL)
+    if(pageId === 'weather') fetchWeather(); 
 }
 function sendWhatsApp() {
     let phone = document.getElementById('wa-phone').value.replace(/\D/g, '');
@@ -612,8 +643,43 @@ function sendWhatsApp() {
 }
 function callNumber(num) { window.location.href = `tel:${num}`; }
 function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => { showToast("已複製"); }); }
-function showPhrase(jp, zh) { document.getElementById('overlay-jp').innerText = jp; document.getElementById('overlay-zh').innerText = zh; document.getElementById('phrase-overlay').classList.add('active'); }
-function closePhrase() { document.getElementById('phrase-overlay').classList.remove('active'); }
+function searchGmail(query) { window.open(`https://mail.google.com/mail/u/0/#search/${encodeURIComponent(query)}`, '_blank'); }
+
+function openModal(data) {
+    currentEventData = data;
+    document.getElementById('modal-title').innerText = data.title;
+    document.getElementById('modal-type').innerText = data.type;
+    document.getElementById('modal-time').innerText = data.time;
+    document.getElementById('modal-price').innerText = data.price;
+    document.getElementById('modal-open-hours').innerText = data.open_hours || "待確認";
+    document.getElementById('modal-address-short').innerText = data.address;
+    document.getElementById('modal-note').innerText = data.note;
+    
+    const actionsContainer = document.getElementById('modal-actions'); actionsContainer.innerHTML = '';
+    const addr = data.address_jp || data.address;
+    
+    actionsContainer.innerHTML += `<button class="btn-action btn-outline" onclick="copyToClipboard('${addr}')"><i class="fa-regular fa-copy"></i> 複製地址</button>`;
+    actionsContainer.innerHTML += `<button class="btn-action btn-black" onclick="openMapQuery('${data.address}')"><i class="fa-solid fa-location-arrow"></i> Google Maps 導航</button>`;
+    
+    if (data.type === '美食' || data.type === '晚餐' || data.type === '午餐' || data.type === '早餐') {
+         actionsContainer.innerHTML += `<button class="btn-action btn-outline" onclick="searchGmail('${data.title}')">🔍 搜尋預約信 (Gmail)</button>`;
+    }
+    if (data.type === '住宿') {
+         actionsContainer.innerHTML += `<button class="btn-action btn-outline" onclick="showPhrase('${addr}', '請載我去這裡')">🚕 顯示的士卡</button>`;
+    }
+
+    document.getElementById('detail-modal').classList.add('open');
+    setTimeout(() => { 
+        if(modalMap) modalMap.remove(); 
+        modalMap = L.map('modal-mini-map', {zoomControl:false, dragging:false, attributionControl: false}).setView(data.coords, 15); 
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(modalMap); 
+        L.marker(data.coords, {icon: L.divIcon({className:'custom-div-icon',html:"<div style='background:black;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);'></div>",iconSize:[12,12]})}).addTo(modalMap); 
+        modalMap.invalidateSize(); 
+    }, 150);
+}
+function openMapQuery(address) { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank'); }
+function closeModal() { document.getElementById('detail-modal').classList.remove('open'); }
+document.getElementById('detail-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
 
 function renderDateSelector() {
     const container = document.getElementById('date-selector'); container.innerHTML = '';
@@ -631,7 +697,8 @@ function selectDay(dayKey, chipEl) {
     (chipEl || document.getElementById(`chip-${dayKey}`)).classList.add('active');
     if(chipEl) chipEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     renderTimeline(dayKey); renderInspiration(dayKey); renderShopping(dayKey);
-    if(document.getElementById('page-weather').classList.contains('active')) renderWeatherModule();
+    // When changing day, we need to refresh weather because Archive API might be needed for different days
+    if(document.getElementById('page-weather').classList.contains('active')) fetchWeather();
 }
 function renderTimeline(dayKey) {
     const container = document.getElementById('timeline-container'); container.innerHTML = '';
@@ -671,43 +738,8 @@ function toggleShopItem(checkbox, id) {
     shopState[id] = checkbox.checked; localStorage.setItem('shopState', JSON.stringify(shopState));
     checkbox.closest('.shop-item').classList.toggle('checked');
 }
-function openMapQuery(address) { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank'); }
-function searchGmail(query) { window.open(`https://mail.google.com/mail/u/0/#search/${encodeURIComponent(query)}`, '_blank'); }
-
-function openModal(data) {
-    currentEventData = data;
-    document.getElementById('modal-title').innerText = data.title;
-    document.getElementById('modal-type').innerText = data.type;
-    document.getElementById('modal-time').innerText = data.time;
-    document.getElementById('modal-price').innerText = data.price;
-    document.getElementById('modal-open-hours').innerText = data.open_hours || "待確認";
-    document.getElementById('modal-address-short').innerText = data.address;
-    document.getElementById('modal-note').innerText = data.note;
-    
-    const actionsContainer = document.getElementById('modal-actions'); actionsContainer.innerHTML = '';
-    const addr = data.address_jp || data.address;
-    
-    actionsContainer.innerHTML += `<button class="btn-action btn-outline" onclick="copyToClipboard('${addr}')"><i class="fa-regular fa-copy"></i> 複製地址</button>`;
-    actionsContainer.innerHTML += `<button class="btn-action btn-black" onclick="openMapQuery('${data.address}')"><i class="fa-solid fa-location-arrow"></i> Google Maps 導航</button>`;
-    
-    if (data.type === '美食' || data.type === '晚餐' || data.type === '午餐' || data.type === '早餐') {
-         actionsContainer.innerHTML += `<button class="btn-action btn-outline" onclick="searchGmail('${data.title}')">🔍 搜尋預約信 (Gmail)</button>`;
-    }
-    if (data.type === '住宿') {
-         actionsContainer.innerHTML += `<button class="btn-action btn-outline" onclick="showPhrase('${addr}', '請載我去這裡')">🚕 顯示的士卡</button>`;
-    }
-
-    document.getElementById('detail-modal').classList.add('open');
-    setTimeout(() => { 
-        if(modalMap) modalMap.remove(); 
-        modalMap = L.map('modal-mini-map', {zoomControl:false, dragging:false, attributionControl: false}).setView(data.coords, 15); 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(modalMap); 
-        L.marker(data.coords, {icon: L.divIcon({className:'custom-div-icon',html:"<div style='background:black;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);'></div>",iconSize:[12,12]})}).addTo(modalMap); 
-        modalMap.invalidateSize(); 
-    }, 150);
-}
-function closeModal() { document.getElementById('detail-modal').classList.remove('open'); }
-document.getElementById('detail-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+function showPhrase(jp, zh) { document.getElementById('overlay-jp').innerText = jp; document.getElementById('overlay-zh').innerText = zh; document.getElementById('phrase-overlay').classList.add('active'); }
+function closePhrase() { document.getElementById('phrase-overlay').classList.remove('active'); }
 
 init();
 </script>
