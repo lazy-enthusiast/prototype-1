@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Travel App v27.0 (Global)</title>
+<title>Travel App v29.0 (Swipe Close)</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
@@ -89,9 +89,12 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .filter-bar-container { padding: 0 20px 20px 20px; position: sticky; top: 0; z-index: 50; background: var(--bg-body); overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
 .filter-chip { display: inline-block; padding: 10px 20px; margin-right: 10px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 0; font-size: 0.8rem; color: var(--text-sub); cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
 .filter-chip.active { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
-.inspire-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 0; padding: 30px; color: var(--text-main); position: relative; display: block; margin-bottom: 20px;}
+.inspire-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 0; padding: 30px; color: var(--text-main); position: relative; display: flex; flex-direction: column; justify-content: center; margin-bottom: 20px; cursor: pointer; min-height: 100px; box-shadow: var(--shadow); }
+.inspire-card:active { transform: scale(0.99); opacity: 0.9; }
 .inspire-card.hidden { display: none; }
 .inspire-badge { background: var(--accent); color: var(--accent-text); padding: 5px 12px; border-radius: 0; font-size: 0.65rem; font-weight: 700; position: absolute; top: -12px; left: 20px; text-transform: uppercase; letter-spacing: 1px; }
+.inspire-title { font-size: 1.1rem; font-weight: 700; margin: 0 0 5px 0; font-family: var(--font-heading); }
+.inspire-note { font-size: 0.9rem; color: var(--text-sub); line-height: 1.5; }
 .info-card { background: var(--bg-card); padding: 25px; border-radius: 0; margin: 0 20px 20px 20px; border: 1px solid var(--border); }
 .info-header { font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; font-family: var(--font-heading); display: flex; justify-content: space-between; align-items: center; }
 .info-row { display: flex; gap: 20px; margin-bottom: 20px; align-items: flex-start; font-size: 0.95rem; color: var(--text-main); line-height: 1.6; }
@@ -108,10 +111,15 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .flight-time { font-size: 0.9rem; font-weight: 600; margin-top: 2px; color: var(--text-main); }
 .flight-meta { font-size: 0.7rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
 .flight-arrow { color: var(--text-sub); font-size: 0.9rem; }
-.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 3000; justify-content: center; align-items: end; backdrop-filter: blur(5px); cursor: pointer; } 
+
+/* MODAL with Swipe Bar */
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; justify-content: center; align-items: end; backdrop-filter: blur(5px); cursor: pointer; } 
 .modal.open { display: flex; }
-.modal-content { background: var(--bg-card); color: var(--text-main); width: 100%; max-width: 600px; max-height: 90vh; border-radius: 0; padding: 0 0 40px 0; overflow-y: auto; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); cursor: default; display: flex; flex-direction: column; border-top: 1px solid var(--border); box-shadow: 0 -10px 40px rgba(0,0,0,0.05); }
-.modal-body { padding: 30px; }
+.modal-content { background: var(--bg-card); color: var(--text-main); width: 100%; max-width: 600px; max-height: 90vh; border-radius: 0; padding: 0 0 40px 0; overflow-y: auto; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); cursor: default; display: flex; flex-direction: column; border-top: 1px solid var(--border); box-shadow: 0 -10px 40px rgba(0,0,0,0.05); transition: transform 0.2s ease-out; }
+/* NEW: Swipe Handle */
+.modal-handle-container { width: 100%; height: 30px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; touch-action: none; cursor: grab; }
+.modal-handle { width: 40px; height: 5px; background: #CCCCCC; border-radius: 10px; }
+.modal-body { padding: 0 30px 30px 30px; } /* Adjusted top padding */
 .modal-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin: 25px 0; }
 .modal-label { font-size: 0.7rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1.5px; display: block; margin-bottom: 8px; font-weight: 700; }
 .modal-value { font-size: 1rem; font-weight: 400; color: var(--text-main); font-family: var(--font-body); }
@@ -119,19 +127,21 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .btn-action { width: 100%; padding: 18px; border-radius: 0; border: none; font-weight: 600; cursor: pointer; font-size: 0.9rem; text-align: center; margin-bottom:12px; text-transform: uppercase; letter-spacing: 1px; }
 .btn-black { background: var(--accent); color: var(--accent-text); }
 .btn-outline { background: var(--bg-card); border: 1px solid var(--text-main); color: var(--text-main); }
+
+/* Utility */
+#toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: var(--text-main); color: var(--bg-card); padding: 12px 24px; border-radius: 30px; font-size: 0.9rem; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-weight: 500; } #toast.show { opacity: 1; }
 .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.2); z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); } .sidebar-overlay.open { opacity: 1; pointer-events: all; }
 .sidebar { position: fixed; top: 0; right: 0; width: 85%; max-width: 300px; height: 100%; background: var(--bg-card); color: var(--text-main); z-index: 1001; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow-y: auto; padding: 25px 20px 100px 20px; padding-top: calc(25px + var(--safe-top)); box-shadow: -5px 0 20px rgba(0,0,0,0.05); display: flex; flex-direction: column; border-left: 1px solid var(--border); } .sidebar.open { transform: translateX(0); } .sidebar-section-title { font-size: 0.75rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; margin-top: 30px; font-weight: 600; }
 .whatsapp-box { background: var(--bg-body); border: 1px solid var(--border); color: var(--text-main); padding: 15px; border-radius: 0; margin-top: 20px; } .wa-input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border); border-radius: 0; font-size: 1rem; background: var(--bg-card); } .wa-btn { width: 100%; background: var(--accent); color: var(--accent-text); border: none; padding: 12px; border-radius: 0; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 0.95rem; }
 .tool-box { background: var(--bg-card); padding: 15px; border-radius: 0; border: 1px solid var(--border); margin-bottom: 10px; box-shadow: var(--shadow); } .currency-grid { display: grid; grid-template-columns: 1fr 30px 1fr; align-items: center; gap: 5px; margin-bottom: 8px; } .curr-group { display: flex; flex-direction: column; } .curr-label { font-size: 0.7rem; color: var(--text-sub); font-weight: bold; margin-bottom: 4px; padding-left: 2px;} .curr-input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 0; font-size: 1.2rem; text-align: center; background: var(--bg-body); font-weight: 600; color: var(--text-main); } .rate-info-container { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 0.75rem; color: var(--text-sub);} .memo-area { width: 100%; height: 120px; padding: 12px; border: 1px solid var(--border); border-radius: 0; font-family: inherit; font-size: 0.95rem; resize: none; background: var(--bg-body); line-height: 1.5; color: var(--text-main); }
 .phrase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; } .phrase-card { background: var(--bg-card); border: 1px solid var(--border); padding: 20px 15px; border-radius: 0; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow); aspect-ratio: 1.3; display: flex; flex-direction: column; justify-content: center; align-items: center; } .phrase-jp { font-weight: 700; font-size: 1.2rem; margin-bottom: 8px; color: var(--text-main); } .phrase-zh { font-size: 0.85rem; color: var(--text-sub); } .phrase-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); z-index: 5000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; } .phrase-overlay.active { opacity: 1; pointer-events: all; } .phrase-content { text-align: center; width: 90%; } .phrase-big { font-size: 3.5rem; font-weight: 800; color: #000; line-height: 1.2; margin-bottom: 20px; word-break: break-all; font-family: var(--font-heading); } .close-phrase { position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); border: 1px solid #E5E5EA; padding: 12px 40px; border-radius: 30px; color: var(--text-main); cursor: pointer; background: var(--bg-card); font-weight: 600; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
-#toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: var(--text-main); color: var(--bg-card); padding: 12px 24px; border-radius: 30px; font-size: 0.9rem; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-weight: 500; } #toast.show { opacity: 1; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 </style>
 </head>
 <body>
 
 <script>
-// --- 1. [設計語言] ---
+// --- 1. [主題設定] ---
 const THEME_CONFIG = {
     // 預設：極簡黑白 (Minimalist)
     accentColor: "#000000",       
@@ -154,18 +164,16 @@ const CONFIG = {
     duration: 8 // 天數 (Layout 會自動適應)
 };
 
-// --- 3. [地點與工具 (NEW! 徹底抽離)] ---
+// --- 3. [地點與工具 (DESTINATION)] ---
 const DESTINATION = {
-    name: "京都 Kyoto",       // 天氣卡片顯示名稱
-    lat: 35.0116,             // 緯度 (用於天氣)
-    lon: 135.7681,            // 經度 (用於天氣)
-    timezone: "Asia/Tokyo",   // 時區 (Open-Meteo 格式)
-    
-    currency: "jpy",          // 當地貨幣代碼 (API用, 小寫)
-    currencyLabel: "JPY",     // 當地貨幣顯示名稱
-    baseCurrency: "HKD",      // 您的本幣 (計算匯率用)
-    
-    appTitle: "KYOTO <span>2026</span>" // 頂部顯示的標題 (支援 HTML)
+    name: "京都 Kyoto",       
+    lat: 35.0116,             // 緯度
+    lon: 135.7681,            // 經度
+    timezone: "Asia/Tokyo",   
+    currency: "jpy",          // API 用代碼 (小寫)
+    currencyLabel: "JPY",     // 顯示名稱
+    baseCurrency: "HKD",      
+    appTitle: "KYOTO <span>2026</span>" 
 };
 
 // --- 4. [實用資訊] ---
@@ -192,6 +200,7 @@ const TRIP_INFO = {
 };
 
 // --- 5. [行程資料] ---
+// Inspiration 現已支援完整資料格式 (address, phone 等)，點擊可開 Modal
 const USER_ITINERARY = {
     "day1": { 
         "events": [
@@ -210,10 +219,21 @@ const USER_ITINERARY = {
                 "moodColor": "#000000"
             }
         ],
-        "inspiration": [], 
+        "inspiration": [
+            {
+                "title": "AEON Mall",
+                "tag": "RAINY",
+                "note": "京都站後站，超大購物中心。",
+                "type": "購物",
+                "address": "京都市南区西九条鳥居口町1",
+                "address_jp": "京都市南区西九条鳥居口町1",
+                "coords": [34.9806, 135.7554],
+                "open_hours": "10:00-21:00"
+            }
+        ], 
         "shopping": ["ICOCA 卡"] 
     }
-    // ... day2-day8 generated by loop
+    // ... day2-day8
 };
 </script>
 
@@ -301,7 +321,8 @@ const USER_ITINERARY = {
 </nav>
 <div id="detail-modal" class="modal">
     <div class="modal-content">
-        <div style="position:absolute; top:15px; right:15px; font-size:1.5rem; cursor:pointer; width:36px; height:36px; background:var(--bg-body); border-radius:50%; display:flex; align-items:center; justify-content:center;" onclick="closeModal()">×</div>
+        <div class="modal-handle-container" id="modal-drag-area"><div class="modal-handle"></div></div>
+        
         <div id="modal-mini-map"></div>
         <div class="modal-body">
             <div style="margin-bottom:20px;"><span class="modal-label" id="modal-type">Type</span><h2 id="modal-title" style="margin:0; font-size:1.6rem; font-family:var(--font-heading);">Title</h2></div>
@@ -371,6 +392,7 @@ function init() {
     if(localStorage.getItem('shopState')) shopState = JSON.parse(localStorage.getItem('shopState'));
     document.getElementById('quick-memo').addEventListener('input', function() { localStorage.setItem('travelMemo', this.value); });
     renderInfoPage(); 
+    initSwipeClose(); // Init Drag
 }
 function renderInfoPage() {
     const container = document.getElementById('dynamic-info-content');
@@ -493,17 +515,28 @@ function openModal(data) {
     actionsContainer.innerHTML += `<button class="btn-action btn-outline" onclick="copyToClipboard('${addr}')"><i class="fa-regular fa-copy"></i> 複製地址</button>`; 
     actionsContainer.innerHTML += `<button class="btn-action btn-black" onclick="openMapQuery('${data.address}')"><i class="fa-solid fa-location-arrow"></i> Google Maps 導航</button>`; 
     if (data.type === '美食' || data.type === '晚餐' || data.type === '午餐' || data.type === '早餐') { actionsContainer.innerHTML += `<button class="btn-action btn-outline" onclick="searchGmail('${data.title}')">🔍 搜尋預約信 (Gmail)</button>`; } 
-    if (data.type === '住宿' || data.type === '交通') { actionsContainer.innerHTML += `<button class="btn-action btn-outline" onclick="showPhrase('${addr}', '請載我去這裡')">🚕 顯示的士卡</button>`; } 
+    if (data.type === '住宿') { actionsContainer.innerHTML += `<button class="btn-action btn-outline" onclick="showPhrase('${addr}', '請載我去這裡')">🚕 顯示的士卡</button>`; } 
     document.getElementById('detail-modal').classList.add('open'); 
     setTimeout(() => { if(modalMap) modalMap.remove(); modalMap = L.map('modal-mini-map', {zoomControl:false, dragging:false, attributionControl: false}).setView(data.coords, 15); L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(modalMap); L.marker(data.coords, {icon: L.divIcon({className:'custom-div-icon',html:"<div style='background:black;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);'></div>",iconSize:[12,12]})}).addTo(modalMap); modalMap.invalidateSize(); }, 150); 
 }
 function openMapQuery(address) { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank'); }
-function closeModal() { document.getElementById('detail-modal').classList.remove('open'); }
+function closeModal() { document.getElementById('detail-modal').classList.remove('open'); document.querySelector('.modal-content').style.transform = ''; }
 document.getElementById('detail-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+function initSwipeClose() {
+    const modalContent = document.querySelector('.modal-content');
+    const dragArea = document.getElementById('modal-drag-area');
+    let startY = 0; let currentY = 0;
+    dragArea.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; modalContent.style.transition = 'none'; });
+    dragArea.addEventListener('touchmove', (e) => { currentY = e.touches[0].clientY; const delta = currentY - startY; if(delta > 0) modalContent.style.transform = `translateY(${delta}px)`; });
+    dragArea.addEventListener('touchend', () => { const delta = currentY - startY; modalContent.style.transition = 'transform 0.3s ease-out'; if(delta > 100) closeModal(); else modalContent.style.transform = ''; });
+}
 function renderDateSelector() { const container = document.getElementById('date-selector'); container.innerHTML = ''; Object.keys(scheduleData).forEach(dayKey => { const day = scheduleData[dayKey]; const chip = document.createElement('div'); chip.className = `date-chip`; chip.id = `chip-${dayKey}`; chip.onclick = () => selectDay(dayKey, chip); chip.innerHTML = `<span class="day-num">${day.display}</span><span class="day-week">${day.weekday}</span>`; container.appendChild(chip); }); }
 function selectDay(dayKey, chipEl) { currentDay = dayKey; document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('active')); (chipEl || document.getElementById(`chip-${dayKey}`)).classList.add('active'); if(chipEl) chipEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); renderTimeline(dayKey); renderInspiration(dayKey); renderShopping(dayKey); if(document.getElementById('page-weather').classList.contains('active')) fetchWeather(); }
 function renderTimeline(dayKey) { const container = document.getElementById('timeline-container'); container.innerHTML = ''; (scheduleData[dayKey].events || []).forEach(event => { const item = document.createElement('div'); item.className = 'timeline-item'; let tags = event.tags.map(t => `<span class="card-tag">${t}</span>`).join(''); const navBtn = `<div class="card-nav-btn" onclick="event.stopPropagation(); openMapQuery('${event.address}')"><i class="fa-solid fa-location-arrow"></i></div>`; const colorStyle = event.moodColor ? `border-left-color: ${event.moodColor};` : 'border-left-color: var(--accent);'; item.innerHTML = `<div class="card" style="${colorStyle}" onclick='openModal(${JSON.stringify(event).replace(/'/g, "'")})'>${navBtn}<span class="card-time">${event.time}</span><h3 class="card-title">${event.title}</h3><div class="tags">${tags}</div></div>`; container.appendChild(item); }); if(!scheduleData[dayKey].events.length) container.innerHTML = "<div style='text-align:center; padding:50px; color:var(--text-sub);'>本日無行程，自由探索！</div>"; }
-function renderInspiration(dayKey) { const container = document.getElementById('inspiration-container'); container.innerHTML = ''; (scheduleData[dayKey].inspiration || []).forEach(item => { container.innerHTML += `<div class="inspire-card" data-tag="${item.tag}"><div class="inspire-badge">${item.tag}</div><h3>${item.title}</h3><p style="margin:5px 0 0 0; font-size:0.9rem; color:inherit;">${item.note}</p></div>`; }); if(!scheduleData[dayKey].inspiration.length) container.innerHTML = "<div style='text-align:center; padding:30px; color:var(--text-sub);'>本日無靈感筆記</div>"; }
+function renderInspiration(dayKey) { const container = document.getElementById('inspiration-container'); container.innerHTML = ''; (scheduleData[dayKey].inspiration || []).forEach(item => { 
+    const clickAttr = item.address ? `onclick='openModal(${JSON.stringify(item).replace(/'/g, "'")})'` : '';
+    container.innerHTML += `<div class="inspire-card" data-tag="${item.tag}" ${clickAttr}><div class="inspire-badge">${item.tag}</div><h3 class="inspire-title">${item.title}</h3><p class="inspire-note">${item.note}</p></div>`; 
+}); if(!scheduleData[dayKey].inspiration.length) container.innerHTML = "<div style='text-align:center; padding:30px; color:var(--text-sub);'>本日無靈感筆記</div>"; }
 function filterInspiration(tag, btn) { document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active')); btn.classList.add('active'); document.querySelectorAll('.inspire-card').forEach(card => { if(tag === 'all' || card.getAttribute('data-tag') === tag) card.classList.remove('hidden'); else card.classList.add('hidden'); }); }
 function renderShopping(dayKey) { const container = document.getElementById('shopping-container'); container.innerHTML = ''; const items = scheduleData[dayKey].shopping || []; if(items.length === 0) { container.innerHTML = "<div style='color:var(--text-sub); text-align:center; padding:20px;'>無待買清單</div>"; return; } items.forEach((item, idx) => { const uniqueId = `${dayKey}-${idx}`; const isChecked = shopState[uniqueId] ? 'checked' : ''; const div = document.createElement('div'); div.className = `shop-item ${isChecked ? 'checked' : ''}`; div.innerHTML = `<input type="checkbox" id="${uniqueId}" ${isChecked} onchange="toggleShopItem(this, '${uniqueId}')"><label for="${uniqueId}">${item}</label>`; container.appendChild(div); }); }
 function toggleShopItem(checkbox, id) { shopState[id] = checkbox.checked; localStorage.setItem('shopState', JSON.stringify(shopState)); checkbox.closest('.shop-item').classList.toggle('checked'); }
