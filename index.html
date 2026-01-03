@@ -717,7 +717,7 @@ if(!phone) { alert("請輸入電話"); return; }
 if (navigator.geolocation) {
 const btn = document.getElementById('wa-btn'); const orgText = btn.innerHTML; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 定位中...';
 navigator.geolocation.getCurrentPosition((pos) => {
-const mapLink = `https://www.google.com/maps/search/?api=1&query=${pos.coords.latitude},${pos.coords.longitude}`;
+const mapLink = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
 const text = `我平安抵達了！位置：${mapLink}`;
 window.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
 btn.innerHTML = orgText;
