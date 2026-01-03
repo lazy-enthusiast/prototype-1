@@ -3,14 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Loading...</title>
+<meta name="theme-color" content="#F9F9F9">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Kyoto Trip</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
 <style>
 /* ========================================================
-🎨 [系統樣式表] 視覺設計
-(System Styles - Visual Design)
+🎨 [系統樣式表] 
 ========================================================
 */
 :root {
@@ -177,7 +182,7 @@ fontHeading: '"Noto Sans JP", sans-serif',
 fontBody: '"Noto Sans JP", sans-serif'
 };
 
-// 2. 🗓️ 旅程設定 (測試日期：2026年5月)
+// 2. 🗓️ 旅程設定
 const CONFIG = {
 ui: {
 browserTitle: "Kyoto Test Trip",
@@ -186,7 +191,7 @@ homeTimezone: "Asia/Hong_Kong",
 homeTimeLabel: "HKG"
 },
 startDate: "2026-05-15", // 模擬出發日
-duration: 5 // 模擬 5 天行程
+duration: 5
 };
 
 // 3. 📍 目的地
@@ -200,7 +205,7 @@ currencyLabel: "JPY",
 baseCurrency: "HKD"
 };
 
-// 4. ✈️ 航班與住宿 (符合不早起、不晚歸習慣)
+// 4. ✈️ 航班與住宿
 const TRIP_INFO = {
 visa: {
 type: "日本短期滯在",
@@ -233,7 +238,7 @@ emergency: [
 ]
 };
 
-// 5. 🗺️ 行程細節 (測試重點：超市、香水、古物、按摩)
+// 5. 🗺️ 行程細節
 const USER_ITINERARY = {
 "day1": {
 "events": [
@@ -356,8 +361,7 @@ const USER_ITINERARY = {
 }
 };
 
-// 6. 🗣️ 常用短語 (測試版)
-// 每次更新行程時，請一併更新此區塊
+// 6. 🗣️ 常用短語
 const PHRASE_DATA = [
 {
 category: "購物",
@@ -511,17 +515,18 @@ const link = document.createElement('link'); link.rel = 'stylesheet'; link.href 
 function generateScheduleData() {
 const dates = {};
 const baseDate = new Date(CONFIG.startDate);
-const duration = CONFIG.duration || 8;
+const duration = CONFIG.duration || 5;
 const weekDays = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
 for(let i=0; i<duration; i++) {
 const d = new Date(baseDate); d.setDate(baseDate.getDate() + i);
 const dayKey = `day${i+1}`;
 const yyyy = d.getFullYear(); const mm = String(d.getMonth() + 1).padStart(2, '0'); const dd = String(d.getDate()).padStart(2, '0');
+const dailyData = USER_ITINERARY[dayKey] || { events:[], inspiration:[], shopping:[] };
 dates[dayKey] = {
 date: `${yyyy}-${mm}-${dd}`, display: dd, weekday: weekDays[d.getDay()],
-events: (USER_ITINERARY[dayKey] && USER_ITINERARY[dayKey].events) || [],
-inspiration: (USER_ITINERARY[dayKey] && USER_ITINERARY[dayKey].inspiration) || [],
-shopping: (USER_ITINERARY[dayKey] && USER_ITINERARY[dayKey].shopping) || []
+events: dailyData.events || [],
+inspiration: dailyData.inspiration || [],
+shopping: dailyData.shopping || []
 };
 }
 return dates;
@@ -725,12 +730,20 @@ btn.innerHTML = orgText;
 } else { alert("瀏覽器不支援定位"); }
 }
 
-function openMapQuery(address) { const query = encodeURIComponent(address); window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank'); }
+// 🗺️ 地圖連結優化 (Universal Links)
+function openMapQuery(address) {
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+const query = encodeURIComponent(address);
+const url = isMobile 
+    ? `https://www.google.com/maps/search/?api=1&query=${query}`
+    : `https://www.google.com/maps/search?q=${query}`;
+window.open(url, '_blank');
+}
+
 function callNumber(num) { window.location.href = `tel:${num}`; }
 function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => { showToast("已複製"); }); }
 function searchGmail(query) { window.open(`https://mail.google.com/mail/u/0/#search/${encodeURIComponent(query)}`, '_blank'); }
 
-// 🟢 核心修正區：Modal 與 點擊邏輯
 function openModal(data) {
 currentEventData = data;
 document.getElementById('modal-title').innerText = data.title;
@@ -770,7 +783,7 @@ actionsContainer.innerHTML += `<button class="btn-action btn-outline" onclick="s
 
 document.getElementById('detail-modal').classList.add('open');
 
-// 地圖處理：如果沒有座標且沒有地址，隱藏地圖容器
+// 地圖處理
 const miniMapContainer = document.getElementById('modal-mini-map');
 if(!data.coords && !data.address) {
 miniMapContainer.style.display = 'none';
@@ -778,7 +791,6 @@ miniMapContainer.style.display = 'none';
 miniMapContainer.style.display = 'block';
 setTimeout(() => {
 if(modalMap) modalMap.remove();
-// 預設座標或目的地座標
 const targetCoords = data.coords || [DESTINATION.lat, DESTINATION.lon];
 modalMap = L.map('modal-mini-map', {zoomControl:false, dragging:false, attributionControl: false}).setView(targetCoords, 15);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(modalMap);
@@ -809,7 +821,6 @@ const container = document.getElementById('timeline-container'); container.inner
 (scheduleData[dayKey].events || []).forEach(event => {
 const item = document.createElement('div'); item.className = 'timeline-item';
 let tags = event.tags.map(t => `<span class="card-tag">${t}</span>`).join('');
-// 確保單引號被轉義
 const safeData = JSON.stringify(event).replace(/'/g, "'");
 const navBtn = `<div class="card-nav-btn" onclick="event.stopPropagation(); openMapQuery('${event.address}')"><i class="fa-solid fa-location-arrow"></i></div>`;
 const colorStyle = event.moodColor ? `border-left-color: ${event.moodColor};` : 'border-left-color: var(--accent);';
@@ -819,11 +830,9 @@ container.appendChild(item);
 if(!scheduleData[dayKey].events.length) container.innerHTML = "<div style='text-align:center; padding:50px; color:var(--text-sub);'>本日無行程，自由探索！</div>";
 }
 
-// 🟢 修正：現在無論是否有地址，都會綁定 openModal
 function renderInspiration(dayKey) {
 const container = document.getElementById('inspiration-container'); container.innerHTML = '';
 (scheduleData[dayKey].inspiration || []).forEach(item => {
-// 修正：移除 address 判斷，並轉義單引號
 const safeData = JSON.stringify(item).replace(/'/g, "'");
 const clickAttr = `onclick='openModal(${safeData})'`;
 container.innerHTML += `<div class="inspire-card" data-tag="${item.tag}" ${clickAttr}><div class="inspire-badge">${item.tag}</div><h3 class="inspire-title">${item.title}</h3><p class="inspire-note">${item.note}</p></div>`;
