@@ -15,7 +15,7 @@
 
 <style>
 /* ========================================================
-🎨 [系統樣式表] 
+🎨 [系統樣式表] 
 ========================================================
 */
 :root {
@@ -65,7 +65,7 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .card-time { font-size: 0.7rem; color: var(--text-sub); font-weight: 600; margin-bottom: 4px; display: block; font-family: var(--font-body); letter-spacing: 0.5px; text-transform: uppercase;}
 .card-tag { font-size: 0.6rem; background: var(--bg-body); padding: 2px 6px; border-radius: 0; color: var(--text-sub); font-weight: 500; border: 1px solid var(--border); letter-spacing: 0.5px; }
 
-/* Weather */
+/* Weather - Modified for Auto Layout */
 .weather-main-card { background: var(--text-main); color: var(--bg-body); border-radius: 0; padding: 20px; margin: 0 15px 20px 15px; text-align: center; position: relative; overflow: hidden;}
 .weather-tag-badge { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.2); padding: 2px 8px; font-size: 0.6rem; border-radius: 10px; font-weight: 600; }
 .weather-header-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px; }
@@ -74,8 +74,33 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .weather-hl { font-size: 0.75rem; opacity: 0.7; font-family: var(--font-body); }
 .weather-main-icon { font-size: 2.5rem; color: inherit; opacity: 0.9; }
 .section-label { padding: 0 15px; font-size: 0.65rem; font-weight: 700; color: var(--text-main); margin-bottom: 10px; display: block; text-transform: uppercase; letter-spacing: 1.5px; }
-.hourly-container { display: flex; gap: 8px; overflow-x: auto; padding: 0 15px 15px 15px; scrollbar-width: none; }
-.hourly-item { flex: 0 0 auto; width: 60px; background: var(--bg-card); border-radius: 0; padding: 10px 5px; text-align: center; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 90px; }
+
+/* --- 🔥 改良重點：自動調節寬度的時段預報 --- */
+.hourly-container { 
+    display: flex; 
+    gap: 6px; /* 稍微縮小間距讓視覺更緊湊 */
+    overflow-x: auto; 
+    padding: 0 15px 15px 15px; 
+    scrollbar-width: none; 
+    /* 這裡不需要 justify-content: space-between，交給 item 的 flex: 1 處理 */
+}
+.hourly-item { 
+    flex: 1; /* ✨ 關鍵：讓項目自動擴展填滿空間 */
+    min-width: 0; /* 允許內容在極小螢幕縮小 */
+    width: auto; /* 取消固定寬度 */
+    background: var(--bg-card); 
+    border-radius: 0; 
+    padding: 10px 2px; /* 左右 padding 縮小，避免在小螢幕被擠爆 */
+    text-align: center; 
+    border: 1px solid var(--border); 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: space-between; 
+    height: 90px; 
+}
+/* --- 改良結束 --- */
+
 .hourly-time { font-size: 0.65rem; color: var(--text-sub); font-weight: 600; margin-bottom: 5px; }
 .hourly-icon { font-size: 1rem; margin: 5px 0; color: var(--text-main); }
 .hourly-temp { font-size: 0.85rem; font-weight: 700; color: var(--text-main); }
@@ -734,9 +759,9 @@ btn.innerHTML = orgText;
 function openMapQuery(address) {
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 const query = encodeURIComponent(address);
-const url = isMobile 
-    ? `https://www.google.com/maps/search/?api=1&query=${query}`
-    : `https://www.google.com/maps/search?q=${query}`;
+const url = isMobile 
+    ? `https://www.google.com/maps/search/?api=1&query=${query}`
+    : `https://www.google.com/maps/search?q=${query}`;
 window.open(url, '_blank');
 }
 
