@@ -416,9 +416,9 @@ items: [
 }
 ];
 
-// 7. 🤖 AI 打包清單設定
+// 7. 🤖 AI 打包清單設定（已改為 Cloudflare Worker 代理，金鑰不再存於前端）
 const AI_CONFIG = {
-apiKey: "sk-or-v1-請替換為您的金鑰", /* 【需用戶設定】請前往 https://openrouter.ai/keys 取得金鑰，並替換此處字串（需保留雙引號） */
+workerUrl: "https://packing-ai.davchan-clp.workers.dev", /* 【需用戶設定】請替換為您部署完成的 Cloudflare Worker 網址，需保留雙引號 */
 model: "openai/o4-mini" /* 【需用戶設定】OpenRouter 模型 ID，如需更換請保留雙引號並確認 OpenRouter 平台上該模型名稱正確 */
 };
 </script>
@@ -841,11 +841,11 @@ ${itinerarySummary}
 每個分類下請列出具體物品，並在必要時簡短說明原因（例如：因某天降雨機率高，建議帶輕便雨具）。請保持精簡實用，總字數控制在400字以內，不要輸出開場白或總結語。`;
 }
 
+// 🔐 已改為呼叫 Cloudflare Worker 代理，不再直接帶金鑰請求 OpenRouter
 async function callOpenRouterAPI(prompt) {
-const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+const res = await fetch(AI_CONFIG.workerUrl, {
 method: 'POST',
 headers: {
-'Authorization': `Bearer ${AI_CONFIG.apiKey}`,
 'Content-Type': 'application/json'
 },
 body: JSON.stringify({
