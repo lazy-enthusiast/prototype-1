@@ -15,7 +15,7 @@
 
 <style>
 /* ========================================================
-🎨 [系統樣式表] 
+🎨 [系統樣式表] 
 ========================================================
 */
 :root {
@@ -123,18 +123,6 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .shop-item.checked { opacity: 0.4; background: var(--bg-body); }
 .shop-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); border-radius: 0; }
 .shop-item label { flex: 1; font-size: 0.95rem; color: var(--text-main); font-family: var(--font-body); }
-
-/* 🎒 AI 智能打包清單 (新增) */
-.ai-packing-header { display:flex; justify-content:space-between; align-items:center; padding:0 15px 12px 15px; }
-.btn-ai-generate { background: var(--accent); color: var(--accent-text); border:none; padding:9px 16px; border-radius:20px; font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px; text-transform:uppercase; letter-spacing:0.5px; white-space:nowrap; }
-.btn-ai-generate:disabled { opacity:0.5; }
-.ai-hint-box { margin:0 15px 20px 15px; padding:25px 15px; background:var(--bg-card); border:1px dashed var(--border); border-radius:0; text-align:center; color:var(--text-sub); font-size:0.8rem; line-height:1.6; }
-.ai-item { background:var(--bg-card); padding:12px 15px; border-radius:0; margin-bottom:6px; display:flex; align-items:center; gap:10px; border:1px solid var(--border); border-left:3px solid var(--accent); }
-.ai-item.checked { opacity:0.4; }
-.ai-item input[type="checkbox"] { width:16px; height:16px; accent-color:var(--accent); flex-shrink:0; }
-.ai-item label { flex:1; font-size:0.88rem; }
-.ai-actions-row { display:flex; gap:10px; padding:12px 15px 25px 15px; margin:0; }
-.ai-actions-row button { flex:1; padding:11px; border-radius:0; font-size:0.7rem; font-weight:700; cursor:pointer; text-transform:uppercase; letter-spacing:1px; margin:0; }
 
 /* Inspiration */
 .filter-bar-container { padding: 0 15px 15px 15px; position: sticky; top: 0; z-index: 50; background: var(--bg-body); overflow-x: auto; white-space: nowrap; scrollbar-width: none; border-bottom: 1px solid var(--border); margin-bottom: 15px; }
@@ -416,13 +404,6 @@ items: [
 ]
 }
 ];
-
-// 7. 🤖 AI 智能打包清單設定
-const AI_CONFIG = {
-  workerUrl: "https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev" 
-  /* 【需用戶設定】請替換成你在 Cloudflare 部署好的 Worker 網址
-     格式範例：必須用雙引號包住，且以 https:// 開頭，結尾不要加斜線 / */
-};
 </script>
 
 <div id="toast"><i class="fa-solid fa-circle-check"></i> <span id="toast-msg">Action Completed</span></div>
@@ -480,16 +461,7 @@ const AI_CONFIG = {
 </div>
 <div id="inspiration-container" class="inspiration-grid"></div>
 </div>
-<div id="page-shopping" class="page">
-<div class="page-header"><h2 class="page-title">購物清單</h2></div>
-<div class="ai-packing-header">
-<span class="section-label" style="padding:0; margin:0;">AI 智能打包建議</span>
-<button class="btn-ai-generate" id="ai-generate-btn" onclick="generateAIPackingList()"><i class="fa-solid fa-wand-magic-sparkles"></i> 生成建議</button>
-</div>
-<div id="ai-packing-section"></div>
-<span class="section-label" style="margin-top:15px;">每日待買清單</span>
-<div id="shopping-container" class="shopping-list"></div>
-</div>
+<div id="page-shopping" class="page"><div class="page-header"><h2 class="page-title">購物清單</h2></div><div id="shopping-container" class="shopping-list"></div></div>
 <div id="page-weather" class="page">
 <div id="weather-content"><div style="text-align:center; padding:50px;"><i class="fa-solid fa-spinner fa-spin"></i></div></div>
 <div id="weather-details-container" style="display:none;">
@@ -614,7 +586,6 @@ document.getElementById('quick-memo').addEventListener('input', function() { loc
 
 renderInfoPage();
 renderPhrasePage();
-renderAIPackingSection();
 initSwipeClose();
 setInterval(updateHomeClock, 1000);
 updateHomeClock();
@@ -673,4 +644,244 @@ if(TRIP_INFO.emergency && TRIP_INFO.emergency.length > 0) {
 html += `<div class="info-card"><div class="info-header">緊急聯絡</div>`;
 TRIP_INFO.emergency.forEach(e => {
 const icon = e.name.includes("警") ? "fa-shield-halved" : "fa-truck-medical";
-html += `<div class="info-row"><div class="info-icon">
+html += `<div class="info-row"><div class="info-icon"><i class="fa-solid ${icon}"></i></div><div style="width:100%; display:flex; justify-content:space-between; align-items:center;"><div><span class="info-label">${e.name}</span><span>${e.phone}</span></div><a href="javascript:void(0)" onclick="callNumber('${e.phone}')" class="btn-icon-sm btn-call"><i class="fa-solid fa-phone"></i></a></div></div>`;
+});
+html += `</div>`;
+}
+container.innerHTML = html;
+}
+
+function showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+
+async function fetchRates(force = false) {
+const statusEl = document.getElementById('rate-status'); statusEl.innerText = '更新中...';
+try {
+const res = await fetch(`https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${DESTINATION.currency}.json`);
+const data = await res.json();
+const rate = data[DESTINATION.currency][DESTINATION.baseCurrency.toLowerCase()];
+if(rate) { exchangeRate = rate; statusEl.innerHTML = `1 ${DESTINATION.baseCurrency} = ${(1/exchangeRate).toFixed(2)} ${DESTINATION.currencyLabel}`; convertCurrency(); if(force) showToast("匯率已更新"); }
+} catch(e) { statusEl.innerText = '離線模式'; }
+}
+function convertCurrency() { const jpy = parseFloat(document.getElementById('curr-jpy').value); if(!isNaN(jpy)) { document.getElementById('curr-hkd').value = (jpy * exchangeRate).toFixed(1); } else { document.getElementById('curr-hkd').value = ""; } }
+
+async function fetchWeather() {
+const lat = DESTINATION.lat; const lon = DESTINATION.lon; const targetDateStr = scheduleData[currentDay].date;
+const today = new Date(); const targetDate = new Date(targetDateStr);
+const diffTime = targetDate - today; const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+let url = ""; let isArchive = false;
+const tz = encodeURIComponent(DESTINATION.timezone);
+if (diffDays >= -1 && diffDays <= 15) { url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max&hourly=temperature_2m,weathercode,precipitation_probability,relative_humidity_2m&timezone=${tz}&forecast_days=16`; }
+else { isArchive = true; const pastYear = targetDate.getFullYear() - 1; const pastDateStr = targetDateStr.replace(/^\d{4}/, pastYear); url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${pastDateStr}&end_date=${pastDateStr}&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset&hourly=temperature_2m,weathercode,relative_humidity_2m&timezone=${tz}`; }
+try {
+const res = await fetch(url); const data = await res.json();
+if(isArchive) { if(!data.daily.precipitation_probability_max) data.daily.precipitation_probability_max = [20]; if(!data.daily.uv_index_max) data.daily.uv_index_max = [3]; if(!data.hourly.precipitation_probability) data.hourly.precipitation_probability = new Array(24).fill(0); }
+weatherCache = data; weatherCache.isArchive = isArchive;
+localStorage.setItem('weatherLastFetch', new Date().getTime());
+if(document.getElementById('page-weather').classList.contains('active')) renderWeatherModule();
+} catch(e) { console.error(e); document.getElementById('weather-content').innerHTML = "<div style='text-align:center; padding:30px;'>暫時無法取得天氣</div>"; }
+}
+
+function renderWeatherModule() {
+const container = document.getElementById('weather-content'); const details = document.getElementById('weather-details-container'); const sourceTag = document.getElementById('data-source-tag');
+if(!weatherCache || !weatherCache.daily) { container.innerHTML = "<div style='text-align:center; padding:30px;'>無天氣資料</div>"; return; }
+let apiIndex = 0;
+if(!weatherCache.isArchive) { const targetDate = scheduleData[currentDay].date; apiIndex = weatherCache.daily.time.indexOf(targetDate); if (apiIndex === -1) { container.innerHTML = `<div style='text-align:center; padding:40px;'>尚無預報</div>`; return; } }
+const d = weatherCache.daily; const code = d.weathercode[apiIndex];
+const wmo = { 0:{i:'fa-sun',t:'晴朗'}, 1:{i:'fa-cloud-sun',t:'多雲'}, 2:{i:'fa-cloud-sun',t:'多雲'}, 3:{i:'fa-cloud',t:'陰天'}, 45:{i:'fa-smog',t:'霧'}, 51:{i:'fa-cloud-rain',t:'毛毛雨'}, 61:{i:'fa-cloud-showers-heavy',t:'陣雨'}, 80:{i:'fa-cloud-showers-water',t:'雷陣雨'}, 95:{i:'fa-bolt',t:'雷雨'} };
+const w = wmo[code] || {i:'fa-cloud',t:'多雲'};
+const maxTemp = Math.round(d.temperature_2m_max[apiIndex]); const minTemp = Math.round(d.temperature_2m_min[apiIndex]); const rainProb = d.precipitation_probability_max ? d.precipitation_probability_max[apiIndex] : 0; const tagText = weatherCache.isArchive ? "歷史平均 (去年)" : "即時預報";
+container.innerHTML = `<div class="weather-main-card"><div class="weather-tag-badge">${tagText}</div><div class="weather-header-row"><div><div class="weather-condition"><i class="fa-solid fa-location-arrow" style="font-size:0.8rem;"></i> ${DESTINATION.name}</div><div class="weather-hl">H:${maxTemp}° L:${minTemp}°</div></div><div class="weather-main-icon" style="color:inherit"><i class="fa-solid ${w.i}"></i></div></div><div class="weather-big-temp">${maxTemp}°</div><div style="font-weight:500;">${w.t} • 降雨 ${rainProb}%</div></div>`;
+const hContainer = document.getElementById('weather-hourly'); hContainer.innerHTML = '';
+const startHour = weatherCache.isArchive ? 0 : apiIndex * 24;
+[9, 12, 15, 18, 21].forEach(hour => {
+const idx = startHour + hour;
+if(weatherCache.hourly.time[idx] || (weatherCache.isArchive && idx < 24)) {
+const hTemp = Math.round(weatherCache.hourly.temperature_2m[idx]); const hRain = weatherCache.hourly.precipitation_probability ? weatherCache.hourly.precipitation_probability[idx] : 0; const hCode = weatherCache.hourly.weathercode[idx]; const hw = wmo[hCode] || {i:'fa-cloud'};
+hContainer.innerHTML += `<div class="hourly-item"><div class="hourly-time">${hour}:00</div><div class="hourly-icon"><i class="fa-solid ${hw.i}"></i></div><div class="hourly-temp">${hTemp}°</div><div class="hourly-rain">${hRain > 20 ? hRain + '%' : ''}</div></div>`;
+}
+});
+let advice = "";
+if (rainProb > 40) advice += "攜帶雨具：降雨機率高，請隨身攜帶折傘。<br>"; if (maxTemp < 5) advice += "極寒保暖：建議穿著羽絨服、圍巾、手套，並使用暖暖包。<br>"; else if (maxTemp < 12) advice += "洋蔥穿搭：早晚溫差大，建議大衣搭配發熱衣。<br>"; else advice += "舒適涼爽：穿著輕便外套即可。<br>"; if (d.uv_index_max && d.uv_index_max[apiIndex] > 5) advice += "注意防曬：紫外線較強。";
+document.getElementById('weather-advice-text').innerHTML = advice || "天氣舒適，適合旅遊的一天！";
+const noonIdx = startHour + 12; document.getElementById('ws-humidity').innerText = weatherCache.hourly.relative_humidity_2m[noonIdx] + '%'; document.getElementById('ws-uv').innerText = d.uv_index_max ? d.uv_index_max[apiIndex] : "-"; document.getElementById('ws-sunrise').innerText = d.sunrise[apiIndex].split('T')[1]; document.getElementById('ws-sunset').innerText = d.sunset[apiIndex].split('T')[1];
+sourceTag.innerText = weatherCache.isArchive ? "(歷史回溯模式)" : "(即時預報)"; details.style.display = 'block';
+}
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('open'); }
+function openTranslate() { window.open("https://translate.google.com/?sl=auto&tl=zh-TW", "_blank"); }
+
+function switchMainPage(pageId, navEl) {
+document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+document.getElementById('page-' + pageId).classList.add('active');
+document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+if(navEl) navEl.classList.add('active');
+const ds = document.querySelector('.date-selector-container');
+if(pageId === 'info' || pageId === 'phrases') ds.style.display = 'none'; else ds.style.display = 'block';
+if(pageId === 'weather') {
+const now = new Date().getTime(); const lastFetch = localStorage.getItem('weatherLastFetch');
+if (!weatherCache || !lastFetch || (now - lastFetch > 3600000)) fetchWeather(); else renderWeatherModule();
+}
+}
+
+function openPhrasePage() { toggleSidebar(); switchMainPage('phrases'); }
+function renderPhrasePage() {
+const container = document.getElementById('phrases-container'); container.innerHTML = '';
+PHRASE_DATA.forEach(category => {
+container.innerHTML += `<div class="phrase-section-header">${category.category}</div>`;
+let gridHtml = '<div class="phrase-grid">';
+category.items.forEach(item => {
+gridHtml += `<div class="phrase-card" onclick="showPhrase('${item.term_primary}', '${item.term_secondary}')">
+<div class="phrase-primary">${item.term_primary}</div>
+<div class="phrase-secondary">${item.term_secondary}</div>
+<div class="phrase-pronounce">${item.term_pronounce || ''}</div>
+</div>`;
+});
+gridHtml += '</div>';
+container.innerHTML += gridHtml;
+});
+}
+
+function sendWhatsApp() {
+let phone = document.getElementById('wa-phone').value.replace(/\D/g, '');
+if(!phone) { alert("請輸入電話"); return; }
+if (navigator.geolocation) {
+const btn = document.getElementById('wa-btn'); const orgText = btn.innerHTML; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 定位中...';
+navigator.geolocation.getCurrentPosition((pos) => {
+const mapLink = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+const text = `我平安抵達了！位置：${mapLink}`;
+window.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+btn.innerHTML = orgText;
+}, (err) => { alert("無法定位: " + err.message); btn.innerHTML = orgText; }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
+} else { alert("瀏覽器不支援定位"); }
+}
+
+// 🗺️ 地圖連結優化 (Universal Links)
+function openMapQuery(address) {
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+const query = encodeURIComponent(address);
+const url = isMobile 
+    ? `https://www.google.com/maps/search/?api=1&query=${query}`
+    : `https://www.google.com/maps/search?q=${query}`;
+window.open(url, '_blank');
+}
+
+function callNumber(num) { window.location.href = `tel:${num}`; }
+function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => { showToast("已複製"); }); }
+function searchGmail(query) { window.open(`https://mail.google.com/mail/u/0/#search/${encodeURIComponent(query)}`, '_blank'); }
+
+function openModal(data) {
+currentEventData = data;
+document.getElementById('modal-title').innerText = data.title;
+document.getElementById('modal-type').innerText = data.type || "Note";
+document.getElementById('modal-time').innerText = data.time || "--:--";
+document.getElementById('modal-price').innerText = data.price || "-";
+document.getElementById('modal-open-hours').innerText = data.open_hours || "待確認";
+document.getElementById('modal-address-short').innerText = data.address || "";
+document.getElementById('modal-note').innerText = data.note || "";
+
+// 聯絡電話處理
+const infoGrid = document.querySelector('.modal-info-grid');
+const existingPhone = document.getElementById('dynamic-phone-row');
+if(existingPhone) existingPhone.remove();
+
+if(data.phone) {
+const phoneRow = document.createElement('div'); phoneRow.id = 'dynamic-phone-row';
+phoneRow.innerHTML = `<span class="modal-label">電話</span><div class="contact-container"><span class="modal-value" style="margin-right:10px;">${data.phone}</span><a href="javascript:void(0)" onclick="callNumber('${data.phone}')" class="btn-icon-sm" style="border:1px solid var(--border);"><i class="fa-solid fa-phone"></i></a></div>`; infoGrid.appendChild(phoneRow);
+}
+
+// 按鈕區處理
+const actionsContainer = document.getElementById('modal-actions');
+actionsContainer.innerHTML = '';
+const addr = data.address_local || data.address;
+
+// 只有當有地址時，才顯示複製與導航
+if(addr) {
+actionsContainer.innerHTML += `<button class="btn-action btn-outline" onclick="copyToClipboard('${addr}')"><i class="fa-regular fa-copy"></i> 複製地址</button>`;
+actionsContainer.innerHTML += `<button class="btn-action btn-black" onclick="openMapQuery('${data.address}')"><i class="fa-solid fa-location-arrow"></i> Google Maps 導航</button>`;
+if (data.type === '住宿' || data.type === '交通') { actionsContainer.innerHTML += `<button class="btn-action btn-outline" onclick="showPhrase('${addr}', '請載我去這裡')">🚕 顯示的士卡</button>`; }
+}
+
+// 搜尋預約信 (總是顯示)
+if (data.type === '美食' || data.type === '晚餐' || data.type === '午餐' || data.type === '早餐' || data.type === '住宿') {
+actionsContainer.innerHTML += `<button class="btn-action btn-outline" onclick="searchGmail('${data.title}')">🔍 搜尋預約信 (Gmail)</button>`;
+}
+
+document.getElementById('detail-modal').classList.add('open');
+
+// 地圖處理
+const miniMapContainer = document.getElementById('modal-mini-map');
+if(!data.coords && !data.address) {
+miniMapContainer.style.display = 'none';
+} else {
+miniMapContainer.style.display = 'block';
+setTimeout(() => {
+if(modalMap) modalMap.remove();
+const targetCoords = data.coords || [DESTINATION.lat, DESTINATION.lon];
+modalMap = L.map('modal-mini-map', {zoomControl:false, dragging:false, attributionControl: false}).setView(targetCoords, 15);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(modalMap);
+if(data.coords) {
+L.marker(data.coords, {icon: L.divIcon({className:'custom-div-icon',html:"<div style='background:black;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);'></div>",iconSize:[12,12]})}).addTo(modalMap);
+}
+modalMap.invalidateSize();
+}, 150);
+}
+}
+
+function closeModal() { document.getElementById('detail-modal').classList.remove('open'); document.querySelector('.modal-content').style.transform = ''; }
+document.getElementById('detail-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+
+function initSwipeClose() {
+const modalContent = document.querySelector('.modal-content'); const dragArea = document.getElementById('modal-drag-area');
+let startY = 0; let currentY = 0;
+dragArea.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; modalContent.style.transition = 'none'; });
+dragArea.addEventListener('touchmove', (e) => { currentY = e.touches[0].clientY; const delta = currentY - startY; if(delta > 0) modalContent.style.transform = `translateY(${delta}px)`; });
+dragArea.addEventListener('touchend', () => { const delta = currentY - startY; modalContent.style.transition = 'transform 0.3s ease-out'; if(delta > 100) closeModal(); else modalContent.style.transform = ''; });
+}
+function renderDateSelector() { const container = document.getElementById('date-selector'); container.innerHTML = ''; Object.keys(scheduleData).forEach(dayKey => { const day = scheduleData[dayKey]; const chip = document.createElement('div'); chip.className = `date-chip`; chip.id = `chip-${dayKey}`; chip.onclick = () => selectDay(dayKey, chip); chip.innerHTML = `<span class="day-num">${day.display}</span><span class="day-week">${day.weekday}</span>`; container.appendChild(chip); }); }
+
+function selectDay(dayKey, chipEl) { currentDay = dayKey; document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('active')); (chipEl || document.getElementById(`chip-${dayKey}`)).classList.add('active'); if(chipEl) chipEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); renderTimeline(dayKey); renderInspiration(dayKey); renderShopping(dayKey); if(document.getElementById('page-weather').classList.contains('active')) fetchWeather(); }
+
+function renderTimeline(dayKey) {
+const container = document.getElementById('timeline-container'); container.innerHTML = '';
+(scheduleData[dayKey].events || []).forEach(event => {
+const item = document.createElement('div'); item.className = 'timeline-item';
+let tags = event.tags.map(t => `<span class="card-tag">${t}</span>`).join('');
+const safeData = JSON.stringify(event).replace(/'/g, "'");
+const navBtn = `<div class="card-nav-btn" onclick="event.stopPropagation(); openMapQuery('${event.address}')"><i class="fa-solid fa-location-arrow"></i></div>`;
+const colorStyle = event.moodColor ? `border-left-color: ${event.moodColor};` : 'border-left-color: var(--accent);';
+item.innerHTML = `<div class="card" style="${colorStyle}" onclick='openModal(${safeData})'>${navBtn}<span class="card-time">${event.time}</span><h3 class="card-title">${event.title}</h3><div class="tags">${tags}</div></div>`;
+container.appendChild(item);
+});
+if(!scheduleData[dayKey].events.length) container.innerHTML = "<div style='text-align:center; padding:50px; color:var(--text-sub);'>本日無行程，自由探索！</div>";
+}
+
+function renderInspiration(dayKey) {
+const container = document.getElementById('inspiration-container'); container.innerHTML = '';
+(scheduleData[dayKey].inspiration || []).forEach(item => {
+const safeData = JSON.stringify(item).replace(/'/g, "'");
+const clickAttr = `onclick='openModal(${safeData})'`;
+container.innerHTML += `<div class="inspire-card" data-tag="${item.tag}" ${clickAttr}><div class="inspire-badge">${item.tag}</div><h3 class="inspire-title">${item.title}</h3><p class="inspire-note">${item.note}</p></div>`;
+});
+if(!scheduleData[dayKey].inspiration.length) container.innerHTML = "<div style='text-align:center; padding:30px; color:var(--text-sub);'>本日無靈感筆記</div>";
+}
+
+function filterInspiration(tag, btn) { document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active')); btn.classList.add('active'); document.querySelectorAll('.inspire-card').forEach(card => { if(tag === 'all' || card.getAttribute('data-tag') === tag) card.classList.remove('hidden'); else card.classList.add('hidden'); }); }
+function renderShopping(dayKey) { const container = document.getElementById('shopping-container'); container.innerHTML = ''; const items = scheduleData[dayKey].shopping || []; if(items.length === 0) { container.innerHTML = "<div style='color:var(--text-sub); text-align:center; padding:20px;'>無待買清單</div>"; return; } items.forEach((item, idx) => { const uniqueId = `${dayKey}-${idx}`; const isChecked = shopState[uniqueId] ? 'checked' : ''; const div = document.createElement('div'); div.className = `shop-item ${isChecked ? 'checked' : ''}`; div.innerHTML = `<input type="checkbox" id="${uniqueId}" ${isChecked} onchange="toggleShopItem(this, '${uniqueId}')"><label for="${uniqueId}">${item}</label>`; container.appendChild(div); }); }
+function toggleShopItem(checkbox, id) { shopState[id] = checkbox.checked; localStorage.setItem('shopState', JSON.stringify(shopState)); checkbox.closest('.shop-item').classList.toggle('checked'); }
+function showPhrase(jp, zh) { document.getElementById('overlay-jp').innerText = jp; document.getElementById('overlay-zh').innerText = zh; document.getElementById('phrase-overlay').classList.add('active'); }
+function closePhrase() { document.getElementById('phrase-overlay').classList.remove('active'); }
+
+// 註冊 Service Worker（PWA 離線快取）
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => console.log('SW 註冊成功'))
+      .catch((err) => console.error('SW 註冊失敗:', err));
+  });
+}
+
+
+init();
+</script>
+</body>
+</html>
