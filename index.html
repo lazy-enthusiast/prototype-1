@@ -15,7 +15,7 @@
 
 <style>
 /* ========================================================
-🎨 [系統樣式表] 
+🎨 [系統樣式表] 
 ========================================================
 */
 :root {
@@ -29,10 +29,10 @@
 --safe-bottom: env(safe-area-inset-bottom);
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-body { font-family: var(--font-body); background-color: var(--bg-body); color: var(--text-main); margin: 0; padding: 0; height: 100vh; height: 100dvh; /* 【Safari相容】保留100vh作為降級後備值 */ display: flex; flex-direction: column; overflow: hidden; transition: all 0.3s ease; line-height: 1.4; }
+body { font-family: var(--font-body); background-color: var(--bg-body); color: var(--text-main); margin: 0; padding: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; transition: all 0.3s ease; line-height: 1.4; }
 
 /* Header */
-header { background-color: var(--bg-card); opacity: 0.98; -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 0 15px; padding-top: var(--safe-top); height: calc(56px + var(--safe-top)); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; position: relative; z-index: 200; }
+header { background-color: var(--bg-card); opacity: 0.98; backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 0 15px; padding-top: var(--safe-top); height: calc(56px + var(--safe-top)); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; position: relative; z-index: 200; }
 header h1 { margin: 0; font-size: 1.1rem; font-weight: 800; letter-spacing: 0.5px; color: var(--text-main); font-family: var(--font-heading); text-transform: uppercase; line-height: 1; }
 #home-clock { font-size: 0.65rem; color: var(--text-sub); font-weight: 600; letter-spacing: 1px; margin-top: 3px; font-variant-numeric: tabular-nums; }
 .header-actions { display: flex; align-items: center; gap: 8px; }
@@ -158,19 +158,8 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .phrase-secondary { font-size: 0.8rem; color: var(--text-sub); }
 .phrase-pronounce { font-size: 0.6rem; color: var(--text-sub); opacity: 0.6; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-/* AI Packing List Page */
-.packing-list-box { padding: 0 15px 20px 15px; }
-.packing-section-title { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-main); margin: 20px 0 10px 0; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
-.packing-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; color: var(--text-main); line-height: 1.5; }
-.packing-item i { margin-top: 3px; color: var(--text-sub); flex-shrink: 0; }
-.packing-desc { font-size: 0.85rem; color: var(--text-sub); padding: 5px 0 5px 0; line-height: 1.5; }
-.packing-loading { text-align: center; padding: 60px 20px; color: var(--text-sub); }
-.packing-loading i { font-size: 2rem; margin-bottom: 15px; display: block; }
-.packing-error { text-align: center; padding: 50px 20px; color: var(--text-sub); }
-.packing-error i { font-size: 2rem; margin-bottom: 15px; display: block; color: #FF3B30; }
-
 /* Modal & Overlay */
-.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; justify-content: center; align-items: end; -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); cursor: pointer; }
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; justify-content: center; align-items: end; backdrop-filter: blur(5px); cursor: pointer; }
 .modal.open { display: flex; }
 .modal-content { background: var(--bg-card); color: var(--text-main); width: 100%; max-width: 600px; max-height: 90vh; border-radius: 0; padding: 0 0 30px 0; overflow-y: auto; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); cursor: default; display: flex; flex-direction: column; border-top: 1px solid var(--border); box-shadow: 0 -10px 40px rgba(0,0,0,0.05); transition: transform 0.2s ease-out; }
 .modal-handle-container { width: 100%; height: 25px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; touch-action: none; cursor: grab; }
@@ -185,12 +174,12 @@ main { flex: 1; overflow-y: hidden; position: relative; }
 .btn-outline { background: var(--bg-card); border: 1px solid var(--text-main); color: var(--text-main); }
 
 /* Nav & Sidebar */
-nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: var(--bg-card); opacity: 0.98; display: flex; justify-content: space-around; padding: 12px 0 calc(12px + var(--safe-bottom)) 0; border-top: 1px solid var(--border); z-index: 100; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: var(--bg-card); opacity: 0.98; display: flex; justify-content: space-around; padding: 12px 0 calc(12px + var(--safe-bottom)) 0; border-top: 1px solid var(--border); z-index: 100; backdrop-filter: blur(10px); }
 .nav-item { color: var(--text-sub); text-align: center; font-size: 0.6rem; cursor: pointer; width: 25%; transition: color 0.2s; opacity: 0.5; }
 .nav-item.active { color: var(--accent); opacity: 1; font-weight: 600; }
 .nav-item i { display: block; font-size: 1.2rem; margin-bottom: 4px; }
 #toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: var(--text-main); color: var(--bg-card); padding: 10px 20px; border-radius: 30px; font-size: 0.85rem; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-weight: 500; } #toast.show { opacity: 1; }
-.sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.2); z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s; -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); } .sidebar-overlay.open { opacity: 1; pointer-events: all; }
+.sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.2); z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); } .sidebar-overlay.open { opacity: 1; pointer-events: all; }
 .sidebar { position: fixed; top: 0; right: 0; width: 85%; max-width: 300px; height: 100%; background: var(--bg-card); color: var(--text-main); z-index: 1001; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow-y: auto; padding: 25px 20px 100px 20px; padding-top: calc(25px + var(--safe-top)); box-shadow: -5px 0 20px rgba(0,0,0,0.05); display: flex; flex-direction: column; border-left: 1px solid var(--border); } .sidebar.open { transform: translateX(0); } .sidebar-section-title { font-size: 0.7rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; margin-top: 30px; font-weight: 600; }
 .whatsapp-box { background: var(--bg-body); border: 1px solid var(--border); color: var(--text-main); padding: 15px; border-radius: 0; margin-top: 20px; } .wa-input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid var(--border); border-radius: 0; font-size: 0.95rem; background: var(--bg-card); } .wa-btn { width: 100%; background: var(--accent); color: var(--accent-text); border: none; padding: 10px; border-radius: 0; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 0.9rem; }
 .tool-box { background: var(--bg-card); padding: 15px; border-radius: 0; border: 1px solid var(--border); margin-bottom: 10px; box-shadow: var(--shadow); } .currency-grid { display: grid; grid-template-columns: 1fr 30px 1fr; align-items: center; gap: 5px; margin-bottom: 8px; } .curr-group { display: flex; flex-direction: column; } .curr-label { font-size: 0.65rem; color: var(--text-sub); font-weight: bold; margin-bottom: 4px; padding-left: 2px;} .curr-input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 0; font-size: 1.1rem; text-align: center; background: var(--bg-body); font-weight: 600; color: var(--text-main); } .rate-info-container { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 0.7rem; color: var(--text-sub);} .memo-area { width: 100%; height: 100px; padding: 10px; border: 1px solid var(--border); border-radius: 0; font-family: inherit; font-size: 0.9rem; resize: none; background: var(--bg-body); line-height: 1.5; color: var(--text-main); }
@@ -415,12 +404,6 @@ items: [
 ]
 }
 ];
-
-// 7. 🤖 AI 打包清單設定（已改為 Cloudflare Worker 代理，金鑰不再存於前端）
-const AI_CONFIG = {
-workerUrl: "https://packing-ai.davchan-clp.workers.dev", /* 【需用戶設定】請替換為您部署完成的 Cloudflare Worker 網址，需保留雙引號 */
-model: "openai/o4-mini" /* 【需用戶設定】OpenRouter 模型 ID，如需更換請保留雙引號並確認 OpenRouter 平台上該模型名稱正確 */
-};
 </script>
 
 <div id="toast"><i class="fa-solid fa-circle-check"></i> <span id="toast-msg">Action Completed</span></div>
@@ -445,9 +428,6 @@ model: "openai/o4-mini" /* 【需用戶設定】OpenRouter 模型 ID，如需更
 <button class="wa-btn" id="wa-btn" onclick="sendWhatsApp()"><i class="fa-solid fa-paper-plane"></i> 發送位置</button>
 </div>
 <div class="sidebar-section-title">工具箱</div>
-<div class="sidebar-menu-btn" onclick="openPackingPage()">
-<i class="fa-solid fa-suitcase-rolling"></i> 🧳 AI 智能打包清單
-</div>
 <div class="tool-box">
 <div style="font-weight:bold; margin-bottom:15px;">匯率換算</div>
 <div class="currency-grid">
@@ -509,13 +489,6 @@ model: "openai/o4-mini" /* 【需用戶設定】OpenRouter 模型 ID，如需更
 <div id="page-phrases" class="page">
 <div class="page-header"><h2 class="page-title">常用短語</h2></div>
 <div id="phrases-container"></div>
-</div>
-<div id="page-packing" class="page">
-<div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
-<h2 class="page-title">AI 智能打包清單</h2>
-<div class="header-btn" onclick="closePackingPage()"><i class="fa-solid fa-xmark"></i></div>
-</div>
-<div id="packing-content"></div>
 </div>
 </main>
 <nav class="bottom-nav">
@@ -593,7 +566,6 @@ let currentEventData = null;
 let exchangeRate = 0.053;
 let weatherCache = null;
 let shopState = {};
-let packingListLoaded = false;
 
 // 4. 啟動程式
 function init() {
@@ -744,7 +716,7 @@ document.getElementById('page-' + pageId).classList.add('active');
 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 if(navEl) navEl.classList.add('active');
 const ds = document.querySelector('.date-selector-container');
-if(pageId === 'info' || pageId === 'phrases' || pageId === 'packing') ds.style.display = 'none'; else ds.style.display = 'block';
+if(pageId === 'info' || pageId === 'phrases') ds.style.display = 'none'; else ds.style.display = 'block';
 if(pageId === 'weather') {
 const now = new Date().getTime(); const lastFetch = localStorage.getItem('weatherLastFetch');
 if (!weatherCache || !lastFetch || (now - lastFetch > 3600000)) fetchWeather(); else renderWeatherModule();
@@ -769,136 +741,6 @@ container.innerHTML += gridHtml;
 });
 }
 
-// 🧳 AI 智能打包清單模組
-function openPackingPage() {
-toggleSidebar();
-switchMainPage('packing');
-if(!packingListLoaded) {
-const cacheKey = 'aiPackingList_' + CONFIG.startDate + '_' + CONFIG.duration;
-const cached = localStorage.getItem(cacheKey);
-if(cached) { renderPackingList(cached); packingListLoaded = true; }
-else { generatePackingList(false); }
-}
-}
-
-function closePackingPage() {
-switchMainPage('itinerary', document.querySelector('.nav-item'));
-}
-
-async function fetchTripWeatherSummary() {
-const lat = DESTINATION.lat, lon = DESTINATION.lon;
-const tz = encodeURIComponent(DESTINATION.timezone);
-const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=${tz}&forecast_days=16`;
-const wmoText = {0:'晴朗',1:'晴時多雲',2:'多雲',3:'陰天',45:'霧',51:'毛毛雨',61:'陣雨',80:'雷陣雨',95:'雷雨'};
-const res = await fetch(url);
-const data = await res.json();
-let summary = [];
-Object.keys(scheduleData).forEach(dayKey => {
-const day = scheduleData[dayKey];
-const idx = data.daily && data.daily.time ? data.daily.time.indexOf(day.date) : -1;
-if(idx !== -1) {
-const code = data.daily.weathercode[idx];
-summary.push({
-day: dayKey, date: day.date,
-maxTemp: Math.round(data.daily.temperature_2m_max[idx]),
-minTemp: Math.round(data.daily.temperature_2m_min[idx]),
-condition: wmoText[code] || '多雲',
-rainProb: data.daily.precipitation_probability_max ? data.daily.precipitation_probability_max[idx] : 0
-});
-} else {
-summary.push({ day: dayKey, date: day.date, maxTemp: '-', minTemp: '-', condition: '超出預報範圍(請參考當地氣候平均值)', rainProb: 0 });
-}
-});
-return summary;
-}
-
-function buildItinerarySummary() {
-let text = '';
-Object.keys(scheduleData).forEach(dayKey => {
-const day = scheduleData[dayKey];
-const eventTitles = (day.events || []).map(e => `${e.title}(${e.type})`).join('、');
-text += `${dayKey} (${day.date}): ${eventTitles || '自由活動'}\n`;
-});
-return text;
-}
-
-function buildPackingPrompt(weatherSummary, itinerarySummary) {
-const weatherText = weatherSummary.map(w => `${w.day} (${w.date}): ${w.condition}，${w.minTemp}°C~${w.maxTemp}°C，降雨機率${w.rainProb}%`).join('\n');
-return `你是一位專業旅行顧問。使用者即將前往「${DESTINATION.name}」，共${CONFIG.duration}天的行程，以下是完整天氣與行程資料。
-
-【每日天氣預報】
-${weatherText}
-
-【每日行程活動】
-${itinerarySummary}
-
-請根據以上天氣與行程內容，生成一份適合「整個行程」的實用打包清單建議。請用繁體中文回答，並依照以下分類條列（使用 Markdown 格式，### 作為分類標題，- 作為項目符號，不要使用其他標記語法）：
-### 衣物類
-### 電子/證件類
-### 個人護理/藥品類
-### 其他建議
-
-每個分類下請列出具體物品，並在必要時簡短說明原因（例如：因某天降雨機率高，建議帶輕便雨具）。請保持精簡實用，總字數控制在400字以內，不要輸出開場白或總結語。`;
-}
-
-// 🔐 已改為呼叫 Cloudflare Worker 代理，不再直接帶金鑰請求 OpenRouter
-async function callOpenRouterAPI(prompt) {
-const res = await fetch(AI_CONFIG.workerUrl, {
-method: 'POST',
-headers: {
-'Content-Type': 'application/json'
-},
-body: JSON.stringify({
-model: AI_CONFIG.model,
-messages: [{ role: 'user', content: prompt }]
-})
-});
-if(!res.ok) {
-const errData = await res.json().catch(()=>({}));
-throw new Error((errData.error && errData.error.message) || `API 請求失敗 (狀態碼 ${res.status})`);
-}
-const data = await res.json();
-if(!data.choices || !data.choices[0]) throw new Error("API 回應格式異常");
-return data.choices[0].message.content;
-}
-
-async function generatePackingList(forceRefresh) {
-const container = document.getElementById('packing-content');
-const cacheKey = 'aiPackingList_' + CONFIG.startDate + '_' + CONFIG.duration;
-
-container.innerHTML = `<div class="packing-loading"><i class="fa-solid fa-spinner fa-spin"></i><p>AI 正在分析行程與天氣資料，<br>生成專屬打包清單...</p></div>`;
-
-try {
-const weatherSummary = await fetchTripWeatherSummary();
-const itinerarySummary = buildItinerarySummary();
-const prompt = buildPackingPrompt(weatherSummary, itinerarySummary);
-const result = await callOpenRouterAPI(prompt);
-localStorage.setItem(cacheKey, result);
-packingListLoaded = true;
-renderPackingList(result);
-} catch(e) {
-container.innerHTML = `<div class="packing-error"><i class="fa-solid fa-triangle-exclamation"></i><p>生成失敗：${e.message}</p><button class="btn-action btn-black" style="margin-top:20px; max-width:220px; margin-left:auto; margin-right:auto;" onclick="generatePackingList(true)"><i class="fa-solid fa-rotate"></i> 重試</button></div>`;
-}
-}
-
-function renderPackingList(markdownText) {
-const container = document.getElementById('packing-content');
-const lines = markdownText.split('\n');
-let html = '';
-lines.forEach(rawLine => {
-const line = rawLine.trim();
-if(line.startsWith('### ')) {
-html += `<div class="packing-section-title">${line.replace('### ', '')}</div>`;
-} else if(line.startsWith('- ') || line.startsWith('* ')) {
-html += `<div class="packing-item"><i class="fa-regular fa-square"></i><span>${line.replace(/^[-*]\s/, '')}</span></div>`;
-} else if(line !== '') {
-html += `<div class="packing-desc">${line}</div>`;
-}
-});
-container.innerHTML = `<div class="packing-list-box">${html}</div>
-<div style="padding:0 15px;"><button class="btn-action btn-outline" onclick="generatePackingList(true)"><i class="fa-solid fa-rotate"></i> 重新生成</button></div>`;
-}
-
 function sendWhatsApp() {
 let phone = document.getElementById('wa-phone').value.replace(/\D/g, '');
 if(!phone) { alert("請輸入電話"); return; }
@@ -917,9 +759,9 @@ btn.innerHTML = orgText;
 function openMapQuery(address) {
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 const query = encodeURIComponent(address);
-const url = isMobile 
-    ? `https://www.google.com/maps/search/?api=1&query=${query}`
-    : `https://www.google.com/maps/search?q=${query}`;
+const url = isMobile 
+    ? `https://www.google.com/maps/search/?api=1&query=${query}`
+    : `https://www.google.com/maps/search?q=${query}`;
 window.open(url, '_blank');
 }
 
